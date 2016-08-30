@@ -312,6 +312,7 @@ Template.Canvas.onRendered(function() {
         "turn": 1,
         "result": 1,
         "dotsData": 1,
+        "groups": 1
     }}).observe({
 
 		added: (doc)=>{
@@ -391,7 +392,7 @@ Template.Canvas.events({
 					          	tY = this.tempData[k][m].neighbors[i].y; //neighbor's y
 							    if(this.tempData[tX][tY].owner === instance.player){
 							    	if(neighborGroupCount === 0){
-							    		neighborGroups[0] = this.tempData[tX][tY].group
+							    		neighborGroups[0] = this.tempData[tX][tY].group;
 							    		tempGroupData[this.tempData[tX][tY].group].libs--;
 							    		neighborGroupCount ++;
 							    	}
