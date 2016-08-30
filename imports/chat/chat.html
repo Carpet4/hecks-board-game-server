@@ -1,0 +1,23 @@
+<template name="Chat">
+	{{#if currentUser}}
+		{{#if Template.subscriptionsReady}}
+			<div class="container-fluid chatContainer">
+				<div class="row chatRow">
+				    <div class="col-md-2 chatCol" style="background-color:grey; border: 2px solid purple;">
+				    	{{>RoomsBar}}
+				    </div>
+				    <div class="col-md-8 chatCol" style="background-color:grey; border: 2px solid purple; min-height:500px;">
+				    	{{>Messages}}
+				    </div>
+				    <div class="col-md-2 chatCol" style="background-color:grey; border: 2px solid purple;">
+				    	{{>UsersBar}}
+				    </div>
+	  			</div>
+	  		</div>	
+		  
+		  
+		  
+		{{/if}} 
+	{{/if}}	
+</template>
+

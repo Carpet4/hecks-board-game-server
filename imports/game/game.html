@@ -1,0 +1,15 @@
+<template name="Game">
+	{{#if $and Template.subscriptionsReady imagesReady}}	  	
+		<div class="container-fluid gameContainer">	
+			<div class="row gameRow">
+				<div class="col-md-8 gameCol" style="background-color:black; border: 2px solid purple; min-height:500px;">
+			    	{{>Canvas}}
+			    </div>
+			    <div class="col-md-4 gameCol" style="background-color:grey; border: 2px solid purple; min-height:500px;">
+	  				{{>GamePanel}}
+			    	{{>GameChat}}
+			    </div>
+  			</div>
+  		</div>	      
+    {{/if}}
+</template>

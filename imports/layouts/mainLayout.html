@@ -1,0 +1,9 @@
+<template name="MainLayout">
+	{{#if Template.subscriptionsReady}}
+	{{> Header}}
+	{{> Messanger}}
+	<main class="main-layout">
+		{{> Template.dynamic template=main}}
+	</main>
+	{{/if}}
+</template>

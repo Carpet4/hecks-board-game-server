@@ -1,0 +1,86 @@
+<template name="RoomUserButton">
+		<div class="btn-group">
+		    <button type="button" class="btn btn-link dropdown-toggle listButton" data-toggle="dropdown">
+		    {{username}}</button>
+		    <ul class="dropdown-menu" role="menu">
+		    	<li><a href="/profile/{{username}}" class="btn-info btn-block" style="color: white; text-align: center;">Profile</a></li>
+		    	{{#if checkIfSelf _id}}
+					<li><button class="openModal btn-warning btn-block" value="{{username}}">Play</button></li>
+					<li><button class="startChat btn-success btn-block" value="{{_id}}">Chat</button></li>
+    	
+					
+					{{#if isMember _id}}
+						{{#if isOwner currentUser._id}}
+							{{#if isPrivate}}
+								{{#unless isOwner _id}}
+									{{#unless isModerator _id}}
+										<li><button class="kick btn-danger btn-block" value="{{_id}}">Kick</button></li>
+									{{/unless}}
+								{{/unless}}
+							{{/if}}
+							{{#if isModerator _id}}
+								<li><button class="disMod btn-danger btn-block" value="{{_id}}">Dismiss Moderator</button></li>
+							{{else}}	
+								{{#unless isOwner _id}}
+									<li><button class="makeMod btn-success btn-block" value="{{_id}}">Make Moderator</button></li>
+								{{/unless}}	
+							{{/if}}
+						{{/if}}
+
+						{{#if isModerator currentUser._id}}
+							{{#if isPrivate}}
+								{{#unless isOwner _id}}
+									{{#unless isModerator _id}}
+										<li><button class="kick btn-danger btn-block" value="{{_id}}">Kick</button></li>
+									{{/unless}}
+								{{/unless}}		
+							{{/if}}
+						{{/if}}	
+					{{else}}
+						<li><button class="cancelInvite btn-danger btn-block" value="{{_id}}">Cancel Invite</button></li>
+					{{/if}}
+
+				{{/if}}		
+		    </ul>
+		</div>
+</template>
+
+<template name="PlayModal">
+    <div class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">Challenge {{this}}</h4>
+                </div>
+
+                <div class="modal-body">
+                	<form class=gameInvite>
+                		Main Time:
+                			<select name="timeMain">
+						  		<option value="60">1m</option>
+								<option value="300">5m</option>
+								<option value="600">10m</option>
+								<option value="1200">20m</option>
+							</select><br>
+
+                		Time increment per move:
+	                    <select name="timeInc">
+					  		<option value="10">10s</option>
+							<option value="20">20s</option>
+							<option value="30">30s</option>
+							<option value="40">40s</option>
+						</select><br>
+						<button name="submit" type="submit" value="{{this}}">Submit</button>
+					</form>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</template>

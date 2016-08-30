@@ -1,0 +1,16 @@
+<template name="GameChat"> 
+  <div class="gameMessagesContainer" id="gameMessagesContainer">
+    <ul>
+      {{#each messages}}
+        {{> Message}}
+        {{scrollDown}}
+      {{/each}}
+    </ul>
+  </div>
+  
+  <div style="position:absolute; bottom: 0px; width: 100%; margin-left: -3px;">
+    <form class="newGameMessage" autocomplete=off>
+        <input type="text" name="text" class="form-control" placeholder="Write something down! :)">
+    </form>
+  </div>
+</template>

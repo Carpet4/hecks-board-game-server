@@ -1,0 +1,46 @@
+<template name="Watch">
+  {{#if Template.subscriptionsReady}}
+    <style>
+  	table, th, td {
+  	    border: 1px solid black;
+  	    padding: 5px;
+  	}
+  	table {
+      	border-spacing: 15px;
+  	}
+    </style>
+
+    <div class="container">
+
+      <h2>Watch Games!</h2>
+      <div class="table-responsive">
+        <table class="table-bordered">
+      		<tr>
+      			<th> </th>
+    		    <th>Player 1</th>
+    		    <th>Rating</th> 
+    		    <th>Player 2</th>
+    		    <th>Rating</th>
+    		    <th>Move</th>
+    	  	</tr>
+    		  {{#each games}}
+            {{> SingleGameWatch}}
+          {{/each}}
+    	 </table>
+     </div> 
+    </div>
+  {{/if}}
+</template>
+ 
+<template name="SingleGameWatch">
+  
+  	<tr> 
+  		<td> <a href="/game/{{gNum}}"> Watch game {{gNum}}</a> </td>
+  		<td>{{name1}}</td> 
+  		<td>{{rating1}}</td> 
+  		<td>{{name2}}</td> 
+  		<td>{{rating2}}</td> 
+  		<td>{{turn}}</td> 
+  	</tr>
+
+</template>

@@ -1,0 +1,90 @@
+<template name="Header">
+	{{#if Template.subscriptionsReady}}
+ 		<nav class="navbar navbar-inverse" style="z-index: 1;">
+  			<div class="container-fluid">
+    			<div class="navbar-header">
+      				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				        <span class="icon-bar"></span>
+				        <span class="icon-bar"></span>
+				        <span class="icon-bar"></span>
+      				</button>
+      				<div class="dropdown">
+      					{{#if notificationExists}}
+					  	<button class="btn btn-default dropdown-toggle navbar-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="color: red;">
+					  		Notifications<span class="caret"></span>
+					  	</button>
+					  	{{else}}
+							<button class="btn btn-default dropdown-toggle navbar-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+								Notifications<span class="caret"></span>
+					  		</button>
+					  	{{/if}}
+					  	<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+						    {{#each notifications}}
+		          				{{>Notification}}
+		          			{{/each}}
+  						</ul>
+					</div>
+
+      				<a class="navbar-brand">Hecks</a>
+    			</div>
+    			<div class="collapse navbar-collapse" id="myNavbar">
+     				<ul class="nav navbar-nav">
+						<li><a href="/chat">Chat</a></li>
+
+						<li><a href="/play">Play</a></li>
+
+						<li><a href="/watch">Watch</a></li>
+
+						<li><a href="/profile/{{username}}">Profile</a></li>
+						
+						<li class="dropdown">
+							{{#if notificationExists}}
+          						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color: red;">
+	          						Notifications <span class="caret"></span>
+	          					</a>
+          					{{else}}
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+									Notifications <span class="caret"></span>
+	          					</a>
+          					{{/if}}
+
+	          					<ul class="dropdown-menu">
+	          						{{#each notifications}}
+				          				{{>Notification}}
+				          			{{/each}}	
+	          					</ul>
+          				</li>		
+					</ul>
+      				{{> loginButtons}}
+    			</div>
+ 			</div>
+		</nav>
+	{{/if}}	
+</template>
+
+<template name="Notification">
+	<li>
+		{{#if $eq type "roomInvite"}}
+			you have been invited to room: <a href="/room/{{roomName room}}">{{roomName room}}</a>by: 
+			<a href="/profile/{{idToName sender}}">{{idToName sender}}</a>									
+			<button class="btn btn-success roomJoin" value="{{room}}">V</button>
+			<button class="btn btn-danger roomDecline" value="{{room}}">X</button>
+		{{else}}
+			{{#if $eq type "gameInvite"}}
+				{{#if $eq reciever currentUser._id}}
+					{{idToName sender}} invited you for a game!<br>
+					Main time: {{mainT}}<br>
+					Time Increments: {{subT}}<br>
+					<button class="btn btn-success gameAccept" value="{{_id}}">V</button>
+					<button class="btn btn-danger gameDecline" value="{{_id}}">X</button>
+			
+				{{else}}
+					You have sent a game request to {{idToName reciever}}!
+					Main time: {{mainT}}<br>
+					Time Increments: {{subT}}<br>
+					<button class="btn btn-danger gameDecline" value="{{_id}}">X</button>
+				{{/if}}	
+			{{/if}}											
+		{{/if}}
+	</li>
+</template>

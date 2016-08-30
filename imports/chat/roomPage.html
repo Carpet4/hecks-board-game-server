@@ -1,0 +1,142 @@
+<template name="RoomPage">
+	<div class="container-fluid">
+		{{#if Template.subscriptionsReady}}
+			{{#if room}}
+				{{#with room}}
+					<table class="table table-bordered">
+						<tbody>
+		      				<tr>
+		        				<td>Room name:</td>
+								<td>
+									{{#if isOwner}}
+										<form class="nameChange">
+							        		<input type="text" name="roomName" value="{{name}}">
+							        		<input type="submit">
+							    		</form>
+									{{else}}
+										<td>{{name}}</td>
+									{{/if}}
+								</td>
+							</tr>
+							<tr>
+								<td>About:</td>
+								<td>
+									{{#if isOwner}}
+										<form class="aboutChange">
+											<div class="form-group">
+						  						<textarea type="text" name="roomAbout" value ="{{desc}}" rows="5"></textarea>
+						  						<input type="submit">
+											</div>
+										</form>
+									{{else}}
+										{{desc}}
+									{{/if}}
+								</td>
+							</tr>
+							<tr>
+								<td>Owner: </td>
+								<td>
+									{{#with ownerObject owner}}
+										{{>RoomUserButton}}
+									{{/with}}	
+								</td>	
+							</tr>
+							<tr>
+								<td>Moderators:</td>
+								<td>
+									{{#each moderators}}
+										{{#with getUser this}}
+											{{>RoomUserButton}},
+										{{/with}}	
+									{{/each}}
+								</td>
+							</tr>
+							<tr>
+								<td>Users:</td>
+								<td>
+									{{#each users}}
+										{{#with getUser this}}
+											{{>RoomUserButton}},
+										{{/with}}	
+									{{/each}}
+								</td>
+							</tr>
+							<tr>
+								<td>Privacy:</td>
+								<td>
+									{{#if isOwner}}
+										<form class="privacyChange">
+											<div class="checkbox">
+						  						{{#if isPrivate}}
+								  					<label><input type="checkbox" name="isPrivate" checked>Private Room?</label>
+								  				{{else}}
+													<label><input type="checkbox" name="isPrivate">Private Room?</label>
+								  				{{/if}}
+											</div>
+											<input type="submit">
+										</form>
+									{{else}}
+										{{#if isPrivate}}
+											Private
+										{{else}}
+											Public
+										{{/if}}
+									{{/if}}
+								</td>
+							</tr>	
+							{{#if isPrivate}}
+								<tr>
+									<td>Are normal users Allowed to invite?</td>
+									<td>
+										{{#if isOwner}}
+											<form class="invPriviChange">
+												<div class="checkbox">
+													{{#if invPrivi}}
+							  							<label><input type="checkbox" name="invBul" checked>Are they?</label>
+							  						{{else}}
+														<label><input type="checkbox" name="invBul">Are they?</label>
+							  						{{/if}}
+												</div>
+												<input type="submit">
+											</form>
+										{{else}}
+											{{#if invPrivi}}
+												Yes
+											{{else}}
+												No
+											{{/if}}
+										{{/if}}
+									</td>
+								</tr>
+								<tr>
+									<td>Invited:</td>
+									<td>
+										{{#each invited}}
+											{{#with getUser this}}
+												{{>RoomUserButton}},
+											{{/with}}	
+										{{/each}}
+									</td>
+								</tr>
+							{{/if}}
+
+							{{#if allowedToInvite}}
+								<tr>
+		        					<td>Invite:</td>
+									<td>
+										<form class="inviteToRoom">
+							        		<input type="text" name="invited">
+							        		<input type="submit">
+							    		</form>
+									</td>
+								</tr>
+							{{/if}}	
+						</tbody>				
+					</table>		
+				{{/with}}
+			{{else}}
+				Room does not exist!
+			{{/if}}
+		{{/if}}	
+	</div>		
+</template>

@@ -1,0 +1,46 @@
+<template name="Play">
+	<div class="container">
+    <h2> Find a game! </h2>
+	{{#if Template.subscriptionsReady}}
+		Minimum time settings
+			<select class="minTime">
+		  		<option value="10">10s</option>
+				<option value="20">20s</option>
+				<option value="30">30s</option>
+				<option value="40">40s</option>
+			</select>
+
+		Maximum time settings
+			<select class="maxTime">
+		  		<option value="10">10s</option>
+				<option value="20">20s</option>
+				<option value="30">30s</option>
+				<option value="40">40s</option>
+			</select>
+
+		Minimum rank
+			<select class="minRank">
+		  		<option value="-300">-300</option>
+				<option value="-200">-200</option>
+				<option value="-100">-100</option>
+				<option value="0">Your rank</option>
+			</select>
+
+		Maximum rank
+			<select class="maxRank">
+		  		<option value="300">+300</option>
+				<option value="200">+200</option>
+				<option value="100">+100</option>
+				<option value="0">Your rank</option>
+			</select>
+	
+	    <button class="btn-lg {{#if isAutomatch}}automatchRemove btn-success{{else}}automatchInsert btn-primary{{/if}}">
+	      {{#if isAutomatch}}
+	      	Searching...
+	      {{else}}
+	      	Match Me Up!
+	      {{/if}}
+	    </button>
+    {{/if}}
+    </div>
+</template>

@@ -1,0 +1,28 @@
+<template name="Profile">
+	<div class="container">
+	{{#with singleProfile}}
+		<ul>
+			<li>
+				<h5>Name: {{username}}</h5>
+			</li>
+			<li>
+				<h5>Rating: {{rating}}</h5>
+			</li>
+			{{#if isYou}}
+			<li>
+				<h5>About:</h5><form class="profileAboutChange">
+					<div class="form-group">
+  						<textarea type="text" name="profileAbout" value ="{{about}}" rows="5"></textarea>
+  						<input type="submit">
+					</div>
+				</form>
+			</li>
+			{{else}}
+			<li>
+				<h5>About: {{about}}</h5>
+			</li>
+			{{/if}}
+		</ul>		
+	{{/with}}
+	</div>	
+</template>

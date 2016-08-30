@@ -1,0 +1,59 @@
+<template name="RoomsBar">
+	
+		<nav class="side-nav">
+			<h3>Chat rooms</h3>
+			<button class="newRoom btn-primary">New Room</button>
+			{{#if newRoom}}
+			<form>
+				Room name:
+				<input type="text" name="roomName">
+				<div class="checkbox">
+  					<label><input type="checkbox" name="isPrivate">Private?</label>
+				</div>
+				<input type="submit" class="submitRoom">
+			</form>
+			{{/if}}
+			<ul>
+
+				
+				<h3>Active:</h3>
+				{{#each activeRooms}}
+					{{>ActiveRoomOnList}}
+				{{/each}}
+
+				<br><h3>Available:</h3>
+				{{#each avaRooms}}
+	        		{{>AvaRoomOnList}}
+	     		{{/each}}
+			</ul>
+		</nav>
+	
+</template>
+
+<template name="AvaRoomOnList">
+	<li>			
+		<button class="avaRoom btn btn-link listButton" value="{{_id}}">{{name}}</button>
+	</li>
+	
+</template>
+
+<template name="ActiveRoomOnList">
+	<li>
+		<div class="btn-group">
+	    	<button type="button" class="btn btn-primary dropdown-toggle listButton" data-toggle="dropdown">
+	    	<span class="glyphicon glyphicon-cog"></span> </button>
+	    	<ul class="dropdown-menu" role="menu">
+			    <li><button class="leaveRoom btn-danger btn-block" value="{{_id}}">Leave</button></li>
+			    <a href="/room/{{name}}" class="more btn-info btn-block">Room Page</a>
+	    	</ul>
+	  	</div>
+	  	{{#if isUnRead _id}}
+			<button class="activeRoom btn btn-link listButton" value="{{_id}}" style="color:red;">{{name}}</button>
+		{{else}}{{#if isOpen _id}}
+			<button class="activeRoom btn btn-link listButton" value="{{_id}}" style="color:green;">{{name}}</button>
+		{{else}}
+			<button class="activeRoom btn btn-link listButton" value="{{_id}}">{{name}}</button>
+		{{/if}}
+		{{/if}}
+	</li>
+</template>
