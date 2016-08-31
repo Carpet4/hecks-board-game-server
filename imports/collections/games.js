@@ -246,6 +246,7 @@ Meteor.methods({
 
 
   'games.makeTurn'(k, m ,id){
+
     if (Meteor.isServer) {
       check(k, Number);
       check(m, Number);
@@ -297,7 +298,13 @@ Meteor.methods({
           }
           if(this.legit === false){
 
-            tempGroupData = this.groups; //data of all groups
+            tempGroupData = new Array();
+            for(i = 0; i < this.groups.length; i++){
+              if(this.groups[i]){
+                tempGroupData[i] = this.groups[i].libs;
+              }
+            }
+
             neighborGroups = new Array(); //array to keep index of neighbor groups
             neighborGroupCount = 0; //count of ally neighbor groups
             for(i = 0; i < 3; i++){
@@ -307,21 +314,21 @@ Meteor.methods({
                 if(this.dotsData[tX][tY].owner === player){ //if the dot belongs to the player
                   if(neighborGroupCount === 0){ //if no former groups were detected
                     neighborGroups[0] = this.dotsData[tX][tY].group //places the index of the ally group
-                    tempGroupData[this.dotsData[tX][tY].group].libs--; //reduces its libs by 1
+                    tempGroupData[this.dotsData[tX][tY].group]--; //reduces its libs by 1
                     neighborGroupCount ++; //increases the ally groups count by one
                   }
                   else{
                     matchGroup = false;
                     for (w = 0; w < neighborGroupCount; w++){ //for all ally groups detected so far
                       if(this.dotsData[tX][tY].group === neighborGroups[w]){ //if the dot belongs to that group
-                        tempGroupData[neighborGroups[w]].libs--; //reduces a lib to the group
+                        tempGroupData[neighborGroups[w]]--; //reduces a lib to the group
                         matchGroup = true;
                         break;
                       }
                     }
                     if(matchGroup === false){ //if dot did not belong to any detected group
                       neighborGroups[neighborGroupCount] = this.dotsData[tX][tY].group; //adds a new group index 
-                      tempGroupData[this.dotsData[tX][tY].group].libs--; //reduces the group's libs by 1
+                      tempGroupData[this.dotsData[tX][tY].group]--; //reduces the group's libs by 1
                       neighborGroupCount ++; //increases the ally groups detected count
                     }
                   }
@@ -330,7 +337,7 @@ Meteor.methods({
             }
             if(neighborGroupCount !== 0){ //if found ally groups
               for(z = 0; z < neighborGroupCount; z++){
-                if(tempGroupData[neighborGroups[z]].libs > 0){ //if any of then has libs
+                if(tempGroupData[neighborGroups[z]] > 0){ //if any of then has libs
 
                   this.legit = true;
                   break;
@@ -340,7 +347,6 @@ Meteor.methods({
           }
         }
       }
-
       if(this.legit === true){
         //time left after reducing time spent
         this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
@@ -354,7 +360,7 @@ Meteor.methods({
         var tX = null; //neighbor's temp x
         var tY = null; //neighbor's temp y
         isGrouped = false;
-        var tempGroup = null
+        var tempGroup = null;
 
 
         //loop for dealing with opponent's touching stones
@@ -387,7 +393,7 @@ Meteor.methods({
             tX = this.dot.neighbors[i].x; //neighbor's x
             tY = this.dot.neighbors[i].y; //neighbor's y
             if(this.dotsData[tX][tY].owner === 0){//if no owner
-              libs++//add's lib
+              libs++;//add's lib
             }
           }
         }

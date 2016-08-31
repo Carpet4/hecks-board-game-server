@@ -51,6 +51,8 @@ Template.Canvas.onCreated(function(){
 	this.game = Games.findOne({gNum: this.gameNumber});
 	this.gameId = this.game._id;
 	this.player = findPlayer();
+	this.lastMoveIndex = false;
+	this.lastMoveBool = false;
 	if(!this.game.result){
 		Session.set('isGameFinished', false);
 	}
@@ -104,17 +106,60 @@ Template.Canvas.onCreated(function(){
 
 	this.dotPainter = ()=>{
 		console.log((new Date).getTime());
-			for(i = 0; i < this.dots.length; i++){
-				for(j = 0; j < this.dots[0].length; j++){
-					if(this.game.dotsData[i][j]){
-      				tempOwner = this.game.dotsData[i][j].owner;//owner of the server dot
-      				tempIndex = this.game.dotsData[i][j].index;//index of the dot
+
+		if(this.lastMoveBool && this.lastMoveIndex){
+			tempIndex = this.lastMoveIndex;
+			tempOwner = this.dotsPaint[tempIndex].owner;
+			if(tempOwner == 1){
+				this.ctx.drawImage(this.blues, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
+			}
+
+			else if(tempOwner == 2){
+				this.ctx.drawImage(this.reds, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
+			}
+			else{
+				this.ctx.beginPath();
+	            this.ctx.arc(this.dotsPaint[tempIndex].xCntr, this.dotsPaint[tempIndex].yCntr, this.radius, 0, 2*Math.PI, false);
+	            this.ctx.lineWidth = 6;
+	            this.ctx.strokeStyle = this.line_color;
+	            this.ctx.fillStyle = this.bg_color;
+	            this.ctx.stroke();
+	            this.ctx.fill();
+
+			}
+
+		}
+
+		for(i = 0; i < this.dots.length; i++){
+			for(j = 0; j < this.dots[0].length; j++){
+				if(this.game.dotsData[i][j]){
+  				tempOwner = this.game.dotsData[i][j].owner;//owner of the server dot
+  				tempIndex = this.game.dotsData[i][j].index;//index of the dot
       				if(tempOwner !== this.dotsPaint[tempIndex].owner){
 	      				if(tempOwner == 1){
 	      					this.ctx.drawImage(this.blues, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
+	      					if(this.lastMoveBool){
+		      					this.ctx.beginPath();
+				                this.ctx.arc(this.dotsPaint[tempIndex].xCntr, this.dotsPaint[tempIndex].yCntr, this.radius / 2, 0, 2*Math.PI, false);
+				                this.ctx.lineWidth = 6;
+				                this.ctx.strokeStyle = this.line_color;
+				                this.ctx.fillStyle = this.line_color;
+				                this.ctx.fill();
+				                this.lastMoveIndex = tempIndex;
+			            	}
 	      				}
 	      				else if(tempOwner == 2){
 	      					this.ctx.drawImage(this.reds, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
+	      					if(this.lastMoveBool){
+		      					this.ctx.beginPath();
+				                this.ctx.arc(this.dotsPaint[tempIndex].xCntr, this.dotsPaint[tempIndex].yCntr, this.radius / 2, 0, 2*Math.PI, false);
+				                this.ctx.lineWidth = 6;
+				                this.ctx.strokeStyle = this.line_color;
+				                this.ctx.fillStyle = this.line_color;
+				                this.ctx.fill();
+				                this.lastMoveIndex = tempIndex;
+				            }
+ 
 	      				}
 	      				else{
 	      					this.ctx.beginPath();
@@ -124,6 +169,7 @@ Template.Canvas.onCreated(function(){
 			                this.ctx.fillStyle = this.bg_color;
 			                this.ctx.stroke();
 			                this.ctx.fill();
+
 	      				}
 
 	      				if(tempOwner === 1 || tempOwner === 0 && this.dotsPaint[tempIndex].owner === 2){
@@ -329,6 +375,7 @@ Template.Canvas.onRendered(function() {
 		changed: (doc,)=>{
 			console.log("changed");
 			console.log((new Date).getTime());
+			this.lastMoveBool = true;
 			this.game = doc;
 			this.turn = this.game.turn;
 			this.dotPainter();
@@ -384,6 +431,13 @@ Template.Canvas.events({
 						}
 
 			    		tempGroupData = instance.game.groups;
+
+			    		tempGroupData = new Array();
+			            for(i = 0; i < instance.game.groups.length; i++){
+			              if(instance.game.groups[i]){
+			                tempGroupData[i] = instance.game.groups[i].libs;
+			              }
+			            }
 			    		neighborGroups = new Array();
 			    		neighborGroupCount = 0;
 			    		for(i = 0; i < 3; i++){
@@ -393,21 +447,21 @@ Template.Canvas.events({
 							    if(this.tempData[tX][tY].owner === instance.player){
 							    	if(neighborGroupCount === 0){
 							    		neighborGroups[0] = this.tempData[tX][tY].group;
-							    		tempGroupData[this.tempData[tX][tY].group].libs--;
+							    		tempGroupData[this.tempData[tX][tY].group]--;
 							    		neighborGroupCount ++;
 							    	}
 							    	else{
 							    		matchGroup = false;
 							    		for (w = 0; w < neighborGroupCount; w++){
 							    			if(this.tempData[tX][tY].group === neighborGroups[w]){
-							    				tempGroupData[neighborGroups[w]].libs--;
+							    				tempGroupData[neighborGroups[w]]--;
 							    				matchGroup = true;
 							    				break;
 							    			}
 							    		}
 							    		if(matchGroup === false){
 							    			neighborGroups[neighborGroupCount] = this.tempData[tX][tY].group
-							    			tempGroupData[this.tempData[tX][tY].group].libs--;
+							    			tempGroupData[this.tempData[tX][tY].group]--;
 							    			neighborGroupCount ++;
 							    		}
 							    	}
@@ -416,7 +470,7 @@ Template.Canvas.events({
 						}
 						if(neighborGroupCount !== 0){
 							for(z = 0; z < neighborGroupCount; z++){
-								if(tempGroupData[neighborGroups[z]].libs > 0){
+								if(tempGroupData[neighborGroups[z]] > 0){
 
 									tempNum = Number(FlowRouter.getParam('num'));
 							        Meteor.call('games.makeTurn', k, m, instance.gameId, function (err, id){
