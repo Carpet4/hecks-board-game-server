@@ -18,7 +18,7 @@
 								Notifications<span class="caret"></span>
 					  		</button>
 					  	{{/if}}
-					  	<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+					  	<ul class="dropdown-menu notificationList" aria-labelledby="dropdownMenu1">
 						    {{#each notifications}}
 		          				{{>Notification}}
 		          			{{/each}}
@@ -30,9 +30,11 @@
     			<div class="collapse navbar-collapse" id="myNavbar">
      				<ul class="nav navbar-nav">
 						<li><a href="/chat">Chat</a></li>
-
-						<li><a href="/play">Play</a></li>
-
+						{{#if activeGames}}
+							<li><a href="/play" style="color:red;">Play</a></li>
+						{{else}}
+							<li><a href="/play">Play</a></li>
+						{{/if}}	
 						<li><a href="/watch">Watch</a></li>
 
 						<li><a href="/profile/{{username}}">Profile</a></li>
@@ -48,7 +50,7 @@
 	          					</a>
           					{{/if}}
 
-	          					<ul class="dropdown-menu">
+	          					<ul class="dropdown-menu notificationList">
 	          						{{#each notifications}}
 				          				{{>Notification}}
 				          			{{/each}}	
@@ -73,15 +75,15 @@
 			{{#if $eq type "gameInvite"}}
 				{{#if $eq reciever currentUser._id}}
 					{{idToName sender}} invited you for a game!<br>
-					Main time: {{mainT}}<br>
-					Time Increments: {{subT}}<br>
+					Main time: {{timeDisplay mainT}}<br>
+					Time Increments: {{timeDisplay subT}}<br>
 					<button class="btn btn-success gameAccept" value="{{_id}}">V</button>
 					<button class="btn btn-danger gameDecline" value="{{_id}}">X</button>
 			
 				{{else}}
 					You have sent a game request to {{idToName reciever}}!
-					Main time: {{mainT}}<br>
-					Time Increments: {{subT}}<br>
+					Main time: {{timeDisplay mainT}}<br>
+					Time Increments: {{timeDisplay subT}}<br>
 					<button class="btn btn-danger gameDecline" value="{{_id}}">X</button>
 				{{/if}}	
 			{{/if}}											

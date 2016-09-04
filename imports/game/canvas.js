@@ -125,7 +125,6 @@ Template.Canvas.onCreated(function(){
 	            this.ctx.fillStyle = this.bg_color;
 	            this.ctx.stroke();
 	            this.ctx.fill();
-
 			}
 
 		}

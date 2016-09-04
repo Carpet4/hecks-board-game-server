@@ -23,6 +23,11 @@ Template.Header.helpers({
       if(Notifications.find().count() > 0){
         return true;
       }
+    },
+    activeGames: ()=>{
+      if(Meteor.user().activeGames[0] || Meteor.user().activeGames.length > 0){
+        return true;
+      }
     }
 
 });
@@ -47,6 +52,33 @@ Template.Notification.helpers({
     console.log(id);
     return Meteor.users.findOne(id).username;
   } 
+});
+
+Template.Notification.helpers({
+
+  timeDisplay: (time)=>{
+    console.log(time);
+    hours = Math.floor(time / 3600);
+    minutes = Math.floor((time - hours*3600) / 60);
+    seconds = time - (hours * 3600) - (minutes * 60);
+
+    var result = "";
+
+    if(hours > 0){
+      result += (hours + "h ");
+    }
+    if(minutes > 0){
+      result += (minutes + "m ");
+    }
+    if(seconds > 0){
+      result += (seconds + "s");
+    }
+    console.log(result);
+
+    return result;
+
+  }
+
 });
 
 Template.Notification.events({

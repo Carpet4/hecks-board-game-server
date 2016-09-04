@@ -2,7 +2,7 @@
 	
 		<nav class="side-nav">
 			<h3>Chat rooms</h3>
-			<button class="newRoom btn-primary">New Room</button>
+			<button class="newRoom mainButton">New Room</button>
 			{{#if newRoom}}
 			<form>
 				Room name:
@@ -40,7 +40,7 @@
 <template name="ActiveRoomOnList">
 	<li>
 		<div class="btn-group">
-	    	<button type="button" class="btn btn-primary dropdown-toggle listButton" data-toggle="dropdown">
+	    	<button type="button" class="mainButton dropdown-toggle listButton" data-toggle="dropdown">
 	    	<span class="glyphicon glyphicon-cog"></span> </button>
 	    	<ul class="dropdown-menu" role="menu">
 			    <li><button class="leaveRoom btn-danger btn-block" value="{{_id}}">Leave</button></li>
