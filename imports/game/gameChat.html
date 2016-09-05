@@ -2,7 +2,7 @@
   <div class="gameMessagesContainer" id="gameMessagesContainer">
     <ul>
       {{#each messages}}
-        {{> Message}}
+        {{> GameMessage}}
         {{scrollDown}}
       {{/each}}
     </ul>
@@ -13,4 +13,8 @@
         <input type="text" name="text" class="form-control" placeholder="Write something down! :)">
     </form>
   </div>
+</template>
+
+<template name="GameMessage">
+  <li style="word-wrap: break-word"> <span class="midAlign">{{timeToMinutes timeStamp}}</span> <strong>{{#each writterCursor username}}{{>UserButton}}{{/each}}</strong><span class="midAlign">: {{text}}</span></li>
 </template>

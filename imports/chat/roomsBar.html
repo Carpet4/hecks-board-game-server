@@ -16,12 +16,12 @@
 			<ul>
 
 				
-				<h3>Active:</h3>
+				<h4>Active:</h4>
 				{{#each activeRooms}}
 					{{>ActiveRoomOnList}}
 				{{/each}}
 
-				<br><h3>Available:</h3>
+				<br><h4>Available:</h4>
 				{{#each avaRooms}}
 	        		{{>AvaRoomOnList}}
 	     		{{/each}}
@@ -48,9 +48,9 @@
 	    	</ul>
 	  	</div>
 	  	{{#if isUnRead _id}}
-			<button class="activeRoom btn btn-link listButton" value="{{_id}}" style="color:red;">{{name}}</button>
+			<button class="activeRoom btn btn-link listButton" value="{{_id}}" style="color:#33ff33;">{{name}}</button>
 		{{else}}{{#if isOpen _id}}
-			<button class="activeRoom btn btn-link listButton" value="{{_id}}" style="color:green;">{{name}}</button>
+			<button class="activeRoom btn btn-link listButton" value="{{_id}}" style="color:#66ffe0; text-decoration: underline;">{{name}}</button>
 		{{else}}
 			<button class="activeRoom btn btn-link listButton" value="{{_id}}">{{name}}</button>
 		{{/if}}

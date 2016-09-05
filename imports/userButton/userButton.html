@@ -45,6 +45,20 @@
 		</div>
 </template>
 
+<template name="UserButton">
+		<div class="btn-group">
+		    <button type="button" class="btn btn-link dropdown-toggle listButton" data-toggle="dropdown">
+		    {{username}}</button>
+		    <ul class="dropdown-menu" role="menu">
+		    	<li><a href="/profile/{{username}}" class="btn-info btn-block" style="color: white; text-align: center;">Profile</a></li>
+		    	{{#if checkIfSelf _id}}
+					<li><button class="openModal btn-warning btn-block" value="{{username}}">Play</button></li>
+					<li><button class="startChat btn-success btn-block" value="{{_id}}">Chat</button></li>
+				{{/if}}		
+		    </ul>
+		</div>
+</template>
+
 <template name="PlayModal">
     <div class="modal fade">
         <div class="modal-dialog">

@@ -24,29 +24,43 @@ import '../imports/router/routes.js';
 Meteor.startup(function(){
 
 	//need to understand how to do it for chat windows only, mabye with an event property?
-$(window).bind('beforeunload', function(event) {
-	event.returnValue = null;
-	if(event.target.location.pathname === '/chat'){
-    	closingWindow();
-    }
+  $(window).bind('beforeunload', function(event) {
+  	event.returnValue = null;
+  	if(event.target.location.pathname === '/chat'){
+      	closingWindow();
+      }
+  });
+
+  UI.registerHelper('scrollDown', function(){
+      out = Template.instance().messagesContainer;
+        if(out){
+        isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 30;
+        console.log(out.scrollHeight - out.clientHeight,  out.scrollTop + 1);
+        if(isScrolledToBottom){
+          setTimeout(function(){//otherwise it runs before DOM is actually updated
+              out.scrollTop = out.scrollHeight - out.clientHeight;
+          }, 10);   
+          
+        }
+      }
+  });
+
+  UI.registerHelper('timeToMinutes', function(time){
+      this.time = new Date(time);
+      return (pad2(this.time.getHours()) + ":" + pad2(this.time.getMinutes()));
+  });
+
+  UI.registerHelper('writterCursor', function(name){
+      return Meteor.users.find({username: name});
+  });
+
 });
 
-UI.registerHelper('scrollDown', function(){
-    out = Template.instance().messagesContainer;
-      if(out){
-      isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 30;
-      console.log(out.scrollHeight - out.clientHeight,  out.scrollTop + 1);
-      if(isScrolledToBottom){
-        setTimeout(function(){//otherwise it runs before DOM is actually updated
-            out.scrollTop = out.scrollHeight - out.clientHeight;
-        }, 10);   
-        
-      }
-    }
-});
-});
 closingWindow = function(){
     if(Meteor.userId()){
     	Meteor.call('users.isChatF', event);
 	}
+}
+pad2 = function(number) {
+  return (number < 10 ? '0' : '') + number;
 }

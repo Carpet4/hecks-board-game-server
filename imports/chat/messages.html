@@ -3,7 +3,7 @@
     <div class="messagesContainer" id="messagesContainer">
       <ul>
         {{#each messages}}
-          {{> Message}}
+          {{> CommunityMessage}}
           {{scrollDown}}
         {{/each}}
       </ul>
@@ -18,6 +18,6 @@
   
 </template>
  
-<template name="Message">
-  <li style="word-wrap: break-word"> {{timeToMinutes timeStamp}} <strong>{{username}}</strong>: {{text}}</li>
+<template name="CommunityMessage">
+  <li style="word-wrap: break-word;"><span class="midAlign">{{timeToMinutes timeStamp}} </span><strong>{{#each writterCursor username}}{{>RoomUserButton}}{{/each}}</strong><span class="midAlign">: {{text}}</span></li>
 </template>

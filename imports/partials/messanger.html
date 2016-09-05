@@ -25,9 +25,9 @@
 		</div>
 	{{else}}
 		<div class="privateChatWrapper rotation">
-			<div class="upperChatWindow rotation openChatWindow">
+			<div class="upperChatWindow rotation openChatWindow {{#if $eq state 'unRead'}}green{{/if}}">
 				{{#if $eq state "unRead"}}
-				 	<div style="color:red">{{idToName chatee}}</div>
+				 	<div style="color:black;">{{idToName chatee}}</div>
 				{{else}}
 					<div>{{idToName chatee}}</div>
 				{{/if}}
@@ -46,3 +46,7 @@
 		{{/each}}
 	</div>
 </Template>
+
+<template name="Message">
+  <li style="word-wrap: break-word"> <span class="midAlign">{{timeToMinutes timeStamp}}</span> <strong>{{username}}</strong><span class="midAlign">: {{text}}</span></li>
+</template>

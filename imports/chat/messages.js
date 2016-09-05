@@ -26,6 +26,15 @@ Template.Messages.helpers({
 
 });
 
+Template.CommunityMessage.helpers({
+
+  writter: (name)=> {
+    console.log(Meteor.users.findOne({username: name}));
+    return Meteor.users.find({username: name});
+  }
+
+});
+
 Template.Messages.events({
   'submit .new-message'(event) {
     console.log((new Date).getTime());
@@ -37,29 +46,10 @@ Template.Messages.events({
     const text = target.text.value;
  
     // Insert a message into the collection
-    Meteor.call('messages.insert', text, Session.get('currentChat'), function (err, id){
-                      console.log((new Date).getTime() + " HELLO");
-                      });
+    Meteor.call('messages.insert', text, Session.get('currentChat'));
  
     // Clear form
     target.text.value = '';
     console.log((new Date).getTime());
   },
-});
-
-
-Template.Message.onCreated(function(){
-  this.pad2 = function(number) {
-  return (number < 10 ? '0' : '') + number;
-  }
-});
-
-Template.Message.helpers({
-
-  timeToMinutes: (time)=> {
-    console.log((new Date).getTime());
-    this.time = new Date(time);
-    return (Template.instance().pad2(this.time.getHours()) + ":" + Template.instance().pad2(this.time.getMinutes()));
-  }
-
 });

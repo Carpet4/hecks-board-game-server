@@ -41,6 +41,16 @@ Template.Canvas.onDestroyed(function(){
 });
         
 Template.Canvas.onCreated(function(){
+	if($(window).width() < 545 || $(window).height() < 545){
+		this.zoomFirst = true;
+	}
+	else{
+		this.zoomFirst = false;
+	}
+
+	this.isZoomed = false;
+	this.imageSave;
+	this.dataSave;
 	this.blues = blues;
 	this.reds = reds;
 	this.redimg = redimg;
@@ -62,6 +72,13 @@ Template.Canvas.onCreated(function(){
 
 
 	$(window).resize(()=> {
+
+		if($(window).width() < 545 || $(window).height() < 545){
+			this.zoomFirst = true;
+		}
+		else{
+			this.zoomFirst = false;
+		}
     	this.divWidth = document.getElementById('canvasHolder').clientWidth;
 		this.divHeight = document.getElementById('canvasHolder').clientHeight - 52;
     	if(this.divHeight * 11 / 10 < this.divWidth){
@@ -392,6 +409,61 @@ Template.Canvas.events({
 		console.log((new Date).getTime());
 		if(instance.player !== 0 && instance.game.result === false){
 			if((instance.player === 1 && instance.turn % 2 === 0) || (instance.player === 2 && instance.turn % 2 !== 0) ){
+
+
+
+
+				if(instance.zoomFirst && !instance.isZoomed){
+					zoomX = instance.coAdjuster * event.offsetX;
+					zoomY = instance.coAdjuster * event.offsetY;
+
+					if(zoomX - 220 < 0){
+						zoomX = 0;
+					}
+					else if(zoomX + 220 > 880){
+						zoomX = 440
+					}
+					else{
+						zoomX -= 220
+					}
+
+					if(zoomY - 200 < 0){
+						zoomY = 0;
+					}
+					else if(zoomY + 200 > 800){
+						zoomY = 400
+					}
+					else{
+						zoomY -= 200
+					}
+
+					instance.imageSave = instance.ctx.getImageData(0, 0, 880, 800);
+					instance.dataSave = instance.pixelContext.getImageData(0, 0, 880, 800);
+
+					imageToZoom = instance.ctx.getImageData(zoomX, zoomY, 440, 400);
+					dataToZoom = instance.pixelContext.getImageData(zoomX, zoomY, 440, 400);
+
+					var tempCanvas = $("<canvas>")
+					    .attr("width", imageToZoom.width)
+					    .attr("height", imageToZoom.height)[0];
+
+					tempCanvas.getContext("2d").putImageData(imageToZoom, 0, 0);
+					instance.ctx.scale(2, 2);
+					instance.ctx.drawImage(tempCanvas, 0, 0);
+
+					tempCanvas.getContext("2d").putImageData(dataToZoom, 0, 0);
+					instance.pixelContext.clearRect(0, 0, 880, 800);
+					instance.pixelContext.scale(2, 2);
+					instance.pixelContext.drawImage(tempCanvas, 0, 0);
+
+					instance.isZoomed = true;
+					instance.ctx.scale(0.5, 0.5);
+					instance.pixelContext.scale(0.5, 0.5);
+					return
+				}
+				
+
+
 				var imageData = instance.pixelContext.getImageData(instance.coAdjuster * event.offsetX, instance.coAdjuster * event.offsetY, 1, 1).data;
 			    var index = (imageData[0] << 16 | imageData[1] << 8 | imageData[2]) - 1;
 			    if(index !== -1){ 
@@ -420,6 +492,13 @@ Template.Canvas.events({
 					          	tY = this.tempData[k][m].neighbors[i].y; //neighbor's y
 					          	if(this.tempData[tX][tY].owner === 0){  
 							        tempNum = Number(FlowRouter.getParam('num'));
+							        if(instance.isZoomed){
+								        instance.ctx.putImageData(instance.imageSave, 0, 0);
+								        instance.pixelContext.clearRect(0, 0, 880, 800);
+								        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
+								        instance.isZoomed = false;
+							    	}
+
 							        Meteor.call('games.makeTurn', k, m, instance.gameId, function (err, id){
        								console.log((new Date).getTime() + " HELLO");
        								});
@@ -472,6 +551,14 @@ Template.Canvas.events({
 								if(tempGroupData[neighborGroups[z]] > 0){
 
 									tempNum = Number(FlowRouter.getParam('num'));
+
+									if(instance.isZoomed){
+								        instance.ctx.putImageData(instance.imageSave, 0, 0);
+								        instance.pixelContext.clearRect(0, 0, 880, 800);
+								        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
+								        instance.isZoomed = false;
+							    	}
+
 							        Meteor.call('games.makeTurn', k, m, instance.gameId, function (err, id){
        								console.log((new Date).getTime() + " HELLO");
        								});
@@ -480,8 +567,14 @@ Template.Canvas.events({
 								}
 							}
 						}
-				    }
+				    }			    
 				}
+				if(instance.isZoomed){
+			        instance.ctx.putImageData(instance.imageSave, 0, 0);
+			        instance.pixelContext.clearRect(0, 0, 880, 800);
+			        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
+			        instance.isZoomed = false;
+		    	}
 		    }
 		}
 	}

@@ -3,6 +3,8 @@ import { Meteor } from 'meteor/meteor';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Rooms } from '../../imports/collections/rooms.js';
 
+//need to fix everything marked as read when going back to chat
+
 import './roomsBar.html';
 Template.RoomsBar.onCreated(function(){
 	this.newRoom = new ReactiveVar(false);
