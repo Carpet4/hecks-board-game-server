@@ -9,11 +9,11 @@ if(Meteor.isClient){
 	});
 
 
-	FlowRouter.triggers.enter([function(context, redirect){
+	/*FlowRouter.triggers.enter([function(context, redirect){
 		if(!Meteor.userId()){
 			FlowRouter.go('login');
 		}
-	}]);
+	}]);*/
 }	
 
 
@@ -24,6 +24,13 @@ FlowRouter.route('/', {
 			FlowRouter.go('chat');
 		}
 		BlazeLayout.render('HomeLayout')
+	}
+});
+
+FlowRouter.route('/.well-known/acme-challenge/Q9ncAugNjp9OqPSQnq4RZTl4aCdqi9dhDKuz5vOaLe8', {
+	name: 'test',
+	action(){
+		BlazeLayout.render('Test')
 	}
 });
 

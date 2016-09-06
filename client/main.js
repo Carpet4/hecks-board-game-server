@@ -4,6 +4,7 @@ import '../imports/chat/usersBar.js';
 import '../imports/chat/messages.js';
 import '../imports/chat/roomsBar.js';
 import '../imports/chat/roomPage.js';
+import '../imports/test.html';
 import '../imports/play/play.js';
 import '../imports/layouts/homeLayout.html';
 import '../imports/layouts/mainLayout.js';
