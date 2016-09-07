@@ -6,33 +6,33 @@
 			<select class="minTime">
 		  		<option value="10">10s</option>
 				<option value="20">20s</option>
-				<option value="30">30s</option>
+				<option value="30" selected="selected">30s</option>
 				<option value="40">40s</option>
-			</select>
+			</select> inc per move. <br><br>
 
 		Maximum time settings
 			<select class="maxTime">
 		  		<option value="10">10s</option>
 				<option value="20">20s</option>
 				<option value="30">30s</option>
-				<option value="40">40s</option>
-			</select>
+				<option value="40" selected="selected">40s</option>
+			</select> inc per move. <br><br>
 
 		Minimum rank
 			<select class="minRank">
-		  		<option value="-300">-300</option>
+		  		<option value="-300" selected="selected">-300</option>
 				<option value="-200">-200</option>
 				<option value="-100">-100</option>
 				<option value="0">Your rank</option>
-			</select>
+			</select><br><br>
 
 		Maximum rank
 			<select class="maxRank">
-		  		<option value="300">+300</option>
+		  		<option value="300" selected="selected">+300</option>
 				<option value="200">+200</option>
 				<option value="100">+100</option>
 				<option value="0">Your rank</option>
-			</select>
+			</select><br><br>
 	
 	    <button class="btn-lg {{#if isAutomatch}}automatchRemove btn-success{{else}}automatchInsert mainButton{{/if}}">
 	      {{#if isAutomatch}}
@@ -40,7 +40,7 @@
 	      {{else}}
 	      	Match Me Up!
 	      {{/if}}
-	    </button>
+	    </button><br><br>
 	    <iframe width="560" height="315" src="https://www.youtube.com/embed/vFBQmppjVC4" frameborder="0" allowfullscreen></iframe>
     {{/if}}
     </div>
