@@ -6,17 +6,16 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { blues, reds, blueimg, redimg, blackimg } from './game.js';
 
 
-function decimalToHex(d) {
-    var hex = Number(d).toString(16);
-    hex = "#000000".substr(0, 7 - hex.length) + hex;
+function decimalToHex(x, y) {
+    x = x.toString(16);
+    y = y.toString(16);
+    var hex = "#00" + "00".substr(0, 2 - x.length) + x + "00".substr(0, 2 - y.length) + y;
     return hex;
 };
 
-Dot = function (fillStyle, xCntr, yCntr, x, y) {
+Dot = function (xCntr, yCntr) {
     this.xCntr = xCntr; // x center of the dot
     this.yCntr = yCntr; // y center of the dot
-    this.index = fillStyle;
-    this.owner = 0;
 };
 
 findPlayer = function(){
@@ -184,6 +183,7 @@ Template.Canvas.onCreated(function(){
 		if(this.hexsPaint[x] && this.hexsPaint[x][y]){
 			this.hexsPaint[x][y].value += tempInt;
 			var hex = this.hexsPaint[x][y];
+			console.log(x + " " + y + " " + hex.value);
 			if(hex.value > 0){
 				this.ctx.globalAlpha = 1;
 				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
@@ -399,11 +399,11 @@ Template.Canvas.onRendered(function() {
     var y = this.suby*2; //instead of 50
 
     //default boardRenderer.subx is 44, default boardRenderer.suby is 25
-    for(j = 0; j < this.hexs.length; j++){
-    	this.hexsPaint[j] = new Array();
-        for(i = 0; i < this.hexs[0].length; i++){
+    for(i = 0; i < this.hexs.length; i++){
+    	this.hexsPaint[i] = new Array();
+        for(j = 0; j < this.hexs[0].length; j++){
             x = x + this.subx;
-            if(this.hexs[j][i] === 1)
+            if(this.hexs[i][j] === 1)
                 continue;
             this.ctx.beginPath();
             this.ctx.moveTo(x,y);
@@ -416,7 +416,7 @@ Template.Canvas.onRendered(function() {
             this.ctx.lineWidth = 3;
             this.ctx.strokeStyle = this.line_color;
             this.ctx.stroke();
-            this.hexsPaint[j][i] = new Hexagon(x, y);
+            this.hexsPaint[i][j] = new Hexagon(x, y);
         }
         x = this.subx;
 
@@ -427,12 +427,11 @@ Template.Canvas.onRendered(function() {
     var x = 0;
     var y = this.suby*2; //instead of 50
 
-    var color = 1;
-    for(j = 0; j < this.dots.length; j++){
-    	this.dotsPaint[j] = new Array();
-        for(i = 0; i < this.dots[0].length; i++) {
+    for(i = 0; i < this.dots.length; i++){
+    	this.dotsPaint[i] = new Array();
+        for(j = 0; j < this.dots[0].length; j++) {
             x = x + this.subx;
-            if(this.dots[j][i] === 1)
+            if(this.dots[i][j] === 1)
                 continue;
             this.ctx.beginPath();
             this.ctx.arc(x, y, this.radius, 0, 2*Math.PI, false);
@@ -441,18 +440,17 @@ Template.Canvas.onRendered(function() {
             this.ctx.fillStyle = this.bg_color;
             this.ctx.stroke();
             this.ctx.fill();
-            this.dotsPaint[j][i] = new Dot(color, x, y);
+            this.dotsPaint[i][j] = new Dot(x, y);
             // creates mask
             this.pixelContext.beginPath();
             this.pixelContext.arc(x, y, this.radius*1.5, 0, 2*Math.PI, false);
             this.pixelContext.lineWidth = 6;
             this.pixelContext.strokeStyle = this.line_color;
-            this.pixelContext.fillStyle = decimalToHex(color);
+            this.pixelContext.fillStyle = decimalToHex(i+1, j+1);
             this.pixelContext.fill();
-            color++;
         }
         var x = 0;
-        if (j % 2 === 0){
+        if (i % 2 === 0){
             y += this.suby;
         }
         else{
@@ -479,7 +477,6 @@ Template.Canvas.onRendered(function() {
     this.maskCanvas.style.width = this.canvasXAdjuster.toString() + "px";
   	this.game = Games.findOne(this.gameId);
   	this.turn = this.game.turn;
-  		this.dotPainter();
 
   	/*this.testObserver = Test.find().observe({
 
@@ -522,6 +519,10 @@ Template.Canvas.onRendered(function() {
 			}
 		},
 	});
+
+	/*$( "#mainCanvas" ).mousemove(function( event ) {
+		console.log(event.offsetX);
+	});*/
 });
 
 
@@ -587,28 +588,9 @@ Template.Canvas.events({
 
 
 				var imageData = instance.pixelContext.getImageData(instance.coAdjuster * event.offsetX, instance.coAdjuster * event.offsetY, 1, 1).data;
-			    var index = (imageData[0] << 16 | imageData[1] << 8 | imageData[2]);
-			    if(index !== 0){ 
-			    	this.tempData = instance.dotsPaint;
-			    	indexToXY = function(tempData){
-			    		for(i = 0; i < instance.dots.length; i++){
-					        for(j = 0; j < instance.dots[0].length; j++){
-					          	if(tempData[i][j]){
-					            	if(tempData[i][j].index === index){
-					              		k = i;
-					              		m = j;
-					              		return
-					            	}
-					          	}
-					        }
-      					}
-					}
-
-					var k;
-					var m;
-					indexToXY(this.tempData);
-
-
+			    var k = imageData[1] -1;
+				var m = imageData[2] -1;
+			    if(k > 0){ 
 					if(instance.dotsData[k][m] === 0 && instance.hasLibs(k, m, instance.player, instance.game)){
 		    	
 				        tempNum = Number(FlowRouter.getParam('num'));
