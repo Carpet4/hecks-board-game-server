@@ -105,7 +105,7 @@ Meteor.methods({
 			Meteor.users.update(this.userId, {$set: {lastRead: lastRead}});
 		}
 	},
-
+	//changes back to number at the beginning of this file
 	'users.infiniteLastReadC'(){
 		if(this.userId){
 			lastRead = Meteor.users.findOne(this.userId).lastRead;

@@ -17,7 +17,6 @@ Template.Chat.onCreated(function(){
   			tempChatRooms[i] = tempChatRooms[i]._id;
   		}
   		Session.set('activeChats', tempChatRooms);
-  		console.log(Session.get('activeChats'));
   	}
   	if(Session.get('activeChats')){
   		this.subscribe('communityMessages', Session.get('activeChats')); //so things get updated if quits or joins a room

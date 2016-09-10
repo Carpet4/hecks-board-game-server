@@ -2,33 +2,34 @@ import { Template } from 'meteor/templating';
 import { Meteor } from 'meteor/meteor';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Rooms } from '../../imports/collections/rooms.js';
+import './roomsBar.html';
 
 //need to fix everything marked as read when going back to chat
 
-import './roomsBar.html';
+
 Template.RoomsBar.onCreated(function(){
 	this.newRoom = new ReactiveVar(false);
 	CommunityChats = new Meteor.Collection(null);
 	Session.set('currentChat', false);
 
-	lastRead = Meteor.user().lastRead.community;
-	if(lastRead === Infinity){
-		lastRead = (new Date).getTime();
-		console.log("horray");
-	}
-	else{
-		setTimeout(function(){
-			if(Meteor.user().lastRead.community < Infinity){
-				Meteor.call('users.infiniteLastReadC');
-			}
-		}, 5000);		
+	lastRead = Session.get('communityLastRead');
+	if(!lastRead){
+		lastRead = Meteor.user().lastRead.community;
+		if(lastRead === Infinity){
+			lastRead = (new Date).getTime();
+		}
+		else{
+			setTimeout(function(){
+				if(Meteor.user().lastRead.community < Infinity){
+					Meteor.call('users.infiniteLastReadC');
+				}
+			}, 5000);		
+		}
 	}
 
-	CommunityChatsObserver = Rooms.find({type: "community", users: Meteor.userId()}).observe({
+	CommunityChatsObserver = Rooms.find({type: "community", users: Meteor.userId()},{ fields: {"id": 1, "lastMessage": 1}}).observe({
 		added: function(doc){
-			console.log(Session.get('currentChat'));
 			if(Session.get('currentChat') === false){
-				console.log("this is false");
 				CommunityChats.insert({roomId: doc._id, state: "open"});
 				Session.set('currentChat', doc._id);
 
@@ -53,6 +54,10 @@ Template.RoomsBar.onCreated(function(){
 		}
 	});		
 });
+
+Template.RoomsBar.onDestroyed(function(){
+	Session.set('communityLastRead', (new Date).getTime());
+})
 
 Template.RoomsBar.helpers({
 

@@ -23,7 +23,6 @@ import '../imports/router/routes.js';
 
 Meteor.startup(function(){
 
-	//need to understand how to do it for chat windows only, mabye with an event property?
   $(window).bind('beforeunload', function(event) {
   	event.returnValue = null;
   	if(event.target.location.pathname === '/chat'){
@@ -35,7 +34,6 @@ Meteor.startup(function(){
       out = Template.instance().messagesContainer;
         if(out){
         isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 30;
-        console.log(out.scrollHeight - out.clientHeight,  out.scrollTop + 1);
         if(isScrolledToBottom){
           setTimeout(function(){//otherwise it runs before DOM is actually updated
               out.scrollTop = out.scrollHeight - out.clientHeight;
@@ -58,7 +56,8 @@ Meteor.startup(function(){
 
 closingWindow = function(){
     if(Meteor.userId()){
-    	Meteor.call('users.isChatF', event);
+      Session.set('closingChat', true);
+    	Meteor.call('users.isChatF');
 	}
 }
 pad2 = function(number) {

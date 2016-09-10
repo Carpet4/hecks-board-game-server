@@ -13,7 +13,6 @@ Template.Messanger.onCreated(function(){
 	lastRead = Meteor.user().lastRead.messanger;
 	if(lastRead === Infinity){
 		lastRead = (new Date).getTime();
-		console.log("horray");
 	}
 	else{
 		setTimeout(function(){
@@ -25,7 +24,6 @@ Template.Messanger.onCreated(function(){
 	}
 	messangerObserver = Rooms.find({type: "messanger", users: Meteor.userId()}).observe({
 		added: function(doc){
-			console.log("added here");
 			if(doc.lastMessage > lastRead){
 				users = doc.users;
 				if(users[0] === Meteor.userId()){
@@ -34,7 +32,6 @@ Template.Messanger.onCreated(function(){
 				else{
 					this.chatee = users[0];
 				}
-				console.log(this.chatee + " chatee");
 				MessangerWindows.insert({roomId: doc._id, state: "unRead", chatee: this.chatee});
 			}
 		},
@@ -54,7 +51,6 @@ Template.Messanger.onCreated(function(){
 				else{
 					this.chatee = users[0];
 				}
-				console.log("gets here???");
 				MessangerWindows.insert({roomId: doc._id, state: "unRead", chatee: this.chatee});
 			}
 		},
@@ -108,7 +104,6 @@ Template.MessangerWindow.helpers({
 Template.MessangerWindow.events({
 
 	'submit .new-message'(event, instance) {
-	    console.log((new Date).getTime());
 	    // Prevent default browser form submit
 	    event.preventDefault();
 	 
@@ -121,11 +116,9 @@ Template.MessangerWindow.events({
 	 
 	    // Clear form
 	    target.text.value = '';
-	    console.log((new Date).getTime());
 	  },
 
 	'click .openChatWindow'(event, instance) {
-		console.log(event.target.value);
 		MessangerWindows.update(instance.data._id, {$set: {state: "open"}});
 	},
 

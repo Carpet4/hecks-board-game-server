@@ -12,10 +12,10 @@ function decimalToHex(d) {
     return hex;
 };
 
-Dot = function (fillStyle, xCntr, yCntr) {
+Dot = function (fillStyle, xCntr, yCntr, x, y) {
     this.xCntr = xCntr; // x center of the dot
     this.yCntr = yCntr; // y center of the dot
-    this.mask_fillStyle = fillStyle;
+    this.index = fillStyle;
     this.owner = 0;
 };
 
@@ -36,11 +36,13 @@ Hexagon = function (xCntr, yCntr) {
     this.value = 0;
 };
 
+
 Template.Canvas.onDestroyed(function(){
 	$(window).off('resize');
 });
         
 Template.Canvas.onCreated(function(){
+
 	if($(window).width() < 545 || $(window).height() < 545){
 		this.zoomFirst = true;
 	}
@@ -56,13 +58,12 @@ Template.Canvas.onCreated(function(){
 	this.redimg = redimg;
 	this.blueimg = blueimg;
 	this.blackimg = blackimg;
-	console.log(this.blackimg);
 	this.gameNumber = Number(FlowRouter.getParam('num'));
 	this.game = Games.findOne({gNum: this.gameNumber});
+	this.dotsData = this.game.dotsData;
 	this.gameId = this.game._id;
 	this.player = findPlayer();
-	this.lastMoveIndex = false;
-	this.lastMoveBool = false;
+	this.previousMove = false;
 	if(!this.game.result){
 		Session.set('isGameFinished', false);
 	}
@@ -96,122 +97,241 @@ Template.Canvas.onCreated(function(){
 	    this.maskCanvas.style.height = this.canvasYAdjuster.toString() + "px";
 	    this.maskCanvas.style.width = this.canvasXAdjuster.toString() + "px";
   	});
+
+
+	this.opponentHasLibs = (o, p, playah, int)=>{
+	  	if(this.dotsData[o] && this.dotsData[o][p] && this.dotsData[o][p] === playah){
+
+			var libsCheckArray = new Array(game.xLength);
+	  		for(i=0; i < this.dots.length; i++){
+	    		libsCheckArray[i] = new Array();
+	  		}
+	  		if(!this.libsCheck(o, p, playah, libsCheckArray, this.dotsData)){
+	  			this.stoneRemover(o, p, playah, int);
+	  		}	      
+	    }
+	}
+
+	this.stoneRemover = (x, y, playah, int)=>{
+	  if(this.dotsData[x] && this.dotsData[x][y] === playah){
+	    this.dotsData[x][y] = 0;
+	    this.ctx.beginPath();
+        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius, 0, 2*Math.PI, false);
+        this.ctx.lineWidth = 6;
+        this.ctx.strokeStyle = this.line_color;
+        this.ctx.fillStyle = this.bg_color;
+        this.ctx.stroke();
+        this.ctx.fill();
+        if(x % 2 === 0){
+			this.hexPainter((x-2) / 2, y - 2, int);
+			this.hexPainter((x-2) / 2, y, int);
+			this.hexPainter(x / 2, y - 1, int);		      					
+	    }
+	    else{
+	    	this.hexPainter((x-3) / 2, y - 1, int);
+			this.hexPainter((x-1) / 2, y - 2, int);
+			this.hexPainter((x-1) / 2, y, int);
+	    }
+	    this.ctx.globalAlpha = 1;
+
+	    if(x%2 === 0){
+	      this.stoneRemover(x-1, y, playah, int);
+	      this.stoneRemover(x+1, y-1, playah, int);
+	      this.stoneRemover(x+1, y+1, playah, int);
+	  	}
+	    else{
+	      this.stoneRemover(x-1, y-1, playah, int);
+	      this.stoneRemover(x-1, y+1, playah, int);
+	      this.stoneRemover(x+1, y, playah, int);
+	    }
+	  }
+	}
+
+
+
+	this.hasLibs = (o, p, playah, game)=>{
+	  var libsCheckArray = new Array(this.dots.length);
+	  for(i=0; i < this.dots.length; i++){
+	    libsCheckArray[i] = new Array();
+	  }
+	  var dotsData = game.dotsData;
+	  return this.libsCheck(o, p, playah, libsCheckArray, dotsData);
+	}
+
+	this.libsCheck = (x, y, playah, libsCheckArray, dotsData)=>{
+	  libsCheckArray[x][y] = true;
+	  if(x%2 === 0)
+	    return (this.stoneCheck(x-1, y, playah, libsCheckArray, dotsData) || this.stoneCheck(x+1, y-1, playah, libsCheckArray, dotsData) || this.stoneCheck(x+1, y+1, playah, libsCheckArray, dotsData));     
+	  else
+	    return (this.stoneCheck(x-1, y-1, playah, libsCheckArray, dotsData) || this.stoneCheck(x-1, y+1, playah, libsCheckArray, dotsData) || this.stoneCheck(x+1, y, playah, libsCheckArray, dotsData));
+	}
+
+	this.stoneCheck = (i, j, playah, libsCheckArray, dotsData)=>{
+	  if(dotsData[i] && dotsData[i][j] !== undefined){
+	    if(!libsCheckArray[i][j] && dotsData[i][j] === 0){
+	      return true;
+	    }
+	    else if(!libsCheckArray[i][j] && dotsData[i][j] === playah){
+	      return this.libsCheck(i, j, playah, libsCheckArray, dotsData);
+	    }
+	    else
+	      return false;           
+	  }
+	}
 	
 
-	this.hexPainter = (x, y)=>{
+	this.hexPainter = (x, y, tempInt)=>{
 		if(this.hexsPaint[x] && this.hexsPaint[x][y]){
 			this.hexsPaint[x][y].value += tempInt;
-			tempHex = this.hexsPaint[x][y];
-			if(tempHex.value > 0){
+			var hex = this.hexsPaint[x][y];
+			if(hex.value > 0){
 				this.ctx.globalAlpha = 1;
-				this.ctx.drawImage(this.blackimg, tempHex.xCntr - this.subx + Math.floor(this.subx / 22), tempHex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-				this.ctx.globalAlpha = 0.5;
-				this.ctx.drawImage(this.blueimg, tempHex.xCntr - this.subx + Math.floor(this.subx / 22), tempHex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx.globalAlpha = 0.4;
+				this.ctx.drawImage(this.blueimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
 			}
-			else if(tempHex.value < 0){
+			else if(hex.value < 0){
 				this.ctx.globalAlpha = 1;
-				this.ctx.drawImage(this.blackimg, tempHex.xCntr - this.subx + Math.floor(this.subx / 22), tempHex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-				this.ctx.globalAlpha = 0.5;
-				this.ctx.drawImage(this.redimg, tempHex.xCntr - this.subx + Math.floor(this.subx / 22), tempHex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx.globalAlpha = 0.4;
+				this.ctx.drawImage(this.redimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
 			}
 			else{
 				this.ctx.globalAlpha = 1;
-				this.ctx.drawImage(this.blackimg, tempHex.xCntr - this.subx + Math.floor(this.subx / 22), tempHex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
 			}
 		}
 	};
 
-	this.dotPainter = ()=>{
-		console.log((new Date).getTime());
-
-		if(this.lastMoveBool && this.lastMoveIndex){
-			tempIndex = this.lastMoveIndex;
-			tempOwner = this.dotsPaint[tempIndex].owner;
+	this.makeTurn = ()=>{
+		if(this.previousMove){
+			var o = this.previousMove.x;
+			var p = this.previousMove.y;
+			var tempOwner = this.dotsData[o][p];
+			var xCntr = this.dotsPaint[o][p].xCntr;
+			var yCntr = this.dotsPaint[o][p].yCntr;
 			if(tempOwner == 1){
-				this.ctx.drawImage(this.blues, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
+				this.ctx.drawImage(this.blues, xCntr - this.radius, yCntr - this.radius, this.radius * 2, this.radius * 2);
 			}
 
 			else if(tempOwner == 2){
-				this.ctx.drawImage(this.reds, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
+				this.ctx.drawImage(this.reds, xCntr - this.radius, yCntr - this.radius, this.radius * 2, this.radius * 2);
 			}
 			else{
 				this.ctx.beginPath();
-	            this.ctx.arc(this.dotsPaint[tempIndex].xCntr, this.dotsPaint[tempIndex].yCntr, this.radius, 0, 2*Math.PI, false);
+	            this.ctx.arc(xCntr, yCntr, this.radius, 0, 2*Math.PI, false);
 	            this.ctx.lineWidth = 6;
 	            this.ctx.strokeStyle = this.line_color;
 	            this.ctx.fillStyle = this.bg_color;
 	            this.ctx.stroke();
 	            this.ctx.fill();
 			}
-
 		}
+		if(this.lastMove){
+			var opponent = (this.turn % 2) + 1;
+			var player = 3 - opponent;
+
+			if(player === 1){
+				var image1 = this.blues;
+				var image2 = this.reds;
+			}
+			else{
+				var image1 = this.reds;
+				var image2 = this.blues;
+			}
+			var x = this.lastMove.x;
+			var y = this.lastMove.y;
+
+			this.dotsData[x][y] = player;
+			this.previousMove = this.lastMove;
+
+			this.ctx.drawImage(image1, this.dotsPaint[x][y].xCntr - this.radius, this.dotsPaint[x][y].yCntr - this.radius, this.radius * 2, this.radius * 2);
+			this.ctx.beginPath();
+	        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius / 2, 0, 2*Math.PI, false);
+	        this.ctx.lineWidth = 6;
+	        this.ctx.strokeStyle = this.line_color;
+	        this.ctx.fillStyle = this.line_color;
+	        this.ctx.fill();
+
+	        if(player === 1)
+	        	var int = 1;
+	        else
+	        	var int = -1;
+
+	        if(x % 2 === 0){
+				this.hexPainter((x-2) / 2, y - 2, int);
+				this.hexPainter((x-2) / 2, y, int);
+				this.hexPainter(x / 2, y - 1, int);		      					
+		    }
+		    else{
+		    	this.hexPainter((x-3) / 2, y - 1, int);
+				this.hexPainter((x-1) / 2, y - 2, int);
+				this.hexPainter((x-1) / 2, y, int);
+		    }
+		    this.ctx.globalAlpha = 1;
+
+
+	        if(x%2 === 0){
+		        this.opponentHasLibs(x-1, y, opponent, int);
+		        this.opponentHasLibs(x+1, y-1, opponent, int);
+		        this.opponentHasLibs(x+1, y+1, opponent, int);
+		    }
+		    else{
+		        this.opponentHasLibs(x-1, y-1, opponent, int);
+		        this.opponentHasLibs(x-1, y+1, opponent, int);
+		      	this.opponentHasLibs(x+1, y, opponent, int);
+		    }
+		}
+		else{
+			this.previousMove = false;
+		}        
+
+	}
+
+	this.dotPainter = ()=>{
+		console.log((new Date).getTime());
 
 		for(i = 0; i < this.dots.length; i++){
 			for(j = 0; j < this.dots[0].length; j++){
-				if(this.game.dotsData[i][j]){
-  				tempOwner = this.game.dotsData[i][j].owner;//owner of the server dot
-  				tempIndex = this.game.dotsData[i][j].index;//index of the dot
-      				if(tempOwner !== this.dotsPaint[tempIndex].owner){
-	      				if(tempOwner == 1){
-	      					this.ctx.drawImage(this.blues, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
-	      					if(this.lastMoveBool){
-		      					this.ctx.beginPath();
-				                this.ctx.arc(this.dotsPaint[tempIndex].xCntr, this.dotsPaint[tempIndex].yCntr, this.radius / 2, 0, 2*Math.PI, false);
-				                this.ctx.lineWidth = 6;
-				                this.ctx.strokeStyle = this.line_color;
-				                this.ctx.fillStyle = this.line_color;
-				                this.ctx.fill();
-				                this.lastMoveIndex = tempIndex;
-			            	}
-	      				}
-	      				else if(tempOwner == 2){
-	      					this.ctx.drawImage(this.reds, this.dotsPaint[tempIndex].xCntr - this.radius, this.dotsPaint[tempIndex].yCntr - this.radius, this.radius * 2, this.radius * 2);
-	      					if(this.lastMoveBool){
-		      					this.ctx.beginPath();
-				                this.ctx.arc(this.dotsPaint[tempIndex].xCntr, this.dotsPaint[tempIndex].yCntr, this.radius / 2, 0, 2*Math.PI, false);
-				                this.ctx.lineWidth = 6;
-				                this.ctx.strokeStyle = this.line_color;
-				                this.ctx.fillStyle = this.line_color;
-				                this.ctx.fill();
-				                this.lastMoveIndex = tempIndex;
-				            }
- 
-	      				}
-	      				else{
-	      					this.ctx.beginPath();
-			                this.ctx.arc(this.dotsPaint[tempIndex].xCntr, this.dotsPaint[tempIndex].yCntr, this.radius, 0, 2*Math.PI, false);
-			                this.ctx.lineWidth = 6;
-			                this.ctx.strokeStyle = this.line_color;
-			                this.ctx.fillStyle = this.bg_color;
-			                this.ctx.stroke();
-			                this.ctx.fill();
+				if(this.dotsData[i][j]){
+  				tempOwner = this.dotsData[i][j];//owner of the server dot
+  				if(tempOwner > 0){
+	  				if(tempOwner == 1){
+	  					this.ctx.drawImage(this.blues, this.dotsPaint[i][j].xCntr - this.radius, this.dotsPaint[i][j].yCntr - this.radius, this.radius * 2, this.radius * 2);
+	  					var int = 1;
+	  				}
+	  				else if(tempOwner == 2){
+	  					this.ctx.drawImage(this.reds, this.dotsPaint[i][j].xCntr - this.radius, this.dotsPaint[i][j].yCntr - this.radius, this.radius * 2, this.radius * 2);
+	  					var int = -1;
+	  				}
 
-	      				}
-
-	      				if(tempOwner === 1 || tempOwner === 0 && this.dotsPaint[tempIndex].owner === 2){
-	      					tempInt = 1;
-	      				}
-	      				else{
-	      					tempInt = -1;
-	      				}
-	      				this.dotsPaint[tempIndex].owner = tempOwner;
-
-	      				//reactively draws hexagons
-	      				if(i % 2 === 0){
-	      					this.hexPainter((i-2) / 2, j - 2);
-	      					this.hexPainter((i-2) / 2, j);
-	      					this.hexPainter(i / 2, j - 1);		      					
-	      			    }
-	      			    else{
-	      			    	this.hexPainter((i-3) / 2, j - 1);
-	      					this.hexPainter((i-1) / 2, j - 2);
-	      					this.hexPainter((i-1) / 2, j);
-	      			    }
-	      			    this.ctx.globalAlpha = 1;
+      				//reactively draws hexagons
+      				if(i % 2 === 0){
+      					this.hexPainter((i-2) / 2, j - 2, int);
+      					this.hexPainter((i-2) / 2, j, int);
+      					this.hexPainter(i / 2, j - 1, int);		      					
+      			    }
+      			    else{
+      			    	this.hexPainter((i-3) / 2, j - 1, int);
+      					this.hexPainter((i-1) / 2, j - 2, int);
+      					this.hexPainter((i-1) / 2, j, int);
+      			    }
+      			    this.ctx.globalAlpha = 1;
 	      			}
       			}
   			}
 		}
+		if(this.lastMove){
+			this.previousMove = this.lastMove;
+			var x = this.lastMove.x;
+			var y = this.lastMove.y;
+			this.ctx.beginPath();
+	        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius / 2, 0, 2*Math.PI, false);
+	        this.ctx.lineWidth = 6;
+	        this.ctx.strokeStyle = this.line_color;
+	        this.ctx.fillStyle = this.line_color;
+	        this.ctx.fill();
+    	}
 		console.log((new Date).getTime());
 	}
 
@@ -309,6 +429,7 @@ Template.Canvas.onRendered(function() {
 
     var color = 1;
     for(j = 0; j < this.dots.length; j++){
+    	this.dotsPaint[j] = new Array();
         for(i = 0; i < this.dots[0].length; i++) {
             x = x + this.subx;
             if(this.dots[j][i] === 1)
@@ -320,7 +441,7 @@ Template.Canvas.onRendered(function() {
             this.ctx.fillStyle = this.bg_color;
             this.ctx.stroke();
             this.ctx.fill();
-            this.dotsPaint[color-1]= new Dot(color, x, y);
+            this.dotsPaint[j][i] = new Dot(color, x, y);
             // creates mask
             this.pixelContext.beginPath();
             this.pixelContext.arc(x, y, this.radius*1.5, 0, 2*Math.PI, false);
@@ -374,27 +495,27 @@ Template.Canvas.onRendered(function() {
         "turn": 1,
         "result": 1,
         "dotsData": 1,
-        "groups": 1
+        "lastMove": 1
     }}).observe({
 
 		added: (doc)=>{
-			this.game = doc;
-			this.turn = this.game.turn;
+			
+			this.dotsData = doc.dotsData
+			this.turn = doc.turn;
+			this.lastMove = doc.lastMove;
 			this.dotPainter();
 
 			if(this.game.result && Session.get('isGameFinished') === false){
-				console.log("no way");
 				Session.set('isGameFinished', true);
 			}
 		},
 
-		changed: (doc,)=>{
-			console.log("changed");
+		changed: (doc)=>{
 			console.log((new Date).getTime());
-			this.lastMoveBool = true;
 			this.game = doc;
-			this.turn = this.game.turn;
-			this.dotPainter();
+			this.turn = doc.turn;
+			this.lastMove = doc.lastMove;
+			this.makeTurn();
 
 			if(this.game.result && Session.get('isGameFinished') === false){
 				Session.set('isGameFinished', true);
@@ -406,6 +527,7 @@ Template.Canvas.onRendered(function() {
 
 Template.Canvas.events({
 	'click'(event, instance) {
+
 		console.log((new Date).getTime());
 		if(instance.player !== 0 && instance.game.result === false){
 			if((instance.player === 1 && instance.turn % 2 === 0) || (instance.player === 2 && instance.turn % 2 !== 0) ){
@@ -465,9 +587,9 @@ Template.Canvas.events({
 
 
 				var imageData = instance.pixelContext.getImageData(instance.coAdjuster * event.offsetX, instance.coAdjuster * event.offsetY, 1, 1).data;
-			    var index = (imageData[0] << 16 | imageData[1] << 8 | imageData[2]) - 1;
-			    if(index !== -1){ 
-			    	this.tempData = instance.game.dotsData;
+			    var index = (imageData[0] << 16 | imageData[1] << 8 | imageData[2]);
+			    if(index !== 0){ 
+			    	this.tempData = instance.dotsPaint;
 			    	indexToXY = function(tempData){
 			    		for(i = 0; i < instance.dots.length; i++){
 					        for(j = 0; j < instance.dots[0].length; j++){
@@ -475,6 +597,7 @@ Template.Canvas.events({
 					            	if(tempData[i][j].index === index){
 					              		k = i;
 					              		m = j;
+					              		return
 					            	}
 					          	}
 					        }
@@ -485,89 +608,21 @@ Template.Canvas.events({
 					var m;
 					indexToXY(this.tempData);
 
-			    	if(this.tempData[k][m].owner === 0){
-						for(i = 0; i < 3; i++){
-							if(this.tempData[k][m].neighbors[i]){
-					          	tX = this.tempData[k][m].neighbors[i].x; //neighbor's x
-					          	tY = this.tempData[k][m].neighbors[i].y; //neighbor's y
-					          	if(this.tempData[tX][tY].owner === 0){  
-							        tempNum = Number(FlowRouter.getParam('num'));
-							        if(instance.isZoomed){
-								        instance.ctx.putImageData(instance.imageSave, 0, 0);
-								        instance.pixelContext.clearRect(0, 0, 880, 800);
-								        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
-								        instance.isZoomed = false;
-							    	}
 
-							        Meteor.call('games.makeTurn', k, m, instance.gameId, function (err, id){
-       								console.log((new Date).getTime() + " HELLO");
-       								});
-							        console.log((new Date).getTime());
-							        return
-							    }
-							}
-						}
+					if(instance.dotsData[k][m] === 0 && instance.hasLibs(k, m, instance.player, instance.game)){
+		    	
+				        tempNum = Number(FlowRouter.getParam('num'));
+				        if(instance.isZoomed){
+					        instance.ctx.putImageData(instance.imageSave, 0, 0);
+					        instance.pixelContext.clearRect(0, 0, 880, 800);
+					        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
+					        instance.isZoomed = false;
+				    	}
 
-			    		tempGroupData = instance.game.groups;
-
-			    		tempGroupData = new Array();
-			            for(i = 0; i < instance.game.groups.length; i++){
-			              if(instance.game.groups[i]){
-			                tempGroupData[i] = instance.game.groups[i].libs;
-			              }
-			            }
-			    		neighborGroups = new Array();
-			    		neighborGroupCount = 0;
-			    		for(i = 0; i < 3; i++){
-							if(this.tempData[k][m].neighbors[i]){
-					          	tX = this.tempData[k][m].neighbors[i].x; //neighbor's x
-					          	tY = this.tempData[k][m].neighbors[i].y; //neighbor's y
-							    if(this.tempData[tX][tY].owner === instance.player){
-							    	if(neighborGroupCount === 0){
-							    		neighborGroups[0] = this.tempData[tX][tY].group;
-							    		tempGroupData[this.tempData[tX][tY].group]--;
-							    		neighborGroupCount ++;
-							    	}
-							    	else{
-							    		matchGroup = false;
-							    		for (w = 0; w < neighborGroupCount; w++){
-							    			if(this.tempData[tX][tY].group === neighborGroups[w]){
-							    				tempGroupData[neighborGroups[w]]--;
-							    				matchGroup = true;
-							    				break;
-							    			}
-							    		}
-							    		if(matchGroup === false){
-							    			neighborGroups[neighborGroupCount] = this.tempData[tX][tY].group
-							    			tempGroupData[this.tempData[tX][tY].group]--;
-							    			neighborGroupCount ++;
-							    		}
-							    	}
-							    }
-							}
-						}
-						if(neighborGroupCount !== 0){
-							for(z = 0; z < neighborGroupCount; z++){
-								if(tempGroupData[neighborGroups[z]] > 0){
-
-									tempNum = Number(FlowRouter.getParam('num'));
-
-									if(instance.isZoomed){
-								        instance.ctx.putImageData(instance.imageSave, 0, 0);
-								        instance.pixelContext.clearRect(0, 0, 880, 800);
-								        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
-								        instance.isZoomed = false;
-							    	}
-
-							        Meteor.call('games.makeTurn', k, m, instance.gameId, function (err, id){
-       								console.log((new Date).getTime() + " HELLO");
-       								});
-							        console.log((new Date).getTime());
-							        return;
-								}
-							}
-						}
-				    }			    
+				        Meteor.call('games.makeTurn', k, m, instance.gameId);
+				        console.log((new Date).getTime());
+				        return;
+				    }  
 				}
 				if(instance.isZoomed){
 			        instance.ctx.putImageData(instance.imageSave, 0, 0);

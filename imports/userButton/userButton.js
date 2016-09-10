@@ -21,7 +21,6 @@ Template.RoomUserButton.helpers({
 	},
 
 	checkIfSelf: (id)=> {
-		console.log(id);
 		return !(Meteor.userId()===id);
 	},
 
@@ -72,7 +71,6 @@ Template.RoomUserButton.events({
        	else{
        		this.clientRoom = MessangerWindows.findOne({roomId: this.room._id});
        		if(!this.clientRoom){
-       			console.log(chatee);
        			MessangerWindows.insert({roomId: this.room._id, state: "open", chatee: chatee});
        		}
        		else{
@@ -101,7 +99,6 @@ Template.UserButton.events({
        	else{
        		this.clientRoom = MessangerWindows.findOne({roomId: this.room._id});
        		if(!this.clientRoom){
-       			console.log(chatee);
        			MessangerWindows.insert({roomId: this.room._id, state: "open", chatee: chatee});
        		}
        		else{

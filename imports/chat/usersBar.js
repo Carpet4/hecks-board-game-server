@@ -6,11 +6,14 @@ import './usersBar.html';
 Template.UsersBar.onCreated(function(){
   this.currentChatUsers = new ReactiveVar;
   this.autorun(()=> {
-  	if(!Meteor.user().isChat){
+  	if(!Meteor.user().isChat && !Session.get('closingChat')){
   		Meteor.call('users.isChatT');
   	}
     if(Session.get('currentChat')){
-      this.currentChatUsers.set(Rooms.findOne(Session.get('currentChat')).users);
+      this.room = Rooms.findOne(Session.get('currentChat'));
+      if(this.room){
+        this.currentChatUsers.set(this.room.users);
+      }
     }
   });
 });
