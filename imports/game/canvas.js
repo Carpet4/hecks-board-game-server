@@ -50,6 +50,8 @@ Template.Canvas.onCreated(function(){
 	}
 
 	this.isZoomed = false;
+	this.lastK = -1;
+	this.lastM = -1;
 	this.imageSave;
 	this.dataSave;
 	this.blues = blues;
@@ -183,7 +185,6 @@ Template.Canvas.onCreated(function(){
 		if(this.hexsPaint[x] && this.hexsPaint[x][y]){
 			this.hexsPaint[x][y].value += tempInt;
 			var hex = this.hexsPaint[x][y];
-			console.log(x + " " + y + " " + hex.value);
 			if(hex.value > 0){
 				this.ctx.globalAlpha = 1;
 				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
@@ -520,9 +521,43 @@ Template.Canvas.onRendered(function() {
 		},
 	});
 
-	/*$( "#mainCanvas" ).mousemove(function( event ) {
-		console.log(event.offsetX);
-	});*/
+	$( "#mainCanvas" ).mousemove((event)=>{
+		if(!this.isZoomed && this.player !== 0 && this.game.result === false){
+			if((this.turn % 2)+1 === this.player){
+				var imageData = this.pixelContext.getImageData(this.coAdjuster * event.offsetX, this.coAdjuster * event.offsetY, 1, 1).data;
+			    var k = imageData[1] -1;
+				var m = imageData[2] -1;
+				if(k !== this.lastK || m !== this.lastM){
+
+					if(this.lastK > -1 && this.lastM > -1 && this.dotsPaint[this.lastK][this.lastM] && this.dotsData[this.lastK][this.lastM] === 0){
+						this.ctx.beginPath();
+			            this.ctx.arc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr, this.radius, 0, 2*Math.PI, false);
+			            this.ctx.lineWidth = 6;
+			            this.ctx.strokeStyle = this.line_color;
+			            this.ctx.fillStyle = this.bg_color;
+			            this.ctx.stroke();
+			            this.ctx.fill();
+			        }
+
+		    		this.lastK = k;
+		    		this.lastM = m;
+			    	if(k > -1 && m > -1){ 
+						if(this.dotsData[k][m] === 0 && this.hasLibs(k, m, this.player, this.game)){
+							if(this.player === 1){
+								this.ctx.drawImage(this.blues, this.dotsPaint[k][m].xCntr - this.radius, this.dotsPaint[k][m].yCntr - this.radius, this.radius * 2, this.radius * 2);
+							}
+
+							else{
+								this.ctx.drawImage(this.reds, this.dotsPaint[k][m].xCntr - this.radius, this.dotsPaint[k][m].yCntr - this.radius, this.radius * 2, this.radius * 2);
+							}
+
+					    } 
+					} 
+				}
+			}
+		}
+		
+	});
 });
 
 
@@ -590,7 +625,7 @@ Template.Canvas.events({
 				var imageData = instance.pixelContext.getImageData(instance.coAdjuster * event.offsetX, instance.coAdjuster * event.offsetY, 1, 1).data;
 			    var k = imageData[1] -1;
 				var m = imageData[2] -1;
-			    if(k > 0){ 
+			    if(k > -1){ 
 					if(instance.dotsData[k][m] === 0 && instance.hasLibs(k, m, instance.player, instance.game)){
 		    	
 				        tempNum = Number(FlowRouter.getParam('num'));

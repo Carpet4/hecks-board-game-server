@@ -98,6 +98,14 @@ Template.GamePanel.helpers({
   		return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
   	},
 
+  	redClock1: ()=> {
+  		return (Math.floor(Template.instance().p1Clock.get() / 1000) < 11);
+  	},
+
+  	redClock2: ()=> {
+  		return (Math.floor(Template.instance().p2Clock.get() / 1000) < 11);
+  	},
+
   	timeInc: ()=> {
   		return "(+" + Template.instance().game.subT + ")";
   	},
