@@ -254,6 +254,21 @@ Template.Canvas.onCreated(function(){
 	        this.ctx.fillStyle = this.line_color;
 	        this.ctx.fill();
 
+	        if(this.lastK > -1){
+	        	if(this.dotsData[this.lastK][this.lastM] === 0){
+	        		this.ctx.beginPath();
+		            this.ctx.arc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr, this.radius, 0, 2*Math.PI, false);
+		            this.ctx.lineWidth = 6;
+		            this.ctx.strokeStyle = this.line_color;
+		            this.ctx.fillStyle = this.bg_color;
+		            this.ctx.stroke();
+		            this.ctx.fill();
+	        	}
+	        	this.lastK = -1;
+	        	this.lastM = -1;
+	        }
+
+
 	        if(player === 1)
 	        	var int = 1;
 	        else

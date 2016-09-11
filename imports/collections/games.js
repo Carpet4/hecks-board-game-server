@@ -157,39 +157,6 @@ export function beginMatch(player1, player2, mainT, subT){
 
 
 
-/*hasLibs = (o, p, playah)=>{
-  var libsCheckArray = new Array(this.game.xLength);
-  libsBool = false;
-  libsCheck(o, p, playah, libsCheckArray);
-  return libsBool;
-}
-
-libsCheck = (x, y, playah, libsCheckArray)=>{
-  libsCheckArray[x][y] = true;
-  if(x%2 === 0){
-    stoneCheck(x-1, y, playah);
-    stoneCheck(x+1, y-1, playah);
-    stoneCheck(x+1, y+1, playah);
-  else{
-    stoneCheck(x-1, y-1, playah);
-    stoneCheck(x-1, y+1, playah);
-    stoneCheck(x+1, y, playah);
-  }
-}
-
-stoneCheck = (i, j, playah, libsCheckArray)=>{
-  if(this.dotsData[i] && this.dotsData[i][j] !== undefined && !libsBool){
-    if(this.dotsData[i][j] = player && libsCheckArray[i] && !libsCheckArray[i][j] ){ //might not need libscheckarray[i]
-      libsCheck(i, j);
-    }       
-    else if(this.dotsData[i][j] = 0){
-      libsBool = true;
-    }
-  }
-}*/
-
-
-
 var opponentHasLibs = (o, p, playah, game)=>{
   dotsData = game.dotsData;
   if(dotsData[o] && dotsData[o][p] && dotsData[o][p] === playah){
