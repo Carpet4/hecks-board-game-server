@@ -527,9 +527,9 @@ Template.Canvas.onRendered(function() {
 				var imageData = this.pixelContext.getImageData(this.coAdjuster * event.offsetX, this.coAdjuster * event.offsetY, 1, 1).data;
 			    var k = imageData[1] -1;
 				var m = imageData[2] -1;
-				if(k !== this.lastK || m !== this.lastM){
+				if((k !== this.lastK || m !== this.lastM) && imageData[3] === 255 || imageData[3] === 0){
 
-					if(this.lastK > -1 && this.lastM > -1 && this.dotsPaint[this.lastK][this.lastM] && this.dotsData[this.lastK][this.lastM] === 0){
+					if(this.lastK > -1 && this.lastM > -1 && this.dotsData[this.lastK][this.lastM] === 0){
 						this.ctx.beginPath();
 			            this.ctx.arc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr, this.radius, 0, 2*Math.PI, false);
 			            this.ctx.lineWidth = 6;
@@ -541,7 +541,7 @@ Template.Canvas.onRendered(function() {
 
 		    		this.lastK = k;
 		    		this.lastM = m;
-			    	if(k > -1 && m > -1){ 
+			    	if(k > -1){ 
 						if(this.dotsData[k][m] === 0 && this.hasLibs(k, m, this.player, this.game)){
 							if(this.player === 1){
 								this.ctx.drawImage(this.blues, this.dotsPaint[k][m].xCntr - this.radius, this.dotsPaint[k][m].yCntr - this.radius, this.radius * 2, this.radius * 2);
@@ -625,7 +625,7 @@ Template.Canvas.events({
 				var imageData = instance.pixelContext.getImageData(instance.coAdjuster * event.offsetX, instance.coAdjuster * event.offsetY, 1, 1).data;
 			    var k = imageData[1] -1;
 				var m = imageData[2] -1;
-			    if(k > -1){ 
+			    if(k > -1 && imageData[3] === 255){ 
 					if(instance.dotsData[k][m] === 0 && instance.hasLibs(k, m, instance.player, instance.game)){
 		    	
 				        tempNum = Number(FlowRouter.getParam('num'));
