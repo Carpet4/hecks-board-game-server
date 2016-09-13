@@ -1,11 +1,13 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
+import { AutomatchPlayers } from './automatchPlayers.js';
 
 if (Meteor.isServer) {
 
 	UserStatus.events.on("connectionLogout", function(fields){//when closes a tab/logsout
 		if(!Meteor.users.findOne(fields.userId).status.online){//if not loggedin somewhere else
+			AutomatchPlayers.remove({user: fields.userId});
 			Meteor.users.update(fields.userId, {$set: {lastRead: {messanger: (new Date).getTime(), community: (new Date).getTime()}}});//change the lastread
 		}
 	});

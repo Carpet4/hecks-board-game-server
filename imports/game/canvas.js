@@ -76,26 +76,43 @@ Template.Canvas.onCreated(function(){
 		Session.set('isGameFinished', true);
 	}
 
-
-	$(window).resize(()=> {
-
+	this.canvasResizer = ()=>{
+		console.log(document.getElementById('canvasCol').clientHeight);
+		console.log($(window).height());
 		if($(window).width() < 545 || $(window).height() < 545){
 			this.zoomFirst = true;
 		}
 		else{
 			this.zoomFirst = false;
 		}
-    	this.divWidth = document.getElementById('canvasCol').clientWidth;
-		this.divHeight = document.getElementById('canvasCol').clientHeight - 52;
-    	if(this.divHeight * 11 / 10 < this.divWidth){
-			this.canvasXAdjuster = this.divHeight * 11 / 10;
-			this.canvasYAdjuster = this.divHeight;
-			this.coAdjuster = this.canvasH / this.divHeight;
+		var divWidth = document.getElementById('canvasCol').clientWidth;
+		var winHeight = $(window).height() - 56;
+
+		var canvasHolder = document.getElementById('canvasHolder');
+
+		if(window.getComputedStyle(canvasHolder).getPropertyValue('z-index') == 1 && divWidth < winHeight * 11 / 10){
+			
+			var height = divWidth * 10 / 11;
+			document.getElementById('canvasHolder').style.height = height.toString() + "px";
+			document.getElementById('canvasHolder').style.width = divWidth.toString() + "px";
+			this.canvas.style.height = height.toString() + "px";
+		    this.canvas.style.width = divWidth.toString() + "px";
+		    this.canvas2.style.height = height.toString() + "px";
+		    this.canvas2.style.width = divWidth.toString() + "px";
+		    this.maskCanvas.style.height = height.toString() + "px";
+		    this.maskCanvas.style.width = divWidth.toString() + "px";
+		    this.coAdjuster = this.canvasW / divWidth;
+		}
+
+    	if(winHeight * 11 / 10 < divWidth){
+			this.canvasXAdjuster = winHeight * 11 / 10;
+			this.canvasYAdjuster = winHeight;
+			this.coAdjuster = this.canvasH / winHeight;
 		}
 		else{
-			this.canvasXAdjuster = this.divWidth;
-			this.canvasYAdjuster = this.divWidth * 10 / 11;
-			this.coAdjuster = this.canvasW / this.divWidth;
+			this.canvasXAdjuster = divWidth;
+			this.canvasYAdjuster = divWidth * 10 / 11;
+			this.coAdjuster = this.canvasW / divWidth;
 		}
 
 		document.getElementById('canvasHolder').style.height = this.canvasYAdjuster.toString() + "px";
@@ -106,6 +123,12 @@ Template.Canvas.onCreated(function(){
 	    this.canvas2.style.width = this.canvasXAdjuster.toString() + "px";
 	    this.maskCanvas.style.height = this.canvasYAdjuster.toString() + "px";
 	    this.maskCanvas.style.width = this.canvasXAdjuster.toString() + "px";
+
+	}
+
+
+	$(window).resize(()=> {
+		this.canvasResizer();
   	});
 
 
@@ -125,13 +148,7 @@ Template.Canvas.onCreated(function(){
 	this.stoneRemover = (x, y, playah, int)=>{
 	  if(this.dotsData[x] && this.dotsData[x][y] === playah){
 	    this.dotsData[x][y] = 0;
-	    this.ctx.beginPath();
-        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius, 0, 2*Math.PI, false);
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeStyle = this.line_color;
-        this.ctx.fillStyle = this.bg_color;
-        this.ctx.stroke();
-        this.ctx.fill();
+	    this.drawArc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr);
         if(x % 2 === 0){
 			this.hexPainter((x-2) / 2, y - 2, int);
 			this.hexPainter((x-2) / 2, y, int);
@@ -228,13 +245,7 @@ Template.Canvas.onCreated(function(){
 				this.ctx.drawImage(this.reds, xCntr - this.radius, yCntr - this.radius, this.radius * 2, this.radius * 2);
 			}
 			else{
-				this.ctx.beginPath();
-	            this.ctx.arc(xCntr, yCntr, this.radius, 0, 2*Math.PI, false);
-	            this.ctx.lineWidth = 3;
-	            this.ctx.strokeStyle = this.line_color;
-	            this.ctx.fillStyle = this.bg_color;
-	            this.ctx.stroke();
-	            this.ctx.fill();
+				this.drawArc(xCntr, yCntr);
 			}
 		}
 		if(this.lastMove){
@@ -267,13 +278,7 @@ Template.Canvas.onCreated(function(){
 
 	        if(this.lastK > -1){
 	        	if(this.dotsData[this.lastK][this.lastM] === 0){
-	        		this.ctx.beginPath();
-		            this.ctx.arc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr, this.radius, 0, 2*Math.PI, false);
-		            this.ctx.lineWidth = 3;
-		            this.ctx.strokeStyle = this.line_color;
-		            this.ctx.fillStyle = this.bg_color;
-		            this.ctx.stroke();
-		            this.ctx.fill();
+	        		this.drawArc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr);
 	        	}
 	        	this.lastK = -1;
 	        	this.lastM = -1;
@@ -388,6 +393,16 @@ Template.Canvas.onRendered(function() {
     this.ctx2.fillStyle = "this.bg_color";
     this.ctx2.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+    this.drawArc = (x, y)=>{
+    	this.ctx.beginPath();
+        this.ctx.arc(x, y, this.radius, 0, 2*Math.PI, false);
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = this.line_color;
+        this.ctx.fillStyle = this.bg_color;
+        this.ctx.stroke();
+        this.ctx.fill();
+    }
+
     this.hexs = [
 	    			[1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
 	                [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
@@ -462,13 +477,7 @@ Template.Canvas.onRendered(function() {
             x = x + this.subx;
             if(this.dots[i][j] === 1)
                 continue;
-            this.ctx.beginPath();
-            this.ctx.arc(x, y, this.radius, 0, 2*Math.PI, false);
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeStyle = this.line_color;
-            this.ctx.fillStyle = this.bg_color;
-            this.ctx.stroke();
-            this.ctx.fill();
+            this.drawArc(x, y);
             this.dotsPaint[i][j] = new Dot(x, y);
             // creates mask
             this.pixelContext.beginPath();
@@ -487,29 +496,7 @@ Template.Canvas.onRendered(function() {
         }
     }
 
-    this.divWidth = document.getElementById('canvasCol').clientWidth;
-	this.divHeight = document.getElementById('canvasCol').clientHeight - 52;
-	if(this.divHeight * 11 / 10 < this.divWidth){
-		this.canvasXAdjuster = this.divHeight * 11 / 10;
-		this.canvasYAdjuster = this.divHeight;
-		this.coAdjuster = this.canvasH / this.divHeight;
-	}
-	else{
-		this.canvasXAdjuster = this.divWidth;
-		this.canvasYAdjuster = this.divWidth * 10 / 11;
-		this.coAdjuster = this.canvasW / this.divWidth;
-	}
-
-	document.getElementById('canvasHolder').style.height = this.canvasYAdjuster.toString() + "px";
-	document.getElementById('canvasHolder').style.width = this.canvasXAdjuster.toString() + "px";
-    this.canvas.style.height = this.canvasYAdjuster.toString() + "px";
-    this.canvas.style.width = this.canvasXAdjuster.toString() + "px";
-    this.canvas2.style.height = this.canvasYAdjuster.toString() + "px";
-    this.canvas2.style.width = this.canvasXAdjuster.toString() + "px";
-    this.maskCanvas.style.height = this.canvasYAdjuster.toString() + "px";
-    this.maskCanvas.style.width = this.canvasXAdjuster.toString() + "px";
-  	this.game = Games.findOne(this.gameId);
-  	this.turn = this.game.turn;
+    this.canvasResizer();
 
   	/*this.testObserver = Test.find().observe({
 
@@ -563,13 +550,7 @@ Template.Canvas.onRendered(function() {
 				if((k !== this.lastK || m !== this.lastM) && imageData[3] === 255 || imageData[3] === 0){
 
 					if(this.lastK > -1 && this.lastM > -1 && this.dotsData[this.lastK][this.lastM] === 0){
-						this.ctx.beginPath();
-			            this.ctx.arc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr, this.radius, 0, 2*Math.PI, false);
-			            this.ctx.lineWidth = 3;
-			            this.ctx.strokeStyle = this.line_color;
-			            this.ctx.fillStyle = this.bg_color;
-			            this.ctx.stroke();
-			            this.ctx.fill();
+						this.drawArc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr)
 			        }
 
 		    		this.lastK = k;
@@ -608,13 +589,8 @@ Template.Canvas.events({
 
 
 					if(instance.lastK > -1 && instance.dotsData[instance.lastK][instance.lastM] === 0){
-		        		instance.ctx.beginPath();
-			            instance.ctx.arc(instance.dotsPaint[instance.lastK][instance.lastM].xCntr, instance.dotsPaint[instance.lastK][instance.lastM].yCntr, instance.radius, 0, 2*Math.PI, false);
-			            instance.ctx.lineWidth = 3;
-			            instance.ctx.strokeStyle = instance.line_color;
-			            instance.ctx.fillStyle = instance.bg_color;
-			            instance.ctx.stroke();
-			            instance.ctx.fill();
+						instance.drawArc(instance.dotsPaint[instance.lastK][instance.lastM].xCntr, instance.dotsPaint[instance.lastK][instance.lastM].yCntr);
+
 			        	instance.lastK = -1;
 			        	instance.lastM = -1;
 			        }

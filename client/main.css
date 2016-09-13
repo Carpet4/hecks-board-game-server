@@ -39,12 +39,15 @@ button.listButton{
   overflow-y: hidden;
   margin-top: -52px;
   padding: 52px 0px 0px 0px;
-  text-align: center; 
+  text-align: center;
+  border: 2px solid purple; 
 } 
 
-#canvas1, #subCanvas{
+.boardCanvas{
   left: 0;
   top: 0;
+  display: block;  
+  position: absolute; 
 }
   
 #canvasHolder {
@@ -53,7 +56,8 @@ button.listButton{
   height: auto;
   position: relative;
   overflow-x: hidden;
-  overflow-y: hidden; 
+  overflow-y: hidden;
+  z-index: 0; 
 }
 
 html,body {
@@ -149,7 +153,9 @@ input[type="text"], select, textarea {
   width: 100%;
 }
 
-
+#canvasCol{
+  background-color:black; 
+}
 
 @media screen and (max-width: 991px) {
     .chatContainer .chatRow .chatCol {
@@ -171,14 +177,12 @@ input[type="text"], select, textarea {
     }
 
     .gameMessagesContainer{  
-      top: 130px;
-        
+      top: 130px;     
     }
 
 
     #canvasHolder{
-      margin-top: 0px;
-      padding-top: 0px;
+      z-index: 1;
     }
 
     html,body {
