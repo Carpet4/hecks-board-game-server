@@ -39,6 +39,7 @@ Template.GamePanel.onCreated(function(){
 		changed: (doc)=>{
 			this.p1Clock.set(doc.p1Time);
 			this.p2Clock.set(doc.p2Time);
+			this.game.result = doc.result;
 			if(doc.turn !== this.turn && this.countdown === true){
 				countdown.pause();
 				countdown.currentTime = 0;
@@ -49,6 +50,10 @@ Template.GamePanel.onCreated(function(){
 			//cancels the interval when game is finished
 			if(this.game.result !== false){
 				Meteor.clearInterval(this.clockInterval);
+				if(this.countdown === true){
+					countdown.pause();
+					this.countdown = false;
+				}
 			}
 		}
 

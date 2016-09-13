@@ -39,7 +39,6 @@ button.listButton{
   overflow-y: hidden;
   margin-top: -52px;
   padding: 52px 0px 0px 0px;
-  text-align: center;
   border: 2px solid purple; 
 } 
 
@@ -154,7 +153,8 @@ input[type="text"], select, textarea {
 }
 
 #canvasCol{
-  background-color:black; 
+  background-color:black;
+  text-align: center; 
 }
 
 @media screen and (max-width: 991px) {

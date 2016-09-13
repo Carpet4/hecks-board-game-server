@@ -4,7 +4,7 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import './play.html';
 
-//checks if automatch is running
+//!!!!need to make sure player is removed from automatch if he started a game outside of the automatch
 Template.Play.onCreated(function bodyOnCreated() {
 	this.subscribe('automatchPlayers');
   
