@@ -38,7 +38,7 @@ Template.Game.onCreated(function GameOnCreated() {
   });
 
   countdown.src = "/countdown.mp3";
-  stonePlacement.src = "/tap-wooden.mp3";//need to make sure this was loaded somehow
+  stonePlacement.src = "/stonePlacement.mp3";//need to make sure this was loaded somehow
 
   blueimg.src = "/hexblue.png";
 
