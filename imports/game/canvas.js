@@ -3,7 +3,7 @@ import { Games } from '../../imports/collections/games.js';
 //import { Test } from '../../imports/collections/games.js';
 import { ReactiveVar } from 'meteor/reactive-var';
 
-import { blues, reds, blueimg, redimg, blackimg } from './game.js';
+import { blues, reds, blueimg, redimg, blackimg, stonePlacement } from './game.js';
 
 
 function decimalToHex(x, y) {
@@ -53,18 +53,22 @@ Template.Canvas.onCreated(function(){
 	this.lastK = -1;
 	this.lastM = -1;
 	this.imageSave;
+	this.imageSave2;
 	this.dataSave;
 	this.blues = blues;
 	this.reds = reds;
 	this.redimg = redimg;
 	this.blueimg = blueimg;
 	this.blackimg = blackimg;
+	this.stonePlacement = stonePlacement;
 	this.gameNumber = Number(FlowRouter.getParam('num'));
 	this.game = Games.findOne({gNum: this.gameNumber});
 	this.dotsData = this.game.dotsData;
 	this.gameId = this.game._id;
 	this.player = findPlayer();
 	this.previousMove = false;
+	this.canvasW = 880;
+	this.canvasH = 800;
 	if(!this.game.result){
 		Session.set('isGameFinished', false);
 	}
@@ -81,20 +85,25 @@ Template.Canvas.onCreated(function(){
 		else{
 			this.zoomFirst = false;
 		}
-    	this.divWidth = document.getElementById('canvasHolder').clientWidth;
-		this.divHeight = document.getElementById('canvasHolder').clientHeight - 52;
+    	this.divWidth = document.getElementById('canvasCol').clientWidth;
+		this.divHeight = document.getElementById('canvasCol').clientHeight - 52;
     	if(this.divHeight * 11 / 10 < this.divWidth){
 			this.canvasXAdjuster = this.divHeight * 11 / 10;
 			this.canvasYAdjuster = this.divHeight;
-			this.coAdjuster = 800 / this.divHeight;
+			this.coAdjuster = this.canvasH / this.divHeight;
 		}
 		else{
 			this.canvasXAdjuster = this.divWidth;
 			this.canvasYAdjuster = this.divWidth * 10 / 11;
-			this.coAdjuster = 880 / this.divWidth;
+			this.coAdjuster = this.canvasW / this.divWidth;
 		}
+
+		document.getElementById('canvasHolder').style.height = this.canvasYAdjuster.toString() + "px";
+		document.getElementById('canvasHolder').style.width = this.canvasXAdjuster.toString() + "px";
 		this.canvas.style.height = this.canvasYAdjuster.toString() + "px";
 	    this.canvas.style.width = this.canvasXAdjuster.toString() + "px";
+	    this.canvas2.style.height = this.canvasYAdjuster.toString() + "px";
+	    this.canvas2.style.width = this.canvasXAdjuster.toString() + "px";
 	    this.maskCanvas.style.height = this.canvasYAdjuster.toString() + "px";
 	    this.maskCanvas.style.width = this.canvasXAdjuster.toString() + "px";
   	});
@@ -118,7 +127,7 @@ Template.Canvas.onCreated(function(){
 	    this.dotsData[x][y] = 0;
 	    this.ctx.beginPath();
         this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius, 0, 2*Math.PI, false);
-        this.ctx.lineWidth = 6;
+        this.ctx.lineWidth = 3;
         this.ctx.strokeStyle = this.line_color;
         this.ctx.fillStyle = this.bg_color;
         this.ctx.stroke();
@@ -133,7 +142,7 @@ Template.Canvas.onCreated(function(){
 			this.hexPainter((x-1) / 2, y - 2, int);
 			this.hexPainter((x-1) / 2, y, int);
 	    }
-	    this.ctx.globalAlpha = 1;
+	    this.ctx2.globalAlpha = 1;
 
 	    if(x%2 === 0){
 	      this.stoneRemover(x-1, y, playah, int);
@@ -186,20 +195,20 @@ Template.Canvas.onCreated(function(){
 			this.hexsPaint[x][y].value += tempInt;
 			var hex = this.hexsPaint[x][y];
 			if(hex.value > 0){
-				this.ctx.globalAlpha = 1;
-				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-				this.ctx.globalAlpha = 0.4;
-				this.ctx.drawImage(this.blueimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx2.globalAlpha = 1;
+				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx2.globalAlpha = 0.4;
+				this.ctx2.drawImage(this.blueimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
 			}
 			else if(hex.value < 0){
-				this.ctx.globalAlpha = 1;
-				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-				this.ctx.globalAlpha = 0.4;
-				this.ctx.drawImage(this.redimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx2.globalAlpha = 1;
+				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx2.globalAlpha = 0.4;
+				this.ctx2.drawImage(this.redimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
 			}
 			else{
-				this.ctx.globalAlpha = 1;
-				this.ctx.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx2.globalAlpha = 1;
+				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
 			}
 		}
 	};
@@ -221,7 +230,7 @@ Template.Canvas.onCreated(function(){
 			else{
 				this.ctx.beginPath();
 	            this.ctx.arc(xCntr, yCntr, this.radius, 0, 2*Math.PI, false);
-	            this.ctx.lineWidth = 6;
+	            this.ctx.lineWidth = 3;
 	            this.ctx.strokeStyle = this.line_color;
 	            this.ctx.fillStyle = this.bg_color;
 	            this.ctx.stroke();
@@ -249,16 +258,18 @@ Template.Canvas.onCreated(function(){
 			this.ctx.drawImage(image1, this.dotsPaint[x][y].xCntr - this.radius, this.dotsPaint[x][y].yCntr - this.radius, this.radius * 2, this.radius * 2);
 			this.ctx.beginPath();
 	        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius / 2, 0, 2*Math.PI, false);
-	        this.ctx.lineWidth = 6;
+	        this.ctx.lineWidth = 3;
 	        this.ctx.strokeStyle = this.line_color;
 	        this.ctx.fillStyle = this.line_color;
 	        this.ctx.fill();
+
+	        this.stonePlacement.play();
 
 	        if(this.lastK > -1){
 	        	if(this.dotsData[this.lastK][this.lastM] === 0){
 	        		this.ctx.beginPath();
 		            this.ctx.arc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr, this.radius, 0, 2*Math.PI, false);
-		            this.ctx.lineWidth = 6;
+		            this.ctx.lineWidth = 3;
 		            this.ctx.strokeStyle = this.line_color;
 		            this.ctx.fillStyle = this.bg_color;
 		            this.ctx.stroke();
@@ -284,7 +295,7 @@ Template.Canvas.onCreated(function(){
 				this.hexPainter((x-1) / 2, y - 2, int);
 				this.hexPainter((x-1) / 2, y, int);
 		    }
-		    this.ctx.globalAlpha = 1;
+		    this.ctx2.globalAlpha = 1;
 
 
 	        if(x%2 === 0){
@@ -332,7 +343,7 @@ Template.Canvas.onCreated(function(){
       					this.hexPainter((i-1) / 2, j - 2, int);
       					this.hexPainter((i-1) / 2, j, int);
       			    }
-      			    this.ctx.globalAlpha = 1;
+      			    this.ctx2.globalAlpha = 1;
 	      			}
       			}
   			}
@@ -343,7 +354,7 @@ Template.Canvas.onCreated(function(){
 			var y = this.lastMove.y;
 			this.ctx.beginPath();
 	        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius / 2, 0, 2*Math.PI, false);
-	        this.ctx.lineWidth = 6;
+	        this.ctx.lineWidth = 3;
 	        this.ctx.strokeStyle = this.line_color;
 	        this.ctx.fillStyle = this.line_color;
 	        this.ctx.fill();
@@ -356,14 +367,16 @@ Template.Canvas.onCreated(function(){
 
 Template.Canvas.onRendered(function() {
 
-	this.radius = 15;
+	this.radius = 20;
 	this.subx = 44;
 	this.suby = 25;
 	this.bg_color = "black";
 	this.line_color = "white";
 
-    this.canvas = document.getElementById("mainCanvas");
+    this.canvas = document.getElementById("canvas1");
     this.ctx = this.canvas.getContext("2d");
+    this.canvas2 = document.getElementById("canvas2");
+    this.ctx2 = this.canvas2.getContext("2d");
     this.maskCanvas = document.getElementById("subCanvas");
     this.maskCanvas.style.display = "none";
     this.pixelContext = this.maskCanvas.getContext("2d");
@@ -372,8 +385,8 @@ Template.Canvas.onRendered(function() {
     this.hexsPaint = new Array();
 
 
-    this.ctx.fillStyle = "this.bg_color";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx2.fillStyle = "this.bg_color";
+    this.ctx2.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.hexs = [
 	    			[1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
@@ -451,7 +464,7 @@ Template.Canvas.onRendered(function() {
                 continue;
             this.ctx.beginPath();
             this.ctx.arc(x, y, this.radius, 0, 2*Math.PI, false);
-            this.ctx.lineWidth = 6;
+            this.ctx.lineWidth = 3;
             this.ctx.strokeStyle = this.line_color;
             this.ctx.fillStyle = this.bg_color;
             this.ctx.stroke();
@@ -459,8 +472,8 @@ Template.Canvas.onRendered(function() {
             this.dotsPaint[i][j] = new Dot(x, y);
             // creates mask
             this.pixelContext.beginPath();
-            this.pixelContext.arc(x, y, this.radius*1.5, 0, 2*Math.PI, false);
-            this.pixelContext.lineWidth = 6;
+            this.pixelContext.arc(x, y, this.radius*1.1, 0, 2*Math.PI, false);
+            this.pixelContext.lineWidth = 3;
             this.pixelContext.strokeStyle = this.line_color;
             this.pixelContext.fillStyle = decimalToHex(i+1, j+1);
             this.pixelContext.fill();
@@ -474,21 +487,25 @@ Template.Canvas.onRendered(function() {
         }
     }
 
-    this.divWidth = document.getElementById('canvasHolder').clientWidth;
-	this.divHeight = document.getElementById('canvasHolder').clientHeight - 52;
-	console.log(this.divHeight);
+    this.divWidth = document.getElementById('canvasCol').clientWidth;
+	this.divHeight = document.getElementById('canvasCol').clientHeight - 52;
 	if(this.divHeight * 11 / 10 < this.divWidth){
 		this.canvasXAdjuster = this.divHeight * 11 / 10;
 		this.canvasYAdjuster = this.divHeight;
-		this.coAdjuster = 800 / this.divHeight;
+		this.coAdjuster = this.canvasH / this.divHeight;
 	}
 	else{
 		this.canvasXAdjuster = this.divWidth;
 		this.canvasYAdjuster = this.divWidth * 10 / 11;
-		this.coAdjuster = 880 / this.divWidth;
+		this.coAdjuster = this.canvasW / this.divWidth;
 	}
+
+	document.getElementById('canvasHolder').style.height = this.canvasYAdjuster.toString() + "px";
+	document.getElementById('canvasHolder').style.width = this.canvasXAdjuster.toString() + "px";
     this.canvas.style.height = this.canvasYAdjuster.toString() + "px";
     this.canvas.style.width = this.canvasXAdjuster.toString() + "px";
+    this.canvas2.style.height = this.canvasYAdjuster.toString() + "px";
+    this.canvas2.style.width = this.canvasXAdjuster.toString() + "px";
     this.maskCanvas.style.height = this.canvasYAdjuster.toString() + "px";
     this.maskCanvas.style.width = this.canvasXAdjuster.toString() + "px";
   	this.game = Games.findOne(this.gameId);
@@ -528,15 +545,16 @@ Template.Canvas.onRendered(function() {
 			this.game = doc;
 			this.turn = doc.turn;
 			this.lastMove = doc.lastMove;
-			this.makeTurn();
-
-			if(this.game.result && Session.get('isGameFinished') === false){
+			if(!this.game.result){
+				this.makeTurn();
+			}
+			else if(Session.get('isGameFinished') === false){
 				Session.set('isGameFinished', true);
 			}
 		},
 	});
 
-	$( "#mainCanvas" ).mousemove((event)=>{
+	$( "#canvas1" ).mousemove((event)=>{
 		if(!this.isZoomed && this.player !== 0 && this.game.result === false){
 			if((this.turn % 2)+1 === this.player){
 				var imageData = this.pixelContext.getImageData(this.coAdjuster * event.offsetX, this.coAdjuster * event.offsetY, 1, 1).data;
@@ -547,7 +565,7 @@ Template.Canvas.onRendered(function() {
 					if(this.lastK > -1 && this.lastM > -1 && this.dotsData[this.lastK][this.lastM] === 0){
 						this.ctx.beginPath();
 			            this.ctx.arc(this.dotsPaint[this.lastK][this.lastM].xCntr, this.dotsPaint[this.lastK][this.lastM].yCntr, this.radius, 0, 2*Math.PI, false);
-			            this.ctx.lineWidth = 6;
+			            this.ctx.lineWidth = 3;
 			            this.ctx.strokeStyle = this.line_color;
 			            this.ctx.fillStyle = this.bg_color;
 			            this.ctx.stroke();
@@ -587,50 +605,73 @@ Template.Canvas.events({
 
 
 				if(instance.zoomFirst && !instance.isZoomed){
+
+
+					if(instance.lastK > -1 && instance.dotsData[instance.lastK][instance.lastM] === 0){
+		        		instance.ctx.beginPath();
+			            instance.ctx.arc(instance.dotsPaint[instance.lastK][instance.lastM].xCntr, instance.dotsPaint[instance.lastK][instance.lastM].yCntr, instance.radius, 0, 2*Math.PI, false);
+			            instance.ctx.lineWidth = 3;
+			            instance.ctx.strokeStyle = instance.line_color;
+			            instance.ctx.fillStyle = instance.bg_color;
+			            instance.ctx.stroke();
+			            instance.ctx.fill();
+			        	instance.lastK = -1;
+			        	instance.lastM = -1;
+			        }
+
 					zoomX = instance.coAdjuster * event.offsetX;
 					zoomY = instance.coAdjuster * event.offsetY;
 
-					if(zoomX - 220 < 0){
+					if(zoomX - (instance.canvasW/4) < 0){
 						zoomX = 0;
 					}
-					else if(zoomX + 220 > 880){
-						zoomX = 440
+					else if(zoomX + (instance.canvasW/4) > instance.canvasW){
+						zoomX = (instance.canvasW/2)
 					}
 					else{
-						zoomX -= 220
+						zoomX -= (instance.canvasW/4)
 					}
 
-					if(zoomY - 200 < 0){
+					if(zoomY - (instance.canvasH/4) < 0){
 						zoomY = 0;
 					}
-					else if(zoomY + 200 > 800){
-						zoomY = 400
+					else if(zoomY + (instance.canvasH/4) > instance.canvasH){
+						zoomY = (instance.canvasH/2);
 					}
 					else{
-						zoomY -= 200
+						zoomY -= (instance.canvasH/4)
 					}
 
-					instance.imageSave = instance.ctx.getImageData(0, 0, 880, 800);
-					instance.dataSave = instance.pixelContext.getImageData(0, 0, 880, 800);
+					instance.imageSave = instance.ctx.getImageData(0, 0, instance.canvasW, instance.canvasH);
+					instance.imageSave2 = instance.ctx2.getImageData(0, 0, instance.canvasW, instance.canvasH);
+					instance.dataSave = instance.pixelContext.getImageData(0, 0, instance.canvasW, instance.canvasH);
 
-					imageToZoom = instance.ctx.getImageData(zoomX, zoomY, 440, 400);
-					dataToZoom = instance.pixelContext.getImageData(zoomX, zoomY, 440, 400);
+					imageToZoom = instance.ctx.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
+					imageToZoom2 = instance.ctx2.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
+					dataToZoom = instance.pixelContext.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
 
 					var tempCanvas = $("<canvas>")
 					    .attr("width", imageToZoom.width)
 					    .attr("height", imageToZoom.height)[0];
 
 					tempCanvas.getContext("2d").putImageData(imageToZoom, 0, 0);
+					instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
 					instance.ctx.scale(2, 2);
 					instance.ctx.drawImage(tempCanvas, 0, 0);
 
+					tempCanvas.getContext("2d").putImageData(imageToZoom2, 0, 0);
+					instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
+					instance.ctx2.scale(2, 2);
+					instance.ctx2.drawImage(tempCanvas, 0, 0);
+
 					tempCanvas.getContext("2d").putImageData(dataToZoom, 0, 0);
-					instance.pixelContext.clearRect(0, 0, 880, 800);
+					instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
 					instance.pixelContext.scale(2, 2);
 					instance.pixelContext.drawImage(tempCanvas, 0, 0);
 
 					instance.isZoomed = true;
 					instance.ctx.scale(0.5, 0.5);
+					instance.ctx2.scale(0.5, 0.5);
 					instance.pixelContext.scale(0.5, 0.5);
 					return
 				}
@@ -645,8 +686,11 @@ Template.Canvas.events({
 		    	
 				        tempNum = Number(FlowRouter.getParam('num'));
 				        if(instance.isZoomed){
+				        	instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
 					        instance.ctx.putImageData(instance.imageSave, 0, 0);
-					        instance.pixelContext.clearRect(0, 0, 880, 800);
+					        instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
+					        instance.ctx2.putImageData(instance.imageSave2, 0, 0);
+					        instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
 					        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
 					        instance.isZoomed = false;
 				    	}
@@ -657,8 +701,11 @@ Template.Canvas.events({
 				    }  
 				}
 				if(instance.isZoomed){
+					instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
 			        instance.ctx.putImageData(instance.imageSave, 0, 0);
-			        instance.pixelContext.clearRect(0, 0, 880, 800);
+			        instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
+			        instance.ctx2.putImageData(instance.imageSave2, 0, 0);
+			        instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
 			        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
 			        instance.isZoomed = false;
 		    	}

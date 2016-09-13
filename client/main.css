@@ -38,16 +38,22 @@ button.listButton{
   overflow-x: hidden;
   overflow-y: hidden;
   margin-top: -52px;
-  padding: 52px 0px 0px 0px; 
+  padding: 52px 0px 0px 0px;
+  text-align: center; 
 } 
 
-
+#canvas1, #subCanvas{
+  left: 0;
+  top: 0;
+}
+  
 #canvasHolder {
-  height: 100vh;
+  display:inline-block;
+  width: auto;
+  height: auto;
+  position: relative;
   overflow-x: hidden;
-  overflow-y: hidden;
-  margin-top: -54px;
-  padding: 52px 0px 0px 0px; 
+  overflow-y: hidden; 
 }
 
 html,body {

@@ -43,9 +43,6 @@ Meteor.methods({
 				Notifications.remove(id);
 				beginMatch(this.userId, this.opponent, this.notification.mainT, this.notification.subT);
 			}
-			else
-				console.log(Games.findOne(
-        	{result: false, $or: [{p1:this.userId}, {p2: this.userId}, {p1:this.opponent}, {p2: this.opponent}]}).gNum);
 		}
 	},
 

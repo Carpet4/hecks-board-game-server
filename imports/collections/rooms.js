@@ -15,9 +15,7 @@ if (Meteor.isServer) {
   	Meteor.publish('singleRoom', function singleRoomPublication(tempName) {
   		this.room = Rooms.findOne({type: "community", name: tempName});
   		if(this.userId && this.room){
-  			console.log("got 1");
   			if(!this.room.isPrivate || this.room.users.indexOf(this.userId) > -1 || this.room.invited.indexOf(this.userId) > -1){
-  				console.log("got 2");
   				return Rooms.find({name: tempName});
   			}
   		}	

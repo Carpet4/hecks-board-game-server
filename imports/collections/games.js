@@ -107,7 +107,6 @@ dots = [
       ];
 
 var dotArrayCreator = function(){
-  console.log("getes here");
   tempArray = new Array();
   for (i = 0; i < dots.length; i++) {
     tempArray[i] = new Array();

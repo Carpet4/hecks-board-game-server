@@ -9,6 +9,8 @@ export const redimg = new Image();
 export const blackimg = new Image();
 export const blues = new Image();
 export const reds = new Image();
+export const stonePlacement = new Audio();
+export const countdown = new Audio();
 
 
 Template.Game.helpers({
@@ -35,39 +37,39 @@ Template.Game.onCreated(function GameOnCreated() {
     }    
   });
 
+  countdown.src = "/countdown.mp3";
+  stonePlacement.src = "/tap-wooden.mp3";//need to make sure this was loaded somehow
+
   blueimg.src = "/hexblue.png";
 
   blueimg.onload = ()=> {
       this.imageLoadCheck.set(this.imageLoadCheck.get() + 1);
-      console.log("hey");
   };
 
   redimg.src = "/hexred.png";
 
   redimg.onload = ()=> {
       this.imageLoadCheck.set(this.imageLoadCheck.get() + 1);
-      console.log("hey");
   };
 
   blackimg.src = "/hexblack.png";
 
   blackimg.onload = ()=> {
       this.imageLoadCheck.set(this.imageLoadCheck.get() + 1);
-      console.log("hey");
   };
 
   blues.src = "/bluesh.png";
 
   blues.onload = ()=> {
       this.imageLoadCheck.set(this.imageLoadCheck.get() + 1);
-      console.log("hey");
   };
 
   reds.src = "/redsh.png";
 
   reds.onload = ()=> {
       this.imageLoadCheck.set(this.imageLoadCheck.get() + 1);
-      console.log("hey");
   };
+
+  
 
 });

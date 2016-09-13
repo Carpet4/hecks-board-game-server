@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Games } from '../../imports/collections/games.js';
+import { countdown } from './game.js';
 import './gamePanel.html';
 
 Template.GamePanel.onCreated(function(){
@@ -12,6 +13,7 @@ Template.GamePanel.onCreated(function(){
 	this.timeFixer = (new Date).getTime() - this.game.lastMoveTime;//fixes to correct time after page reload
 	this.p1Clock = new ReactiveVar(this.game.p1Time);//clock1
 	this.p2Clock = new ReactiveVar(this.game.p2Time);//clock2
+	this.countdown = false;
 
 	if(this.game.p1 === Meteor.userId()){
 		this.player = 1;
@@ -35,9 +37,13 @@ Template.GamePanel.onCreated(function(){
 	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1}}).observe({
 
 		changed: (doc)=>{
-			console.log("clocks " + (new Date).getTime());
 			this.p1Clock.set(doc.p1Time);
 			this.p2Clock.set(doc.p2Time);
+			if(doc.turn !== this.turn && this.countdown === true){
+				countdown.pause();
+				countdown.currentTime = 0;
+				this.countdown = false;
+			}
 			this.turn = doc.turn;
 
 			//cancels the interval when game is finished
@@ -62,18 +68,30 @@ Template.GamePanel.onCreated(function(){
 	if(!this.game.result){
 		this.clockInterval = Meteor.setInterval(()=> {
 			if(this.turn % 2 === 0){
-				this.p1Clock.set(this.p1Clock.get() - 1000);
+				var time = this.p1Clock.get();
+				if(time < 10100 && this.countdown === false){
+					countdown.currentTime = Math.max(0, 10000 - time);
+					countdown.play();
+					this.countdown = true;
+				}
+				this.p1Clock.set(time - 100);
 				if(this.player === 2 && this.p1Clock.get() <= 0){
 					Meteor.call('games.timeLoss', this.gameId);
 				}
 			}
 			else{
-				this.p2Clock.set(this.p2Clock.get() - 1000);
+				var time = this.p2Clock.get();
+				if(time < 10100 && this.countdown === false){
+					countdown.currentTime = Math.max(0, 10000 - time);
+					countdown.play();
+					this.countdown = true;
+				}
+				this.p2Clock.set(time - 100);
 				if(this.player === 1 && this.p2Clock.get() <= 0){
 					Meteor.call('games.timeLoss', this.gameId);
 				}
 			}
-		} ,1000);
+		} ,100);
 	}	
 
 });
@@ -85,25 +103,25 @@ Template.GamePanel.onDestroyed(function () {
 Template.GamePanel.helpers({
 	//clocks display
   	clock1: ()=> {
-  		rawTime = Math.floor(Template.instance().p1Clock.get() / 1000);
+  		rawTime = Math.ceil(Template.instance().p1Clock.get() / 1000);
   		minutes = Math.floor(rawTime / 60);
   		seconds = rawTime - (minutes * 60);
   		return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
   	},
 
   	clock2: ()=> {
-  		rawTime = Math.floor(Template.instance().p2Clock.get() / 1000);
+  		rawTime = Math.ceil(Template.instance().p2Clock.get() / 1000);
   		minutes = Math.floor(rawTime / 60);
   		seconds = rawTime - (minutes * 60);
   		return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
   	},
 
   	redClock1: ()=> {
-  		return (Math.floor(Template.instance().p1Clock.get() / 1000) < 11);
+  		return (Math.ceil(Template.instance().p1Clock.get() / 1000) < 11);
   	},
 
   	redClock2: ()=> {
-  		return (Math.floor(Template.instance().p2Clock.get() / 1000) < 11);
+  		return (Math.ceil(Template.instance().p2Clock.get() / 1000) < 11);
   	},
 
   	timeInc: ()=> {
