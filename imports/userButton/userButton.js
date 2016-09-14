@@ -39,6 +39,10 @@ Template.UserButton.helpers({
 });
 
 Template.RoomUserButton.events({
+  'click .profile'(event){
+    FlowRouter.go('/profile/' + event.target.value);
+  },
+
 	'click .makeMod'(event){
 		Meteor.call('rooms.makeMod', Session.get('currentChat'), event.target.value);
 	},
@@ -82,31 +86,33 @@ Template.RoomUserButton.events({
 });
 
 Template.UserButton.events({
+  'click .profile'(event){
+    FlowRouter.go('/profile/' + event.target.value);
+  },
 
 	'click .openModal'(event) {
         event.preventDefault();
        	Modal.show('PlayModal', event.target.value);
-    },
+  },
 
-    'click .startChat'(event) {
-    	chatee = event.target.value;
-    	this.room = Rooms.findOne({type: "messanger", users: {$all: [Meteor.userId(), chatee]}});
-       	if(!this.room){
-       		Meteor.call('rooms.createMessanger', chatee, function (err, id){
-       		MessangerWindows.insert({roomId: id, state: "open", chatee: chatee})
-       		});
-       	}
-       	else{
-       		this.clientRoom = MessangerWindows.findOne({roomId: this.room._id});
-       		if(!this.clientRoom){
-       			MessangerWindows.insert({roomId: this.room._id, state: "open", chatee: chatee});
-       		}
-       		else{
-       			MessangerWindows.update({roomId: this.room._id}, {$set: {state: "open"}});
-       		}
-       	}
-
-    },
+  'click .startChat'(event) {
+  	chatee = event.target.value;
+  	this.room = Rooms.findOne({type: "messanger", users: {$all: [Meteor.userId(), chatee]}});
+   	if(!this.room){
+   		Meteor.call('rooms.createMessanger', chatee, function (err, id){
+   		MessangerWindows.insert({roomId: id, state: "open", chatee: chatee})
+   		});
+   	}
+   	else{
+   		this.clientRoom = MessangerWindows.findOne({roomId: this.room._id});
+   		if(!this.clientRoom){
+   			MessangerWindows.insert({roomId: this.room._id, state: "open", chatee: chatee});
+   		}
+   		else{
+   			MessangerWindows.update({roomId: this.room._id}, {$set: {state: "open"}});
+   		}
+   	}
+  },
 });
 
 Template.PlayModal.events({  

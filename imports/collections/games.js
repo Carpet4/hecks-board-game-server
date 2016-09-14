@@ -127,27 +127,29 @@ export function beginMatch(player1, player2, mainT, subT){
   player2Name = Meteor.users.findOne(player2).username;
   tempNum = Games.find().count(); //may be dangerous, need to test a global variable for games count perhaps;
   tempTime = (new Date).getTime();
-  Games.insert({
-    gNum: tempNum,
-    p1: player1,
-    p2: player2,
-    p1Time: mainT * 1000,
-    p2Time: mainT * 1000,
-    subT: subT,
-    lastMove: false,
-    lastMoveTime: tempTime,
-    name1: player1Name,
-    name2: player2Name,
-    rating1: player1Rating,
-    rating2: player2Rating,
-    turn: 0,
-    result: false,
-    passCount: 0,
-    dotsData: dotArrayCreator(),
-    xLength: 20,
-    yLength: 19
-  });
-  console.log(player1 + "lalala" + player2);
+  if(!Games.findOne(
+  {result: false, $or: [{p1: {$in:[player1, player2]}}, {p2: {$in:[player1, player2]}}]})){
+    Games.insert({
+      gNum: tempNum,
+      p1: player1,
+      p2: player2,
+      p1Time: mainT * 1000,
+      p2Time: mainT * 1000,
+      subT: subT,
+      lastMove: false,
+      lastMoveTime: tempTime,
+      name1: player1Name,
+      name2: player2Name,
+      rating1: player1Rating,
+      rating2: player2Rating,
+      turn: 0,
+      result: false,
+      passCount: 0,
+      dotsData: dotArrayCreator(),
+      xLength: 20,
+      yLength: 19
+    });
+  }
   if(Meteor.isServer){
     Meteor.users.update({_id: player2}, {$push: {activeGames: tempNum}});
     Meteor.users.update({_id: player1}, {$push: {activeGames: tempNum}});
@@ -524,42 +526,44 @@ Meteor.methods({
           result: this.game.name2 + " wins by resignation!"
         }};
       }
-      else{
+      else if(this.game.p2 === this.userId){
         var modifier = {$set: {
           result: this.game.name1 + " wins by resignation!"
         }};
-      }  
+      }
 
-      Games.update(selector, modifier);
+      if(modifier){  
+        Games.update(selector, modifier);
 
-      if (Meteor.isServer) {
-        
-        Qa = this.game.rating1;
-        Qb = this.game.rating2;
+        if (Meteor.isServer) {
+          
+          Qa = this.game.rating1;
+          Qb = this.game.rating2;
 
-        if(this.game.p2 === this.userId){
-          ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
+          if(this.game.p2 === this.userId){
+            ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
 
-          Qa += ratingOperator;
-          Qb -= ratingOperator;
+            Qa += ratingOperator;
+            Qb -= ratingOperator;
+          }
+
+          else{
+            ratingOperator = 40 * (Math.pow(10 , Qa/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
+
+            Qa -= ratingOperator;
+            Qb += ratingOperator;
+          }
+
+          Meteor.users.update(this.game.p1, {
+            $set: {rating: Qa},
+            $pull: {activeGames: tempNum}
+          });
+
+          Meteor.users.update(this.game.p2, {
+            $set: {rating: Qb},
+            $pull: {activeGames: tempNum}
+          });
         }
-
-        else{
-          ratingOperator = 40 * (Math.pow(10 , Qa/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
-
-          Qa -= ratingOperator;
-          Qb += ratingOperator;
-        }
-
-        Meteor.users.update(this.game.p1, {
-          $set: {rating: Qa},
-          $pull: {activeGames: tempNum}
-        });
-
-        Meteor.users.update(this.game.p2, {
-          $set: {rating: Qb},
-          $pull: {activeGames: tempNum}
-        });
       }
     }
   }

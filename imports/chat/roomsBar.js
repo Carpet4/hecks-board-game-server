@@ -101,14 +101,27 @@ Template.RoomsBar.events({
 	},
 
 	'click .avaRoom'(event, instance){
-		Meteor.call('rooms.join', event.target.value);
+		FlowRouter.go('/room/' + event.target.value);
 	}
 });
 
 Template.ActiveRoomOnList.events({
+	'click .info'(event){
+		FlowRouter.go('/room/' + event.target.value);
+	},
 
 	'click .leaveRoom'(event){
 		Meteor.call('rooms.leave', event.target.value);
+	},
+});
+
+Template.AvaRoomOnList.events({
+	'click .info'(event){
+		FlowRouter.go('/room/' + event.target.value);
+	},
+
+	'click .join'(event){
+		Meteor.call('rooms.join', event.target.value);
 	},
 });
 

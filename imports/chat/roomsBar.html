@@ -31,10 +31,16 @@
 </template>
 
 <template name="AvaRoomOnList">
-	<li>			
-		<button class="avaRoom btn btn-link listButton" value="{{_id}}">{{name}}</button>
+	<li>
+		<div class="btn-group">
+	    	<button type="button" class="btn btn-link dropdown-toggle listButton" data-toggle="dropdown">
+	    	{{name}}</button>
+	    	<ul class="dropdown-menu inviDropMenu" role="menu">
+	    		<li><button class="info userBtn pink" value="{{name}}">Info</button></li>
+			    <li><button class="join userBtn green" value="{{_id}}">Join</button></li>
+	    	</ul>
+	  	</div>
 	</li>
-	
 </template>
 
 <template name="ActiveRoomOnList">
@@ -42,9 +48,9 @@
 		<div class="btn-group">
 	    	<button type="button" class="mainButton dropdown-toggle listButton" data-toggle="dropdown">
 	    	<span class="glyphicon glyphicon-cog"></span> </button>
-	    	<ul class="dropdown-menu" role="menu">
-			    <li><button class="leaveRoom btn-danger btn-block" value="{{_id}}">Leave</button></li>
-			    <a href="/room/{{name}}" class="more btn-info btn-block">Room Page</a>
+	    	<ul class="dropdown-menu inviDropMenu" role="menu">
+	    		<li><button class="info userBtn pink" value="{{name}}">Info</button></li>
+			    <li><button class="leaveRoom userBtn darkred" value="{{_id}}">Leave</button></li>
 	    	</ul>
 	  	</div>
 	  	{{#if isUnRead _id}}

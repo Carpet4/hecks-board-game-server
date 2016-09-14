@@ -2,11 +2,12 @@
 		<div class="btn-group">
 		    <button type="button" class="btn btn-link dropdown-toggle listButton" data-toggle="dropdown">
 		    {{username}}</button>
-		    <ul class="dropdown-menu" role="menu">
-		    	<li><a href="/profile/{{username}}" class="btn-info btn-block" style="color: white; text-align: center;">Profile</a></li>
+		    <ul class="dropdown-menu inviDropMenu" role="menu">
+		    	<li><button class="profile userBtn pink" value="{{username}}">Profile</button></li>
 		    	{{#if checkIfSelf _id}}
-					<li><button class="openModal btn-warning btn-block" value="{{username}}">Play</button></li>
-					<li><button class="startChat btn-success btn-block" value="{{_id}}">Chat</button></li>
+		    		<li><button class="startChat userBtn lightblue" value="{{_id}}">Chat</button></li>
+					<li><button class="openModal userBtn green" value="{{username}}">Play</button></li>
+					
     	
 					
 					{{#if isMember _id}}
@@ -14,15 +15,15 @@
 							{{#if isPrivate}}
 								{{#unless isOwner _id}}
 									{{#unless isModerator _id}}
-										<li><button class="kick btn-danger btn-block" value="{{_id}}">Kick</button></li>
+										<li><button class="kick userBtn darkred" value="{{_id}}">Kick</button></li>
 									{{/unless}}
 								{{/unless}}
 							{{/if}}
 							{{#if isModerator _id}}
-								<li><button class="disMod btn-danger btn-block" value="{{_id}}">Dismiss Moderator</button></li>
+								<li><button class="disMod userBtn darkred" value="{{_id}}">Dis Mod</button></li>
 							{{else}}	
 								{{#unless isOwner _id}}
-									<li><button class="makeMod btn-success btn-block" value="{{_id}}">Make Moderator</button></li>
+									<li><button class="makeMod userBtn purple" value="{{_id}}">Make Mod</button></li>
 								{{/unless}}	
 							{{/if}}
 						{{/if}}
@@ -31,13 +32,13 @@
 							{{#if isPrivate}}
 								{{#unless isOwner _id}}
 									{{#unless isModerator _id}}
-										<li><button class="kick btn-danger btn-block" value="{{_id}}">Kick</button></li>
+										<li><button class="kick userBtn darkred" value="{{_id}}">Kick</button></li>
 									{{/unless}}
 								{{/unless}}		
 							{{/if}}
 						{{/if}}	
 					{{else}}
-						<li><button class="cancelInvite btn-danger btn-block" value="{{_id}}">Cancel Invite</button></li>
+						<li><button class="cancelInvite userBtn darkred" value="{{_id}}">Cancel Invite</button></li>
 					{{/if}}
 
 				{{/if}}		
@@ -49,11 +50,11 @@
 		<div class="btn-group">
 		    <button type="button" class="btn btn-link dropdown-toggle listButton" data-toggle="dropdown">
 		    {{username}}</button>
-		    <ul class="dropdown-menu" role="menu">
-		    	<li><a href="/profile/{{username}}" class="btn-info btn-block" style="color: white; text-align: center;">Profile</a></li>
+		    <ul class="dropdown-menu inviDropMenu" role="menu">
+		    	<li><button class="profile userBtn pink" value="{{username}}">Profile</button></li>
 		    	{{#if checkIfSelf _id}}
-					<li><button class="openModal btn-warning btn-block" value="{{username}}">Play</button></li>
-					<li><button class="startChat btn-success btn-block" value="{{_id}}">Chat</button></li>
+					<li><button class="startChat userBtn lightblue" value="{{_id}}">Chat</button></li>
+					<li><button class="openModal userBtn green" value="{{username}}">Play</button></li>
 				{{/if}}		
 		    </ul>
 		</div>

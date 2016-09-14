@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { Games } from './games.js';
+import { AutomatchPlayers } from './automatchPlayers.js';
 import { beginMatch } from './games.js';
 import { check } from 'meteor/check';
 
@@ -39,7 +40,8 @@ Meteor.methods({
 		if(this.notification){
 			this.opponent = this.notification.sender;
 			if(!Games.findOne(
-        	{result: false, $or: [{p1:this.userId}, {p2: this.userId}, {p1:this.opponent}, {p2: this.opponent}]})){		
+        	{result: false, $or: [{p1: {$in:[this.userId, this.opponent]}}, {p2: {$in:[this.userId, this.opponent]}}]})){
+        		AutomatchPlayers.remove({user: {$in:[this.userId, this.opponent]}});		
 				Notifications.remove(id);
 				beginMatch(this.userId, this.opponent, this.notification.mainT, this.notification.subT);
 			}
