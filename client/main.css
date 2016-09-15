@@ -78,21 +78,21 @@ td h2{
   margin: 5px 0px 5px 0px;
 }
 
-button[type="submit"], input[type="submit"]{
-  color: black;
-}
-
-input[type="submit"]{
-  
-}
-
-input[type="text"], select, textarea {
+input[type="text"], input[type="password"], select, textarea {
   color: white;
   background-color : purple;
 }
 
 .modal-content{
   background-color: purple;
+}
+
+.at-btn{
+  background-color: purple;
+}
+
+#at-signUp, #at-signIn{
+  color: #ff66d9;
 }
 
 .notificationList{
@@ -175,7 +175,39 @@ input[type="text"], select, textarea {
 .SEbox{
   background-color: purple;
   border: 1px dotted grey;
-  height: 500px;
+  min-height: 500px;
+  width: 100%;
+  max-width: 600px;
+  word-wrap: break-word;
+}
+
+.loginBackground{
+  height: 100vh;
+  width: 100%;
+  background:url(/loginBackground.png) center center no-repeat;
+  background-color: black;
+  position:absolute;
+  top:0;
+}
+
+.loginBox{
+  margin: auto;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 3px solid purple;
+  width: 315px;
+  text-align: center;
+  border-radius: 5px;
+}
+
+#roomAboutChange{
+  width: 100%;
+  max-width: 500px;
+  height: 350px;
+}
+
+#roomAbout{
+  background-color: purple;
+  border: 1px dotted grey;
   width: 100%;
   max-width: 600px;
   word-wrap: break-word;
@@ -274,7 +306,40 @@ input[type="text"], select, textarea {
   color: red;
 }
 
+.login-link-text, .login-close-text{
+  color: #ff66d9;
+}
 
+.login-link-text:hover, .login-link-text:active, .login-link-text:focus{
+  color: #b30086;
+}
+
+.login-close-text:hover, .login-close-text:active, .login-close-text:focus{
+  color: #b30086;
+}
+
+.accounts-dialog{
+  color: white;
+}
+
+#login-buttons-do-change-password{
+  background-color: purple;
+}
+
+#login-buttons .login-button, .accounts-dialog .login-button {
+  background-color: purple;
+  border: 1px solid grey;
+  border-radius: 4px;
+}
+
+#login-buttons:hover .login-button:hover, .accounts-dialog:hover .login-button:hover {
+    background-color: #b30086;
+}
+
+#login-dropdown-list{
+  background-color: rgb(25, 25, 25);
+  border: 1px solid purple;
+}
 
 .rotation{
   -ms-transform: rotate(180deg); /* IE 9 */
@@ -302,7 +367,8 @@ i{
 }
 
 .mainButton{
-  background-color: purple; /* Green */
+  background-color: purple;
+  color: white;
 }
 
 .mainButton:hover{
@@ -332,4 +398,38 @@ i{
 
 .linkButton:hover{
   color: #b30086;
+}
+
+input:-webkit-autofill {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px purple inset;
+}
+input:-moz-autofill {
+    -moz-text-fill-color: white;
+    -moz-box-shadow: 0 0 0px 1000px purple inset;
+}
+input:-o-autofill {
+    -o-text-fill-color: white;
+    -o-box-shadow: 0 0 0px 1000px purple inset;
+}
+input:-khtml-autofill {
+    -khtml-text-fill-color: white;
+    -khtml-box-shadow: 0 0 0px 1000px purple inset;
+}
+
+input:focus:-webkit-autofill {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px purple inset;
+}
+input:focus:-moz-autofill {
+    -moz-text-fill-color: white;
+    -moz-box-shadow: 0 0 0px 1000px purple inset;
+}
+input:focus:-o-autofill {
+    -o-text-fill-color: white;
+    -o-box-shadow: 0 0 0px 1000px purple inset;
+}
+input:focus:-khtml-autofill {
+    -khtml-text-fill-color: white;
+    -khtml-box-shadow: 0 0 0px 1000px purple inset;
 }

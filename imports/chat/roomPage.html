@@ -11,7 +11,7 @@
 									{{#if isOwner}}
 										<form class="nameChange">
 							        		<input type="text" name="roomName" value="{{name}}">
-							        		<input type="submit">
+							        		<input type="submit" value="Save" class="mainButton">
 							        		<div id="nameExists"></div>
 							    		</form>
 									{{else}}
@@ -24,13 +24,11 @@
 								<td>
 									{{#if isOwner}}
 										<form class="aboutChange">
-											<div class="form-group">
-						  						<textarea type="text" name="roomAbout" value ="{{desc}}" rows="5"></textarea>
-						  						<input type="submit">
-											</div>
+						  					<textarea type="text" name="roomAbout" id="roomAboutChange" value ="{{desc}}"></textarea>
+						  					<input type="submit" value="Save" class="mainButton">
 										</form>
 									{{else}}
-										{{desc}}
+										<div id="roomAbout">{{desc}}</div>
 									{{/if}}
 								</td>
 							</tr>
@@ -73,8 +71,9 @@
 								  				{{else}}
 													<label><input type="checkbox" name="isPrivate">Private Room?</label>
 								  				{{/if}}
+								  				<input type="submit" value="Save" class="mainButton">
 											</div>
-											<input type="submit">
+											
 										</form>
 									{{else}}
 										{{#if isPrivate}}
@@ -97,8 +96,9 @@
 							  						{{else}}
 														<label><input type="checkbox" name="invBul">Are they?</label>
 							  						{{/if}}
+							  						<input type="submit" value="Save" class="mainButton">
 												</div>
-												<input type="submit">
+												
 											</form>
 										{{else}}
 											{{#if invPrivi}}
@@ -127,7 +127,7 @@
 									<td>
 										<form class="inviteToRoom">
 							        		<input type="text" name="invited">
-							        		<input type="submit">
+							        		<input type="submit" value="Invite" class="mainButton">
 							    		</form>
 									</td>
 								</tr>

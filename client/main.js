@@ -1,4 +1,5 @@
 import '../imports/accounts/accounts-config.js';
+import '../imports/accounts/loginModal.html';
 import '../imports/chat/chat.js';
 import '../imports/chat/usersBar.js';
 import '../imports/chat/messages.js';
@@ -20,6 +21,11 @@ import '../imports/profile/profile.js';
 import '../imports/userButton/userButton.js';
 import '../imports/login/login.html';
 import '../imports/router/routes.js';
+import { Accounts } from 'meteor/accounts-base';
+ 
+Accounts.ui.config({
+  passwordSignupFields: 'USERNAME_ONLY',
+});
 
 Meteor.startup(function(){
 

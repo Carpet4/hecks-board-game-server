@@ -30,7 +30,12 @@ FlowRouter.route('/', {
 FlowRouter.route('/login', {
 	name: 'login',
 	action(){
-		BlazeLayout.render('Login');
+		if(Meteor.userId()){
+			FlowRouter.go('chat');
+		}
+		else{
+			BlazeLayout.render('Login');
+		}
 	}
 });
 

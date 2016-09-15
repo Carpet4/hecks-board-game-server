@@ -6,8 +6,11 @@ import '../imports/collections/games.js';
 import '../imports/collections/rooms.js';
 import '../imports/collections/notifications.js';
 import '../imports/accounts/accountSchema.js';
+import '../imports/accounts/accounts-config.js';
+
 
 
 Meteor.startup(() => {
   
+
 });

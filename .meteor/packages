@@ -27,8 +27,9 @@ fastclick@1.0.12
 raix:handlebar-helpers
 aldeed:collection2
 aldeed:autoform
-accounts-ui@1.1.9
+accounts-base
 accounts-password@1.2.12
+useraccounts:unstyled
 matb33:bootstrap-glyphicons
 zimme:active-route
 gwendall:auth-client-callbacks
@@ -36,6 +37,7 @@ meteortoys:allthings
 mizzao:user-status
 twbs:bootstrap
 peppelg:bootstrap-3-modal
+accounts-ui
 
 check@1.2.3
 session@1.1.6
