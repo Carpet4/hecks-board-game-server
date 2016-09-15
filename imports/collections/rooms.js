@@ -48,6 +48,10 @@ Meteor.methods({
 				moderators: [],
 				desc: ""
 			});
+			return true;
+		}
+		else{
+			return false;
 		}
 	},
 
@@ -100,10 +104,17 @@ Meteor.methods({
 
 	'rooms.nameChange'(room, tempName){
 		check(tempName, String);
-		if(this.userId && Rooms.findOne(room)){
+		if(this.userId && Rooms.findOne(room) && !Rooms.findOne({name: tempName})){
 			if(Rooms.findOne(room).owner === this.userId){
 				Rooms.update(room, {$set:{ name: tempName}});
+				return true;
 			}
+			else{
+				return false;
+			}
+		}
+		else{
+			return false
 		}
 	},
 

@@ -78,12 +78,26 @@ Template.RoomsBar.helpers({
 });
 
 Template.RoomsBar.events({
-	'submit form'(event){
+	'submit form'(event, instance){
 		event.preventDefault();
-		this.name = event.target.roomName.value;
-		this.isPrivate = event.target.isPrivate.checked;
-		if(this.name.length > 0)
-			Meteor.call('rooms.create', this.name, this.isPrivate);
+		var name = event.target.roomName.value;
+		var isPrivate = event.target.isPrivate.checked;
+		if(name.length > 0)
+			Meteor.call('rooms.create', name, isPrivate, function(err, result){
+				if(result){
+					event.target.roomName.value = "";
+					event.target.isPrivate.checked = false;
+					document.getElementById("nameExists2").innerHTML = "";
+					instance.newRoom.set(false);
+				}
+				else{
+					event.target.roomName.value = "";
+					if(isPrivate){
+						event.target.isPrivate.checked = true;
+					}
+					document.getElementById("nameExists2").innerHTML = "Exists already";
+				}
+			});
 		event.target.roomName.value = "";
 		event.target.isPrivate.checked = false;
 	},

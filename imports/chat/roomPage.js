@@ -8,10 +8,12 @@ Template.RoomPage.onCreated(function(){
 	this.roomName = FlowRouter.getParam('name');
 	this.subscribe('singleRoom', this.roomName);
 	this.subscribe('users');
-	this.autorun(()=> {
+	this.autorun((func)=> {
 		if(this.subscriptionsReady()){
-			this.roomId = Rooms.findOne({name: this.roomName})._id;
-			Session.set('currentChat', this.roomId);
+			this.room = Rooms.findOne({name: this.roomName});
+			this.roomId = this.room._id;
+			func.stop();
+			//Session.set('currentChat', this.roomId); why this???
 		}
 	});
 });
@@ -50,8 +52,17 @@ Template.RoomPage.events({
   'submit .nameChange'(event, instance) {
   	event.preventDefault();
   	newName = event.target.roomName.value.toString();
-  	Meteor.call('rooms.nameChange', instance.roomId, newName);
-  	FlowRouter.go('/room/' + newName);
+  	Meteor.call('rooms.nameChange', instance.roomId, newName, function(err, result){
+  		if(result){
+  			FlowRouter.go('/room/' + newName);
+  			document.getElementById("nameExists").innerHTML = "";
+  		}
+  		else{
+  			event.target.roomName.value = instance.room.name;
+  			document.getElementById("nameExists").innerHTML = "Exists already";
+  		}
+  	});
+  	
   },
 
   'submit .aboutChange'(event, instance) {

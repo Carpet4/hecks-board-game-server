@@ -157,6 +157,10 @@ input[type="text"], select, textarea {
   text-align: center; 
 }
 
+#nameExists, #nameExists2{
+  color:red;
+}
+
 .userBtn{
   width: 100%;
   overflow: hidden;
