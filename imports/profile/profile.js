@@ -15,16 +15,26 @@ Template.Profile.helpers({
   isYou: ()=>{
   	if(Meteor.user().username === FlowRouter.getParam('username'))
   		return true;
-  }
+  },
 
 });
 
+
 Template.Profile.events({
 
-	'submit .profileAboutChange'(event) {
+	'submit form'(event, instance) {
   	event.preventDefault();
-  	newAbout = event.target.profileAbout.value.toString();
-  	Meteor.call('users.aboutChange', newAbout);
+    event.stopPropagation();
+  	Meteor.call('users.profileChange', event.target.box.value);
   },
+
+  /*'change #genderSelect'(event, instance) {
+    if(event.target.value === "Other"){
+      document.getElementById('otherGender').innerHTML='<input type="text" name="other" />';
+    }
+    else{
+      document.getElementById('otherGender').innerHTML='';
+    }
+  },*/
 
 });

@@ -52,6 +52,10 @@ Meteor.startup(function(){
       return Meteor.users.find({username: name});
   });
 
+  UI.registerHelper('mathFloor', function(num){
+      return Math.floor(num);
+  });
+
 });
 
 closingWindow = function(){

@@ -6,20 +6,37 @@
 				<h5>Name: {{username}}</h5>
 			</li>
 			<li>
-				<h5>Rating: {{rating}}</h5>
+				<h5>Rating: {{mathFloor rating}}</h5><br>
 			</li>
 			{{#if isYou}}
+			<form>
+			<!--<li>
+				Gender:<select name="gender" id="genderSelect">
+					<option selected="selected"></option>
+					<option value="Vacuum cleaner">Vacuum cleaner</option>
+					<option value="Carpet">Carpet</option>
+				</select>
+			</li>-->
+			<!--<li>
+				Philosophy of life:<select name="philosophy">
+					<option selected="selected"></option>
+					<option value="yes">Yes</option>
+					<option value="no">No</option>
+				</select>
+			</li>-->
 			<li>
-				<h5>About:</h5><form class="profileAboutChange">
-					<div class="form-group">
-  						<textarea type="text" name="profileAbout" value ="{{about}}" rows="5"></textarea>
-  						<input type="submit">
-					</div>
-				</form>
+				<h5>Self expression box:</h5>
+  				<textarea type="text" name="box" value ="{{profile.box}}" class="SEbox"></textarea>			
 			</li>
+			<input type="submit" id="submitProfile" value="Save changes">
+			</form>
+
 			{{else}}
 			<li>
-				<h5>About: {{about}}</h5>
+				Self Expression Box:
+				<div class="SEbox">
+				{{profile.box}}
+				</div>
 			</li>
 			{{/if}}
 		</ul>		

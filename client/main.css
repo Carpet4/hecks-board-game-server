@@ -167,6 +167,15 @@ input[type="text"], select, textarea {
   border: 1px solid rgb(20, 20, 20);
   border-radius: 5px;
 }
+
+.SEbox{
+  background-color: purple;
+  border: 1px dotted grey;
+  height: 500px;
+  width: 100%;
+  max-width: 600px;
+  word-wrap: break-word;
+}
 .pink{
   background-color: #ff66d9;
 }

@@ -32,7 +32,7 @@ if (Meteor.isServer) {
 		            "_id": 1,
 		            "username": 1,
 		            "rating": 1,
-		            "about": 1,
+		            "profile": 1,
 		            "status.online": 1,
 		            "status.idle": 1
 		        }
@@ -74,10 +74,10 @@ if (Meteor.isServer) {
 
 Meteor.methods({
 
-	'users.aboutChange'(newAbout){
+	'users.profileChange'(box){
 		if(this.userId){
-			check(newAbout, String);
-			Meteor.users.update(this.userId, {$set: {about: newAbout}});
+			check(box, String);
+			Meteor.users.update(this.userId, {$set: {'profile.box': box}});
 		}
 	},
 

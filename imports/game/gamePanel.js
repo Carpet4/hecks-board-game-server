@@ -35,7 +35,6 @@ Template.GamePanel.onCreated(function(){
 	}
 
 	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1}}).observe({
-
 		changed: (doc)=>{
 			this.p1Clock.set(doc.p1Time);
 			this.p2Clock.set(doc.p2Time);
@@ -56,7 +55,6 @@ Template.GamePanel.onCreated(function(){
 				}
 			}
 		}
-
 	});
 
 	//fixes to correct time after reload using this.timeFixer

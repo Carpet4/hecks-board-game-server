@@ -5,11 +5,11 @@ Accounts.onCreateUser((options, user) => {
  
   user.rating = 800;
   user.isChat = 0;
-  user.about = "";
+  user.profile = "";
   user.activeGames = [];
   user.lastRead = 0;
-  if(Rooms.findOne({name: "English"})){
-  	roomId = Rooms.findOne({name: "English"})._id;
+  if(Rooms.findOne({name: "Main"})){
+  	roomId = Rooms.findOne({name: "Main"})._id;
   	user.chatRooms = [roomId];
 	Rooms.update(roomId, {$push: {users: user._id}})
   }
