@@ -28,7 +28,7 @@ Template.Profile.helpers({
 
 Template.Profile.events({
 
-	'submit #submitProfile'(event, instance) {
+	'submit #submitProfile'(event, instance) { //cannot change back to empty, need to fix
   	event.preventDefault();
     event.stopPropagation();
     if(event.target.box.value.length > 0){
