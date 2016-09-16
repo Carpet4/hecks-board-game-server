@@ -9,7 +9,7 @@
 				<h5>Rating: {{mathFloor rating}}</h5><br>
 			</li>
 			{{#if isYou}}
-			<form>
+			<form id="submitProfile">
 			<!--<li>
 				Gender:<select name="gender" id="genderSelect">
 					<option selected="selected"></option>
@@ -28,8 +28,12 @@
 				<h5>Self expression box:</h5>
   				<textarea type="text" name="box" value ="{{profile.box}}" class="SEbox"></textarea>			
 			</li>
-			<input type="submit" id="submitProfile" value="Save changes">
-			</form>
+			<input type="submit" class="mainButton" value="Save changes">
+			</form><br>
+			<button id="changePwd" class="btn-link">Change password</button>
+				{{#if changePwdHelper}}
+					{{>atForm}}
+				{{/if}}	
 
 			{{else}}
 			<li>

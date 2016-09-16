@@ -19,13 +19,8 @@ import '../imports/watch/watch.js';
 import '../imports/game/gameChat.js';
 import '../imports/profile/profile.js';
 import '../imports/userButton/userButton.js';
-import '../imports/login/login.html';
+import '../imports/login/login.js';
 import '../imports/router/routes.js';
-import { Accounts } from 'meteor/accounts-base';
- 
-Accounts.ui.config({
-  passwordSignupFields: 'USERNAME_ONLY',
-});
 
 Meteor.startup(function(){
 

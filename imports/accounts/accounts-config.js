@@ -12,6 +12,6 @@ AccountsTemplates.addFields([
   pwd
 ]);
 
-/*AccountsTemplates.configure({
-    forbidClientAccountCreation: true
-});*/
+AccountsTemplates.configure({
+    enablePasswordChange: true,
+});

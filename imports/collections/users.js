@@ -77,7 +77,14 @@ Meteor.methods({
 	'users.profileChange'(box){
 		if(this.userId){
 			check(box, String);
-			Meteor.users.update(this.userId, {$set: {'profile.box': box}});
+			var profile = Meteor.users.findOne(this.userId).profile;
+			if(profile === ""){
+				profile = {};
+				Meteor.users.update(this.userId, {$set: {profile: profile}});
+			}
+			if(box.length > 0){
+				Meteor.users.update(this.userId, {$set: {'profile.box': box}});
+			}
 		}
 	},
 

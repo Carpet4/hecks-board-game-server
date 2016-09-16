@@ -38,6 +38,10 @@ Template.Header.events({
 		event.stopPropagation();
 	},
 
+  'click #logoutBtn'() {
+    AccountsTemplates.logout();
+  },
+
 });
 
 Template.Notification.helpers({  

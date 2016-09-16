@@ -1,10 +1,12 @@
 import { Template } from 'meteor/templating';
 import { Meteor } from 'meteor/meteor';
+import { ReactiveVar } from 'meteor/reactive-var';
 //import { Messages } from '../../imports/collections/messages.js';
 import './profile.html';
 
 Template.Profile.onCreated(function(){
 	this.subscribe('singleProfile', FlowRouter.getParam('username'));
+  this.changePassword = new ReactiveVar(false);
 });
 
 Template.Profile.helpers({
@@ -17,16 +19,34 @@ Template.Profile.helpers({
   		return true;
   },
 
+  changePwdHelper: ()=>{
+    return Template.instance().changePassword.get();
+  }
+
 });
 
 
 Template.Profile.events({
 
-	'submit form'(event, instance) {
+	'submit #submitProfile'(event, instance) {
   	event.preventDefault();
     event.stopPropagation();
-  	Meteor.call('users.profileChange', event.target.box.value);
+    if(event.target.box.value.length > 0){
+  	 Meteor.call('users.profileChange', event.target.box.value);
+    }
   },
+
+  'click #changePwd'(event, instance){
+    console.log(instance.changePassword);
+    instance.changePassword.set(!instance.changePassword.get());
+    if(instance.changePassword.get()){
+      AccountsTemplates.setState('changePwd');
+    }
+    else{
+      AccountsTemplates.setState('hide');
+    }
+    return instance.changePassword.get();
+  }
 
   /*'change #genderSelect'(event, instance) {
     if(event.target.value === "Other"){
