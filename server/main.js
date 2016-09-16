@@ -11,6 +11,5 @@ import '../imports/accounts/accounts-config.js';
 
 
 Meteor.startup(() => {
-  	var profile = {};
-	Meteor.users.update({profile: ""}, {$set: {profile: profile}});
+	
 });
