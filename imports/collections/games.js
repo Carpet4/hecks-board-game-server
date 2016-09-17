@@ -381,14 +381,50 @@ Meteor.methods({
   },
 
   'games.pass'(gameNum) {
-    this.game = Games.findOne({gNum: gameNum});
+    this.game = Games.findOne({gNum: gameNum}); 
+    this.turn = this.game.turn;
     if(this.userId && this.game && this.game.result === false){
       if((this.userId === this.game.p1 && this.game.turn % 2 === 0) || (this.userId === this.game.p2 && this.game.turn % 2 !== 0)){
 
-        tempPassCount = this.game.passCount;
-        tempTurn = this.game.turn;
+        if(this.turn % 2 === 0){
+          this.playerTime = this.game.p1Time;
+        }
+        else{
+          this.playerTime = this.game.p2Time;
+        }
+        console.log(this.playerTime);
+
+        var tempPassCount = this.game.passCount;
+        var tempTurn = this.game.turn;
+        this.moveTime = (new Date).getTime();
+        this.lastMoveTime = this.game.lastMoveTime;
+        this.fischerParam = this.game.subT * 1000;
+        
+        this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
+        if(this.playerTime < this.fischerParam){
+          Meteor.call('games.timeLoss', this.game._id);
+        }
+        console.log(this.playerTime);
+
         var selector = {gNum: gameNum};
-        var modifier = {$set: {passCount: tempPassCount + 1, turn: tempTurn + 1, lastMove: false}};
+        if(this.turn % 2 === 0){
+          var modifier = {$set: {
+            passCount: tempPassCount + 1, 
+            turn: tempTurn + 1, 
+            lastMove: false,
+            lastMoveTime: this.moveTime,
+            p1Time: this.playerTime
+          }};
+        }
+        else{
+          var modifier = {$set: {
+            passCount: tempPassCount + 1, 
+            turn: tempTurn + 1, 
+            lastMove: false,
+            lastMoveTime: this.moveTime,
+            p2Time: this.playerTime
+          }};
+        }
         Games.update(selector, modifier);
 
         if(this.game.passCount === 1){
