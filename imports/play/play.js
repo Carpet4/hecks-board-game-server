@@ -8,8 +8,8 @@ import './play.html';
 Template.Play.onCreated(function bodyOnCreated() {
 	this.subscribe('automatchPlayers');
   
-  this.minTime = 10;
-  this.maxTime = 10;
+  this.minTime = 30;
+  this.maxTime = 40;
   this.minRank = -300;
   this.maxRank = +300;
 
