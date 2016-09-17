@@ -44,12 +44,14 @@ Template.Messages.events({
     // Get value from form element
     const target = event.target;
     const text = target.text.value;
+    if(text.length > 0){
  
-    // Insert a message into the collection
-    Meteor.call('messages.insert', text, Session.get('currentChat'));
- 
-    // Clear form
-    target.text.value = '';
-    console.log((new Date).getTime());
+      // Insert a message into the collection
+      Meteor.call('messages.insert', text, Session.get('currentChat'));
+   
+      // Clear form
+      target.text.value = '';
+      console.log((new Date).getTime());
+    }
   },
 });

@@ -110,12 +110,13 @@ Template.MessangerWindow.events({
 	    // Get value from form element
 	    const target = event.target;
 	    const text = target.text.value;
-	 
+	 	if(text.length > 0){
 	    // Insert a message into the collection
-	    Meteor.call('messages.messangerInsert', text, instance.data.roomId);
-	 
-	    // Clear form
-	    target.text.value = '';
+		    Meteor.call('messages.messangerInsert', text, instance.data.roomId);
+		 
+		    // Clear form
+		    target.text.value = '';
+		}
 	  },
 
 	'click .openChatWindow'(event, instance) {

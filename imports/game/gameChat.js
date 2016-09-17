@@ -35,13 +35,14 @@ Template.GameChat.events({
     const target = event.target;
     const text = target.text.value;
 
-    console.log(instance.gameNumber);
+    if(text.length > 0){
  
-    // Insert a message into the collection
-    Meteor.call('messages.gameInsert', text, instance.gameNumber);
- 
-    // Clear form
-    target.text.value = '';
+      // Insert a message into the collection
+      Meteor.call('messages.gameInsert', text, instance.gameNumber);
+   
+      // Clear form
+      target.text.value = '';
+    }
   },
 
 });
