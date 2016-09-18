@@ -67,6 +67,10 @@ Template.Header.events({
     AccountsTemplates.logout();
   },
 
+  'click .navbar-brand'(){
+    FlowRouter.go('about');
+  }
+
 });
 
 Template.Notification.helpers({  

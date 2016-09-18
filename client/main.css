@@ -12,6 +12,10 @@ button.listButton{
       border-radius: 0;
 }
 
+.navbar-brand{
+  cursor: pointer;
+}
+
 .closeChatWindow{
   position: absolute;
     right: 0px;
@@ -101,6 +105,10 @@ input[type="text"], input[type="password"], select, textarea {
 
 .mainLink{
   color: #ff66d9;
+}
+
+.aboutDiv{
+  padding-left: 10px;
 }
 
 .dropdown-menu > li > a{

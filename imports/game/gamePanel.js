@@ -34,6 +34,9 @@ Template.GamePanel.onCreated(function(){
 		}
 	}
 
+	
+
+
 	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1}}).observe({
 		changed: (doc)=>{
 			this.p1Clock.set(doc.p1Time);
@@ -48,7 +51,7 @@ Template.GamePanel.onCreated(function(){
 
 			//cancels the interval when game is finished
 			if(this.game.result !== false){
-				Meteor.clearInterval(this.clockInterval);
+				this.clockWorker.terminate();
 				if(this.countdown === true){
 					countdown.pause();
 					this.countdown = false;
@@ -69,8 +72,11 @@ Template.GamePanel.onCreated(function(){
 
 	//interval that decreases a second at a time (client only) for the player whose turn it is, 
 	if(!this.game.result){
-		this.clockInterval = Meteor.setInterval(()=> {
-			if(this.turn % 2 === 0){
+		if(typeof(this.clockWorker) == "undefined") {
+	    	this.clockWorker = new Worker("/clockWorker.js");
+		}
+		this.clockWorker.onmessage = (event)=>{
+		    if(this.turn % 2 === 0){
 				var time = this.p1Clock.get();
 				if(time < 10100 && this.countdown === false){
 					countdown.currentTime = Math.max(0, 10000 - time);
@@ -94,13 +100,16 @@ Template.GamePanel.onCreated(function(){
 					Meteor.call('games.timeLoss', this.gameId);
 				}
 			}
-		} ,100);
+		}; 
 	}	
 
 });
 
 Template.GamePanel.onDestroyed(function () {
-	Meteor.clearInterval(this.clockInterval);
+	if(this.clockWorker) {
+	    this.clockWorker.terminate();
+	}
+	
 });
 
 Template.GamePanel.helpers({

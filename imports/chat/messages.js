@@ -43,8 +43,9 @@ Template.Messages.events({
  
     // Get value from form element
     const target = event.target;
-    const text = target.text.value;
+    var text = target.text.value;
     if(text.length > 0){
+      //text = text.linkify();
  
       // Insert a message into the collection
       Meteor.call('messages.insert', text, Session.get('currentChat'));

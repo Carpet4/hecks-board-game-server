@@ -46,6 +46,13 @@ FlowRouter.route('/chat', {
 	}
 });
 
+FlowRouter.route('/about', {
+	name: 'about',
+	action(){
+		BlazeLayout.render('MainLayout', {main: 'About'});
+	}
+});
+
 FlowRouter.route('/play', {
 	name:'play',
 	action(){

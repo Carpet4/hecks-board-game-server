@@ -1,0 +1,1 @@
+var interval = setInterval(function(){postMessage("a");}, 100);
