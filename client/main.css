@@ -99,9 +99,18 @@ input[type="text"], input[type="password"], select, textarea {
   color: #ff66d9;
 }
 
+.mainLink{
+  color: #ff66d9;
+}
+
+.dropdown-menu > li > a{
+  color: #ff66d9;
+}
+
 .notificationList{
   background-color: rgb(25, 25, 25);
   border: 1px solid purple;
+  z-index: 1000;
 }
 
 .messagesContainer{ 

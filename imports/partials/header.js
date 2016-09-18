@@ -8,6 +8,14 @@ Template.Header.onCreated(function(){
   this.subscribe('rooms');
   this.subscribe('users');
   this.subscribe('notifications');
+  this.notificationSound = new Audio();
+  this.gameStartSound = new Audio();
+  this.notificationCount = 0;
+  this.activeGame = false;
+  setTimeout(()=>{
+    this.notificationSound.src = "/notification.mp3";
+    this.gameStartSound.src = "/gameStart.mp3";
+  }, 8000);
 });
 
 Template.Header.helpers({
@@ -20,14 +28,31 @@ Template.Header.helpers({
   	},
 
     notificationExists: ()=>{
-      if(Notifications.find().count() > 0){
+      var count = Notifications.find().count();
+      if(count > 0){
+        if(count > Template.instance().notificationCount){
+          var sound = Template.instance().notificationSound;
+          if(sound.src){
+            sound.play()
+          }
+        }
+        Template.instance().notificationCount = count;
         return true;
       }
+      Template.instance().notificationCount = count;
     },
     activeGames: ()=>{
       if(Meteor.user().activeGames[0] || Meteor.user().activeGames.length > 0){
+        if(!Template.instance().activeGame){
+          Template.instance().activeGame = true;
+          var sound = Template.instance().gameStartSound;
+          if(sound.src){
+            sound.play()
+          }
+        }
         return true;
       }
+      Template.instance().activeGame = false;
     }
 
 });
@@ -53,7 +78,6 @@ Template.Notification.helpers({
   },
 
   idToName: (id)=>{
-    console.log(id);
     return Meteor.users.findOne(id).username;
   } 
 });
@@ -61,7 +85,6 @@ Template.Notification.helpers({
 Template.Notification.helpers({
 
   timeDisplay: (time)=>{
-    console.log(time);
     hours = Math.floor(time / 3600);
     minutes = Math.floor((time - hours*3600) / 60);
     seconds = time - (hours * 3600) - (minutes * 60);
@@ -77,7 +100,6 @@ Template.Notification.helpers({
     if(seconds > 0){
       result += (seconds + "s");
     }
-    console.log(result);
 
     return result;
 

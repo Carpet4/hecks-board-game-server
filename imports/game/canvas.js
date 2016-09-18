@@ -3,7 +3,7 @@ import { Games } from '../../imports/collections/games.js';
 //import { Test } from '../../imports/collections/games.js';
 import { ReactiveVar } from 'meteor/reactive-var';
 
-import { blues, reds, blueimg, redimg, blackimg, stonePlacement } from './game.js';
+import { blues, reds, blueimg, redimg, blackimg, stonePlacement, passSound } from './game.js';
 
 
 function decimalToHex(x, y) {
@@ -61,6 +61,7 @@ Template.Canvas.onCreated(function(){
 	this.blueimg = blueimg;
 	this.blackimg = blackimg;
 	this.stonePlacement = stonePlacement;
+	this.passSound = passSound;
 	this.gameNumber = Number(FlowRouter.getParam('num'));
 	this.game = Games.findOne({gNum: this.gameNumber});
 	this.dotsData = this.game.dotsData;
@@ -316,6 +317,9 @@ Template.Canvas.onCreated(function(){
 		}
 		else{
 			this.previousMove = false;
+			if(this.turn > 0){
+				this.passSound.play();
+			}
 		}        
 
 	}

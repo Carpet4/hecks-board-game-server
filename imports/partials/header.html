@@ -1,6 +1,6 @@
 <template name="Header">
 	{{#if Template.subscriptionsReady}}
- 		<nav class="navbar navbar-inverse" style="z-index: 1;">
+ 		<nav class="navbar navbar-inverse" style="z-index: 1000;">
   			<div class="container-fluid">
     			<div class="navbar-header">
       				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -67,8 +67,8 @@
 <template name="Notification">
 	<li>
 		{{#if $eq type "roomInvite"}}
-			you have been invited to room: <a href="/room/{{roomName room}}">{{roomName room}}</a>by: 
-			<a href="/profile/{{idToName sender}}">{{idToName sender}}</a>									
+			you have been invited to room: <a href="/room/{{roomName room}}" class="mainLink">{{roomName room}}</a>by: 
+			<a href="/profile/{{idToName sender}} " class="mainLink">{{idToName sender}}</a>									
 			<button class="btn btn-success roomJoin" value="{{room}}">V</button>
 			<button class="btn btn-danger roomDecline" value="{{room}}">X</button>
 		{{else}}
