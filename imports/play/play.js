@@ -1,5 +1,6 @@
 import { ReactiveVar } from 'meteor/reactive-var';
 import { AutomatchPlayers } from '../../imports/collections/automatchPlayers.js';
+import { Games } from '../../imports/collections/games.js';
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import './play.html';
@@ -7,6 +8,7 @@ import './play.html';
 //!!!!need to make sure player is removed from automatch if he started a game outside of the automatch
 Template.Play.onCreated(function bodyOnCreated() {
 	this.subscribe('automatchPlayers');
+  this.subscribe('activeGames');
   
   this.minTime = 30;
   this.maxTime = 40;
@@ -15,8 +17,9 @@ Template.Play.onCreated(function bodyOnCreated() {
 
   this.autorun(() => {
     if (this.subscriptionsReady()) {
-      var result = Meteor.user().activeGames[0];
-      if (result !== undefined) {
+      var foundGame = Games.findOne({result: false, $or:[{p1: Meteor.userId()}, {p2: Meteor.userId()}]});
+      if(foundGame){
+        var result = foundGame._id;
         FlowRouter.go('/game/' + result);
       }
     }

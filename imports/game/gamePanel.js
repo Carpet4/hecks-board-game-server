@@ -6,8 +6,8 @@ import './gamePanel.html';
 
 Template.GamePanel.onCreated(function(){
 
-	this.gNum = Number(FlowRouter.getParam('num'));
-	this.game = Games.findOne({gNum: this.gNum});
+	this.gameId = FlowRouter.getParam('id');
+	this.game = Games.findOne(this.gameId);
 	this.gameId = this.game._id;
 	this.turn = this.game.turn;
 	this.timeFixer = (new Date).getTime() - this.game.lastMoveTime;//fixes to correct time after page reload
@@ -151,7 +151,7 @@ Template.GamePanel.helpers({
   	},
 
   	turn: ()=> {
-  		game = Games.findOne({gNum: Template.instance().gNum});
+  		game = Games.findOne(Template.instance().gameId);
   		if(!game.result){
   			if(game.turn % 2 === 0){
   				return game.name1 + "'s turn";
@@ -171,12 +171,10 @@ Template.GamePanel.helpers({
 Template.GamePanel.events({
 
 	'click .resign'(event, instance) {
-      var tempNum = Number(FlowRouter.getParam('num'));
-      Meteor.call('games.resign', tempNum);
+      Meteor.call('games.resign', instance.gameId);
     },
 
     'click .pass'(event, instance) {
-      var tempNum = Number(FlowRouter.getParam('num'));
-      Meteor.call('games.pass', tempNum);
+      Meteor.call('games.pass', instance.gameId);
     }
 });

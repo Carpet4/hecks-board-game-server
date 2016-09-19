@@ -6,12 +6,10 @@ import './buttons.html';
 Template.Buttons.events({
 
 	'click .resign'(event, instance) {
-      var tempNum = Number(FlowRouter.getParam('num'));
-      Meteor.call('games.resign', tempNum);
+      Meteor.call('games.resign', FlowRouter.getParam('id'));
     },
 
     'click .pass'(event, instance) {
-      var tempNum = Number(FlowRouter.getParam('num'));
-      Meteor.call('games.pass', tempNum);
+      Meteor.call('games.pass', FlowRouter.getParam('id'));
     }
 });

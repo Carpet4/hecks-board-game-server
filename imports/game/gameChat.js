@@ -5,7 +5,7 @@ import './gameChat.html';
 
 Template.GameChat.onCreated(function(){
 
-  this.gameNumber = Number(FlowRouter.getParam('num'));
+  this.gameId = FlowRouter.getParam('id');
 
 });
 
@@ -20,7 +20,7 @@ Template.GameChat.onRendered(function(){
 Template.GameChat.helpers({
 
   messages: ()=> {
-    return Messages.find({type: "game", room: Template.instance().gameNumber});
+    return Messages.find({type: "game", room: Template.instance().gameId});
   },
 
 });
@@ -38,7 +38,7 @@ Template.GameChat.events({
     if(text.length > 0){
  
       // Insert a message into the collection
-      Meteor.call('messages.gameInsert', text, instance.gameNumber);
+      Meteor.call('messages.gameInsert', text, instance.gameId);
    
       // Clear form
       target.text.value = '';

@@ -9,21 +9,17 @@ export const Games = new Meteor.Collection('games');
 
 if (Meteor.isServer) {
 
-  /*Meteor.publish('test', function testPublication() {
-    return Test.find();
-  });*/
-
-	Meteor.publish('playerGames', function gamesPublication() {
+  Games.remove({ gNum: { $exists: true } });
+  
+	Meteor.publish('playerGames', function gamesPublication() { //what is this for???
     if(this.userId){
-      return Games.find({gNum: {$in: Meteor.users.findOne(this.userId).activeGames}});
+      return Games.find({result: false, $or:[{p1: this.userId}, {p2: this.userId}]});
     }
   });
 
-	Meteor.publish('singleGame', function singleGamePublication(num) {
+	Meteor.publish('singleGame', function singleGamePublication(id) {
     if(this.userId){
-    	return Games.find({
-    		gNum: num
-    	});
+    	return Games.find(id);
     }
   });
 
@@ -31,12 +27,13 @@ if (Meteor.isServer) {
     if(this.userId){
       return Games.find({result: false}, {
         fields: {
+          "p1": 1,
+          "p2": 1,
           "name1": 1,
           "name2": 1,
           "rating1": 1,
           "rating2": 1,
           "turn": 1,
-          "gNum": 1,
           "result": 1
         }
       });
@@ -125,12 +122,10 @@ export function beginMatch(player1, player2, mainT, subT){
   player1Name = Meteor.users.findOne(player1).username;
   player2Rating = Meteor.users.findOne(player2).rating;
   player2Name = Meteor.users.findOne(player2).username;
-  tempNum = Games.find().count(); //may be dangerous, need to test a global variable for games count perhaps;
   tempTime = (new Date).getTime();
   if(!Games.findOne(
   {result: false, $or: [{p1: {$in:[player1, player2]}}, {p2: {$in:[player1, player2]}}]})){
     Games.insert({
-      gNum: tempNum,
       p1: player1,
       p2: player2,
       p1Time: mainT * 1000,
@@ -150,10 +145,6 @@ export function beginMatch(player1, player2, mainT, subT){
       yLength: 19
     });
   }
-  if(Meteor.isServer){
-    Meteor.users.update({_id: player2}, {$push: {activeGames: tempNum}});
-    Meteor.users.update({_id: player1}, {$push: {activeGames: tempNum}});
-  }  
 }
 
 
@@ -231,13 +222,15 @@ Meteor.methods({
       if(this.turn % 2 === 0){
         this.playerTime = this.game.p1Time;
         modifier = {$set: {
-          result: this.game.name2 + " wins on time!"
+          result: this.game.name2 + " wins on time!",
+          p1Time: 0
         }};
       }
       else{
         this.playerTime = this.game.p2Time;
         modifier = {$set: {
-          result: this.game.name1 + " wins on time!"
+          result: this.game.name1 + " wins on time!",
+          p2Time: 0
         }};
       }
 
@@ -269,15 +262,9 @@ Meteor.methods({
           }
 
 
-          Meteor.users.update(this.game.p1, {
-            $set: {rating: Qa},
-            $pull: {activeGames: this.game.gNum}
-          });
+          Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
 
-          Meteor.users.update(this.game.p2, {
-            $set: {rating: Qb},
-            $pull: {activeGames: this.game.gNum}
-          });
+          Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
         }
       } 
     }
@@ -380,10 +367,10 @@ Meteor.methods({
     }
   },
 
-  'games.pass'(gameNum) {
-    this.game = Games.findOne({gNum: gameNum}); 
-    this.turn = this.game.turn;
+  'games.pass'(id) {
+    this.game = Games.findOne(id); 
     if(this.userId && this.game && this.game.result === false){
+      this.turn = this.game.turn;
       if((this.userId === this.game.p1 && this.game.turn % 2 === 0) || (this.userId === this.game.p2 && this.game.turn % 2 !== 0)){
 
         if(this.turn % 2 === 0){
@@ -406,7 +393,6 @@ Meteor.methods({
         }
         console.log(this.playerTime);
 
-        var selector = {gNum: gameNum};
         if(this.turn % 2 === 0){
           var modifier = {$set: {
             passCount: tempPassCount + 1, 
@@ -425,7 +411,7 @@ Meteor.methods({
             p2Time: this.playerTime
           }};
         }
-        Games.update(selector, modifier);
+        Games.update(id, modifier);
 
         if(this.game.passCount === 1){
 
@@ -532,19 +518,13 @@ Meteor.methods({
 
             //updates users collection with new ratings
             
-            Meteor.users.update(this.game.p1, {
-              $set: {rating: Qa},
-              $pull: {activeGames: gameNum}
-            });
+            Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
 
-            Meteor.users.update(this.game.p2, {
-              $set: {rating: Qb},
-              $pull: {activeGames: gameNum}
-            });
+            Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
 
 
             //updates games collection with new result
-            Games.update({gNum: gameNum}, {$set:{ result: endText}});
+            Games.update(id, {$set:{ result: endText}});
           }
         }
 
@@ -552,10 +532,9 @@ Meteor.methods({
     }
   },
 
-  'games.resign'(tempNum){
-    this.game = Games.findOne({gNum: tempNum});
+  'games.resign'(id){
+    this.game = Games.findOne(id);
     if(this.game && !this.game.result && (this.userId === this.game.p1 || this.game.p2)){
-      var selector = {gNum: tempNum};
 
       if(this.game.p1 === this.userId){
         var modifier = {$set: {
@@ -569,7 +548,7 @@ Meteor.methods({
       }
 
       if(modifier){  
-        Games.update(selector, modifier);
+        Games.update(id, modifier);
 
         if (Meteor.isServer) {
           
@@ -591,14 +570,10 @@ Meteor.methods({
           }
 
           Meteor.users.update(this.game.p1, {
-            $set: {rating: Qa},
-            $pull: {activeGames: tempNum}
-          });
+            $set: {rating: Qa}});
 
           Meteor.users.update(this.game.p2, {
-            $set: {rating: Qb},
-            $pull: {activeGames: tempNum}
-          });
+            $set: {rating: Qb}});
         }
       }
     }

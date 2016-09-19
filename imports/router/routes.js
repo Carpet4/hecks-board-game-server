@@ -60,7 +60,7 @@ FlowRouter.route('/play', {
 	}
 });
 
-FlowRouter.route('/game/:num', {
+FlowRouter.route('/game/:id', {
 	name: 'game',
 	action(){
 		BlazeLayout.render('MainLayout', {main: 'Game'});

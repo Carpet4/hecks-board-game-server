@@ -27,14 +27,15 @@ Template.Game.helpers({
 
 Template.Game.onCreated(function GameOnCreated() {
   this.imageLoadCheck = new ReactiveVar(0);
-  this.gameNumber = Number(FlowRouter.getParam('num'));
-	this.subscribe('singleGame', this.gameNumber); //might better place the subsciptions inside autorun?
-  this.subscribe('gameMessages', this.gameNumber);
+  this.gameId = FlowRouter.getParam('id');
+  console.log(this.gameId);
+	this.subscribe('singleGame', this.gameId); //might better place the subsciptions inside autorun?
+  this.subscribe('gameMessages', this.gameId);
   //this.subscribe('test');
   this.autorun(() => {
     if(Session.get('isGameFinished') === true){
-      this.subscribe('singleGame', this.gameNumber);
-      this.subscribe('gameMessages', this.gameNumber);
+      this.subscribe('singleGame', this.gameId);
+      this.subscribe('gameMessages', this.gameId);
     }    
   });
 

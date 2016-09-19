@@ -6,41 +6,41 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { blues, reds, blueimg, redimg, blackimg, stonePlacement, passSound } from './game.js';
 
 
-function decimalToHex(x, y) {
-    x = x.toString(16);
-    y = y.toString(16);
-    var hex = "#00" + "00".substr(0, 2 - x.length) + x + "00".substr(0, 2 - y.length) + y;
-    return hex;
-};
-
-Dot = function (xCntr, yCntr) {
-    this.xCntr = xCntr; // x center of the dot
-    this.yCntr = yCntr; // y center of the dot
-};
-
-findPlayer = function(){
-	if(Games.findOne({gNum: Number(FlowRouter.getParam('num')), p1: Meteor.userId()})){
-		return 1;
-	}
-	if(Games.findOne({gNum: Number(FlowRouter.getParam('num')), p2: Meteor.userId()})){
-		return 2;
-	}
-	else
-		return 0;
-};
-
-Hexagon = function (xCntr, yCntr) {
-    this.xCntr = xCntr; // hex x center
-    this.yCntr = yCntr; // jex y center
-    this.value = 0;
-};
-
-
 Template.Canvas.onDestroyed(function(){
 	$(window).off('resize');
 });
         
 Template.Canvas.onCreated(function(){
+
+	this.decimalToHex = function(x, y) {
+	    x = x.toString(16);
+	    y = y.toString(16);
+	    var hex = "#00" + "00".substr(0, 2 - x.length) + x + "00".substr(0, 2 - y.length) + y;
+	    return hex;
+	};
+
+	this.findPlayer = ()=>{
+	if(Games.findOne({_id: this.gameId, p1: Meteor.userId()})){
+		return 1;
+	}
+	if(Games.findOne({_id: this.gameId, p2: Meteor.userId()})){
+		return 2;
+	}
+	else
+		return 0;
+	};
+
+	this.Hexagon = function (xCntr, yCntr) {
+	    this.xCntr = xCntr; // hex x center
+	    this.yCntr = yCntr; // jex y center
+	    this.value = 0;
+	};
+
+	this.Dot = function (xCntr, yCntr) {
+	    this.xCntr = xCntr; // x center of the dot
+	    this.yCntr = yCntr; // y center of the dot
+	};
+
 
 	if($(window).width() < 545 || $(window).height() < 545){
 		this.zoomFirst = true;
@@ -62,11 +62,10 @@ Template.Canvas.onCreated(function(){
 	this.blackimg = blackimg;
 	this.stonePlacement = stonePlacement;
 	this.passSound = passSound;
-	this.gameNumber = Number(FlowRouter.getParam('num'));
-	this.game = Games.findOne({gNum: this.gameNumber});
+	this.gameId = FlowRouter.getParam('id');
+	this.game = Games.findOne(this.gameId);
 	this.dotsData = this.game.dotsData;
-	this.gameId = this.game._id;
-	this.player = findPlayer();
+	this.player = this.findPlayer();
 	this.previousMove = false;
 	this.canvasW = 880;
 	this.canvasH = 800;
@@ -464,7 +463,7 @@ Template.Canvas.onRendered(function() {
             this.ctx.lineWidth = 3;
             this.ctx.strokeStyle = this.line_color;
             this.ctx.stroke();
-            this.hexsPaint[i][j] = new Hexagon(x, y);
+            this.hexsPaint[i][j] = new this.Hexagon(x, y);
         }
         x = this.subx;
 
@@ -482,13 +481,13 @@ Template.Canvas.onRendered(function() {
             if(this.dots[i][j] === 1)
                 continue;
             this.drawArc(x, y);
-            this.dotsPaint[i][j] = new Dot(x, y);
+            this.dotsPaint[i][j] = new this.Dot(x, y);
             // creates mask
             this.pixelContext.beginPath();
             this.pixelContext.arc(x, y, this.radius*1.1, 0, 2*Math.PI, false);
             this.pixelContext.lineWidth = 3;
             this.pixelContext.strokeStyle = this.line_color;
-            this.pixelContext.fillStyle = decimalToHex(i+1, j+1);
+            this.pixelContext.fillStyle = this.decimalToHex(i+1, j+1);
             this.pixelContext.fill();
         }
         var x = 0;
@@ -584,14 +583,15 @@ Template.Canvas.events({
 
 		console.log((new Date).getTime());
 		if(instance.player !== 0 && instance.game.result === false){
+			console.log(instance.player);
 			if((instance.player === 1 && instance.turn % 2 === 0) || (instance.player === 2 && instance.turn % 2 !== 0) ){
 
-
+				console.log("gets2");
 
 
 				if(instance.zoomFirst && !instance.isZoomed){
 
-
+					console.log("gets3");
 					if(instance.lastK > -1 && instance.dotsData[instance.lastK][instance.lastM] === 0){
 						instance.drawArc(instance.dotsPaint[instance.lastK][instance.lastM].xCntr, instance.dotsPaint[instance.lastK][instance.lastM].yCntr);
 
@@ -664,7 +664,6 @@ Template.Canvas.events({
 			    if(k > -1 && imageData[3] === 255){ 
 					if(instance.dotsData[k][m] === 0 && instance.hasLibs(k, m, instance.player, instance.game)){
 		    	
-				        tempNum = Number(FlowRouter.getParam('num'));
 				        if(instance.isZoomed){
 				        	instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
 					        instance.ctx.putImageData(instance.imageSave, 0, 0);

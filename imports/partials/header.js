@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Rooms } from '../../imports/collections/rooms.js';
+import { Games } from '../../imports/collections/games.js';
 import { Notifications } from '../../imports/collections/notifications.js';
 import './header.html';
 
@@ -8,6 +9,7 @@ Template.Header.onCreated(function(){
   this.subscribe('rooms');
   this.subscribe('users');
   this.subscribe('notifications');
+  this.subscribe('playerGames');
   this.notificationSound = new Audio();
   this.gameStartSound = new Audio();
   this.notificationCount = 0;
@@ -42,7 +44,7 @@ Template.Header.helpers({
       Template.instance().notificationCount = count;
     },
     activeGames: ()=>{
-      if(Meteor.user().activeGames[0] || Meteor.user().activeGames.length > 0){
+      if(Games.findOne({result: false, $or:[{p1: Meteor.userId()}, {p2: Meteor.userId()}]})){
         if(!Template.instance().activeGame){
           Template.instance().activeGame = true;
           var sound = Template.instance().gameStartSound;

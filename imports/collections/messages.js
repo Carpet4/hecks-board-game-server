@@ -34,14 +34,14 @@ if (Meteor.isServer) {
     }
   });
 
-  Meteor.publish('gameMessages', function gameMessagesPublication(num) {
+  Meteor.publish('gameMessages', function gameMessagesPublication(id) {
     if(this.userId){
-      this.game = Games.findOne({gNum: num});
+      this.game = Games.findOne(id);
       if((this.game.p1 === this.userId || this.game.p2 === this.userId) && this.game.result === false){
-        return Messages.find({type: "game", room: num, owner:{$in:[this.game.p1, this.game.p2]}});
+        return Messages.find({type: "game", room: id, owner:{$in:[this.game.p1, this.game.p2]}});
       }
       else{
-        return Messages.find({type: "game", room: num});
+        return Messages.find({type: "game", room: id});
       }
     }
   });
@@ -55,7 +55,7 @@ if (Meteor.isServer) {
 
 Meteor.methods({
 
-  'messages.gameInsert'(text, num){
+  'messages.gameInsert'(text, id){
     check(text, String);
     if(this.userId){
       tempName = Meteor.users.findOne(this.userId).username;
@@ -63,7 +63,7 @@ Meteor.methods({
 
       Messages.insert({
         text: text,
-        room: num,
+        room: id,
         type: "game",
         timeStamp: tempTime,
         owner: this.userId,
