@@ -155,12 +155,14 @@ input[type="text"], input[type="password"], select, textarea {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid purple;
+  table-layout: fixed;
 }
 
 .gamePanel td{
   width: 50%;
   text-align: center;
   border: 1px solid purple;
+  overflow: hidden;
 }
 
 .gamePanel tr{
