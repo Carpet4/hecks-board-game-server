@@ -8,7 +8,6 @@ export const Games = new Meteor.Collection('games');
 //export const Test = new Meteor.Collection('test');
 
 if (Meteor.isServer) {
-  Games.remove({kifu: {$exists: false}});
 
 	Meteor.publish('playerGames', function gamesPublication() {
     if(this.userId){

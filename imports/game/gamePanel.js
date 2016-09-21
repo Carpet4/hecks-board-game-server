@@ -8,6 +8,7 @@ Template.GamePanel.onCreated(function(){
 
 	this.gameId = FlowRouter.getParam('id');
 	this.game = Games.findOne(this.gameId);
+	this.kifu = this.game.kifu
 	this.gameId = this.game._id;
 	this.turn = this.game.turn;
 	this.timeFixer = (new Date).getTime() - this.game.lastMoveTime;//fixes to correct time after page reload
@@ -37,11 +38,12 @@ Template.GamePanel.onCreated(function(){
 	
 
 
-	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1}}).observe({
+	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1, "kifu": 1}}).observe({
 		changed: (doc)=>{
 			this.p1Clock.set(doc.p1Time);
 			this.p2Clock.set(doc.p2Time);
 			this.game.result = doc.result;
+			this.kifu = doc.kifu;
 			if(doc.turn !== this.turn && this.countdown === true){
 				countdown.pause();
 				countdown.currentTime = 0;
@@ -105,7 +107,7 @@ Template.GamePanel.onCreated(function(){
 	this.autorun(()=>{
 		var variation = Session.get('myVar')
 		if(variation){
-			var num = variation[0] + variation.length - 1;
+			var num = Number(variation[0]) + variation.length - 1;
 			document.getElementById('moveNumber').value = num;
 		}
 	})	
@@ -198,10 +200,32 @@ Template.GamePanel.events({
      		Meteor.call('messages.variationInsert', Session.get('myVar'), instance.gameId);
     },
 
-    'submit .changeMove'(event){
+    'submit .changeMove'(event, instance){
 		event.preventDefault();
 		var num = Number(event.target.num.value);
-		Session.set('moveNum', num);
+		if(num < 0){
+			document.getElementById('moveNumber').value = 0;
+		}
+		else{
+			var variation = Session.get('myVar');
+			if(variation){
+				if(num > variation[0] + variation.length - 1){
+					document.getElementById('moveNumber').value = variation[0] + variation.length - 1;
+				}
+				else{
+					document.getElementById('moveNumber').value = num;
+				}
+			}
+			else{
+				if(num > instance.game.kifu.length){
+					document.getElementById('moveNumber').value = instance.kifu.length;
+				}
+				else{
+					document.getElementById('moveNumber').value = num;
+				}
+			}
+		}
+		Session.set('moveNum', document.getElementById('moveNumber').value);
 	},
 
 	'click .back10'(event){
@@ -228,17 +252,51 @@ Template.GamePanel.events({
 		Session.set('moveNum', document.getElementById('moveNumber').value);
 	},
 
-	'click .forward1'(event){
+	'click .forward1'(event, instance){
 		var num = Number(document.getElementById('moveNumber').value);
 		num += 1;
-		document.getElementById('moveNumber').value = num;
+
+		var variation = Session.get('myVar');
+		if(variation){
+			if(num > variation[0] + variation.length - 1){
+				document.getElementById('moveNumber').value = variation[0] + variation.length - 1;
+			}
+			else{
+				document.getElementById('moveNumber').value = num;
+			}
+		}
+		else{
+			if(num > instance.game.kifu.length){
+				document.getElementById('moveNumber').value = instance.kifu.length;
+			}
+			else{
+				document.getElementById('moveNumber').value = num;
+			}
+		}
 		Session.set('moveNum', document.getElementById('moveNumber').value);
 	},
 
-	'click .forward10'(event){
+	'click .forward10'(event, instance){
 		var num = Number(document.getElementById('moveNumber').value);
 		num += 10;
-		document.getElementById('moveNumber').value = num;
+
+		var variation = Session.get('myVar');
+		if(variation){
+			if(num > variation[0] + variation.length - 1){
+				document.getElementById('moveNumber').value = variation[0] + variation.length - 1;
+			}
+			else{
+				document.getElementById('moveNumber').value = num;
+			}
+		}
+		else{
+			if(num > instance.game.kifu.length){
+				document.getElementById('moveNumber').value = instance.kifu.length;
+			}
+			else{
+				document.getElementById('moveNumber').value = num;
+			}
+		}
 		Session.set('moveNum', document.getElementById('moveNumber').value);
 	},
 });

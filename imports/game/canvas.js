@@ -58,20 +58,25 @@ Template.Canvas.onCreated(function(){
 		console.log((new Date).getTime());
 		location = Number(location);
 		if(Number.isInteger(location)){
+			console.log("first if");
 			if(this.game.result !== false){
 				if(!variation){
 					if(location + 1 > this.kifu.length){
 						location = this.kifu.length;
+						console.log(location);
 						if(document.getElementById('moveNumber')){
-							document.getElementById('moveNumber').value = location;
+							console.log(location);
+							document.getElementById('moveNumber').value = Number(location);
 						}
 					}
 				}
 				else{
 					if(location + 2 > variation[0] + variation.length){
 						location = variation[0] + variation.length - 1;
+						console.log(location);
 						if(document.getElementById('moveNumber')){
-							document.getElementById('moveNumber').value = location;
+							console.log(location);
+							document.getElementById('moveNumber').value = Number(location);
 						}
 					}
 				}
@@ -368,6 +373,7 @@ Template.Canvas.onCreated(function(){
 	
 
 	this.makeTurn = (moveString)=>{
+		this.turn++
 		if(!this.game.result){
 			this.kifu[this.kifu.length] = moveString;
 		}
@@ -403,7 +409,6 @@ Template.Canvas.onCreated(function(){
 			this.lastMove = false;
 		}
 		if(this.lastMove){
-			this.turn++
 			var opponent = (this.turn % 2) + 1;
 			var player = 3 - opponent;
 
@@ -920,7 +925,7 @@ Template.Canvas.events({
 			    		}
 			    		else{
 			    			var variation = [];
-			    			variation.push(Session.get('moveNum'));
+			    			variation.push(Number(Session.get('moveNum')));
 			    			variation.push(moveString);
 			    		}
 			    		instance.currentVariation = variation;
