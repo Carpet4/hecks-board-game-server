@@ -9,7 +9,7 @@ import { Games } from './games.js';
 export const Messages = new Meteor.Collection('messages');
 
 if (Meteor.isServer) {
-	//deletes old messages
+	//deletes olfdgdd messages
 	/*Meteor.startup(function() {
   		Messages._ensureIndex( { "createdAt": 1 }, { expireAfterSeconds: 10 } );
 	});*/
@@ -36,12 +36,15 @@ if (Meteor.isServer) {
 
   Meteor.publish('gameMessages', function gameMessagesPublication(id) {
     if(this.userId){
-      this.game = Games.findOne(id);
-      if((this.game.p1 === this.userId || this.game.p2 === this.userId) && this.game.result === false){
-        return Messages.find({type: "game", room: id, owner:{$in:[this.game.p1, this.game.p2]}});
-      }
-      else{
-        return Messages.find({type: "game", room: id});
+      console.log(Games.find().count());
+      var game = Games.findOne(id);
+      if(game){
+        if((game.p1 === this.userId || game.p2 === this.userId) && game.result === false){
+          return Messages.find({type: "game", room: id, owner:{$in:[game.p1, game.p2]}});
+        }
+        else{
+          return Messages.find({room: id});
+        }
       }
     }
   });
@@ -65,6 +68,27 @@ Meteor.methods({
         text: text,
         room: id,
         type: "game",
+        timeStamp: tempTime,
+        owner: this.userId,
+        username: tempName
+      });
+    }
+  },
+
+  'messages.variationInsert'(variation, id){
+    check(variation, Array);
+    check(variation[0], Number);
+    for(var i=1; i<variation.length; i++){
+      check(variation[i], String);
+    }
+    if(this.userId){
+      tempName = Meteor.users.findOne(this.userId).username;
+      tempTime = (new Date).getTime();
+      Messages.insert({
+        variation: variation,
+        text: "",
+        room: id,
+        type: "variation",
         timeStamp: tempTime,
         owner: this.userId,
         username: tempName

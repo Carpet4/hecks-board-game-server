@@ -10,8 +10,8 @@ Template.Play.onCreated(function bodyOnCreated() {
 	this.subscribe('automatchPlayers');
   this.subscribe('activeGames');
   
-  this.minTime = 30;
-  this.maxTime = 40;
+  this.minTime = 20;
+  this.maxTime = 30;
   this.minRank = -300;
   this.maxRank = +300;
 

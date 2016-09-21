@@ -6,16 +6,170 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { blues, reds, blueimg, redimg, blackimg, stonePlacement, passSound } from './game.js';
 
 
+
+
+
+
+
+//export let variation = [];
+
+
+
+
 Template.Canvas.onDestroyed(function(){
 	$(window).off('resize');
 });
         
 Template.Canvas.onCreated(function(){
+	 Session.set('globalVar', false);
 
-	this.decimalToHex = function(x, y) {
-	    x = x.toString(16);
+	this.sbOppoHasLibs = (y, x, playah, dotsArray)=>{
+	  	if(dotsArray[y] && dotsArray[y][x] && dotsArray[y][x] === playah){
+
+			var libsCheckArray = new Array(this.dots.length);
+	  		for(i=0; i < this.dots.length; i++){
+	    		libsCheckArray[i] = new Array();
+	  		}
+	  		if(!this.libsCheck(y, x, playah, libsCheckArray, dotsArray)){
+	  			this.sbStoneRemover(y, x, playah, dotsArray);
+	  		}	      
+	    }
+	}
+
+	this.sbStoneRemover = (y, x, playah, dotsArray, gVar)=>{
+	  if(dotsArray[y] && dotsArray[y][x] === playah){
+	    dotsArray[y][x] = 0;
+
+	    if(y%2 === 0){
+	      this.sbStoneRemover(y-1, x, playah, dotsArray);
+	      this.sbStoneRemover(y+1, x-1, playah, dotsArray);
+	      this.sbStoneRemover(y+1, x+1, playah, dotsArray);
+	  	}
+	    else{
+	      this.sbStoneRemover(y-1, x-1, playah, dotsArray);
+	      this.sbStoneRemover(y-1, x+1, playah, dotsArray);
+	      this.sbStoneRemover(y+1, x, playah, dotsArray);
+	    }
+	  }
+	}
+
+
+	this.setBoard = (location, variation)=>{
+		console.log((new Date).getTime());
+		location = Number(location);
+		if(Number.isInteger(location)){
+			if(this.game.result !== false){
+				if(!variation){
+					if(location + 1 > this.kifu.length){
+						location = this.kifu.length;
+						if(document.getElementById('moveNumber')){
+							document.getElementById('moveNumber').value = location;
+						}
+					}
+				}
+				else{
+					if(location + 2 > variation[0] + variation.length){
+						location = variation[0] + variation.length - 1;
+						if(document.getElementById('moveNumber')){
+							document.getElementById('moveNumber').value = location;
+						}
+					}
+				}
+			}
+			this.turn = 0;
+			var dotsArray = new Array(this.dots.length);
+			for(var i=0; i<this.dots.length; i++){
+				dotsArray[i] = new Array();
+				for(var j=0; j<this.dots[0].length; j++){
+					if(this.dots[i][j] === 0){
+						dotsArray[i][j] = 0;
+					}
+				}
+			}
+			if(!variation || variation[0] >= location){
+				for(var i=0; i<location; i++){
+					if(this.kifu[i]){
+						this.sbMakeTurn(this.kifu[i], dotsArray);
+					}
+				}
+				var moveString = this.kifu[location-1];
+			}
+			else{
+				for(var i=0; i<variation[0]; i++){
+					if(this.kifu[i]){
+						this.sbMakeTurn(this.kifu[i], dotsArray);
+					}
+				}
+
+				for(var i=1; i < location + 1 - variation[0]; i++){
+					this.sbMakeTurn(variation[i], dotsArray)
+				}
+				var moveString = variation[location - variation[0]];
+			}
+
+			if(moveString){
+				if(moveString.length === 2){
+					this.lastMove = {};
+					this.lastMove.x = parseInt(moveString.charAt(0), 36);
+					this.lastMove.y = parseInt(moveString.charAt(1), 36);
+				}
+				else{
+					this.lastMove = false;
+				}
+			}
+			else{
+				this.lastMove = false;
+			}
+			this.dotsData = dotsArray;
+			this.boardPainter();
+		}
+		console.log((new Date).getTime());
+	}
+
+
+	this.sbMakeTurn = (moveString, dotsArray, turn)=>{
+		this.turn++;
+		if(moveString){
+			var lastMove;
+			if(moveString.length === 2){
+				lastMove = true;
+			}
+			else{
+				lastMove = false;
+			}
+		}
+		else{
+			lastMove = false;
+		}
+		if(lastMove){
+			var opponent = (this.turn % 2) + 1;
+			var player = 3 - opponent;
+			var x = parseInt(moveString.charAt(0), 36);
+			var y = parseInt(moveString.charAt(1), 36);
+			if(this.dots[y] && this.dots[y][x] === 0){
+				if(this.hasLibs(y, x, player, dotsArray)){
+					dotsArray[y][x] = player;
+
+			        if(y%2 === 0){
+				        this.sbOppoHasLibs(y-1, x, opponent, dotsArray);
+				        this.sbOppoHasLibs(y+1, x-1, opponent, dotsArray);
+				        this.sbOppoHasLibs(y+1, x+1, opponent, dotsArray);
+				    }
+				    else{
+				        this.sbOppoHasLibs(y-1, x-1, opponent, dotsArray);
+				        this.sbOppoHasLibs(y-1, x+1, opponent, dotsArray);
+				      	this.sbOppoHasLibs(y+1, x, opponent, dotsArray);
+				    }
+				}
+			}		
+		}       
+	}
+	//XXXXX
+
+	this.decimalToHex = function(y, x) {
 	    y = y.toString(16);
-	    var hex = "#00" + "00".substr(0, 2 - x.length) + x + "00".substr(0, 2 - y.length) + y;
+	    x = x.toString(16);
+	    var hex = "#00" + "00".substr(0, 2 - y.length) + y + "00".substr(0, 2 - x.length) + x;
 	    return hex;
 	};
 
@@ -49,17 +203,21 @@ Template.Canvas.onCreated(function(){
 		this.zoomFirst = false;
 	}
 
+	Session.set('myVar', false);
 	this.isZoomed = false;
 	this.lastK = -1;
 	this.lastM = -1;
 	this.imageSave;
 	this.imageSave2;
 	this.dataSave;
+	this.dotImgs = new Array(3);
 	this.blues = blues;
 	this.reds = reds;
 	this.redimg = redimg;
 	this.blueimg = blueimg;
 	this.blackimg = blackimg;
+	this.dotImgs[1] = this.blues;
+	this.dotImgs[2] = this.reds;
 	this.stonePlacement = stonePlacement;
 	this.passSound = passSound;
 	this.gameId = FlowRouter.getParam('id');
@@ -69,16 +227,17 @@ Template.Canvas.onCreated(function(){
 	this.previousMove = false;
 	this.canvasW = 880;
 	this.canvasH = 800;
+	this.currentVariation = false;
+	this.lastGVar = false;
 	if(!this.game.result){
 		Session.set('isGameFinished', false);
 	}
 	else if(!Session.get('isGameFinished')){
 		Session.set('isGameFinished', true);
+
 	}
 
 	this.canvasResizer = ()=>{
-		console.log(document.getElementById('canvasCol').clientHeight);
-		console.log($(window).height());
 		if($(window).width() < 545 || $(window).height() < 545){
 			this.zoomFirst = true;
 		}
@@ -132,74 +291,73 @@ Template.Canvas.onCreated(function(){
   	});
 
 
-	this.opponentHasLibs = (o, p, playah, int)=>{
-	  	if(this.dotsData[o] && this.dotsData[o][p] && this.dotsData[o][p] === playah){
+	this.opponentHasLibs = (y, x, playah, int)=>{
+	  	if(this.dotsData[y] && this.dotsData[y][x] && this.dotsData[y][x] === playah){
 
-			var libsCheckArray = new Array(game.xLength);
+			var libsCheckArray = new Array(this.dots.length);
 	  		for(i=0; i < this.dots.length; i++){
 	    		libsCheckArray[i] = new Array();
 	  		}
-	  		if(!this.libsCheck(o, p, playah, libsCheckArray, this.dotsData)){
-	  			this.stoneRemover(o, p, playah, int);
+	  		if(!this.libsCheck(y, x, playah, libsCheckArray, this.dotsData)){
+	  			this.stoneRemover(y, x, playah, int);
 	  		}	      
 	    }
 	}
 
-	this.stoneRemover = (x, y, playah, int)=>{
-	  if(this.dotsData[x] && this.dotsData[x][y] === playah){
-	    this.dotsData[x][y] = 0;
-	    this.drawArc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr);
-        if(x % 2 === 0){
-			this.hexPainter((x-2) / 2, y - 2, int);
-			this.hexPainter((x-2) / 2, y, int);
-			this.hexPainter(x / 2, y - 1, int);		      					
+	this.stoneRemover = (y, x, playah, int)=>{
+	  if(this.dotsData[y] && this.dotsData[y][x] === playah){
+	    this.dotsData[y][x] = 0;
+	    this.drawArc(this.dotsPaint[y][x].xCntr, this.dotsPaint[y][x].yCntr);
+        if(y % 2 === 0){
+			this.hexMakeTurn((y-2) / 2, x - 2, int);
+			this.hexMakeTurn((y-2) / 2, x, int);
+			this.hexMakeTurn(y / 2, x - 1, int);		      					
 	    }
 	    else{
-	    	this.hexPainter((x-3) / 2, y - 1, int);
-			this.hexPainter((x-1) / 2, y - 2, int);
-			this.hexPainter((x-1) / 2, y, int);
+	    	this.hexMakeTurn((y-3) / 2, x - 1, int);
+			this.hexMakeTurn((y-1) / 2, x - 2, int);
+			this.hexMakeTurn((y-1) / 2, x, int);
 	    }
 	    this.ctx2.globalAlpha = 1;
 
-	    if(x%2 === 0){
-	      this.stoneRemover(x-1, y, playah, int);
-	      this.stoneRemover(x+1, y-1, playah, int);
-	      this.stoneRemover(x+1, y+1, playah, int);
+	    if(y%2 === 0){
+	      this.stoneRemover(y-1, x, playah, int);
+	      this.stoneRemover(y+1, x-1, playah, int);
+	      this.stoneRemover(y+1, x+1, playah, int);
 	  	}
 	    else{
-	      this.stoneRemover(x-1, y-1, playah, int);
-	      this.stoneRemover(x-1, y+1, playah, int);
-	      this.stoneRemover(x+1, y, playah, int);
+	      this.stoneRemover(y-1, x-1, playah, int);
+	      this.stoneRemover(y-1, x+1, playah, int);
+	      this.stoneRemover(y+1, x, playah, int);
 	    }
 	  }
 	}
 
 
 
-	this.hasLibs = (o, p, playah, game)=>{
+	this.hasLibs = (y, x, playah, dotsData)=>{
 	  var libsCheckArray = new Array(this.dots.length);
 	  for(i=0; i < this.dots.length; i++){
 	    libsCheckArray[i] = new Array();
 	  }
-	  var dotsData = game.dotsData;
-	  return this.libsCheck(o, p, playah, libsCheckArray, dotsData);
+	  return this.libsCheck(y, x, playah, libsCheckArray, dotsData);
 	}
 
-	this.libsCheck = (x, y, playah, libsCheckArray, dotsData)=>{
-	  libsCheckArray[x][y] = true;
-	  if(x%2 === 0)
-	    return (this.stoneCheck(x-1, y, playah, libsCheckArray, dotsData) || this.stoneCheck(x+1, y-1, playah, libsCheckArray, dotsData) || this.stoneCheck(x+1, y+1, playah, libsCheckArray, dotsData));     
+	this.libsCheck = (y, x, playah, libsCheckArray, dotsData)=>{
+	  libsCheckArray[y][x] = true;
+	  if(y%2 === 0)
+	    return (this.stoneCheck(y-1, x, playah, libsCheckArray, dotsData) || this.stoneCheck(y+1, x-1, playah, libsCheckArray, dotsData) || this.stoneCheck(y+1, x+1, playah, libsCheckArray, dotsData));     
 	  else
-	    return (this.stoneCheck(x-1, y-1, playah, libsCheckArray, dotsData) || this.stoneCheck(x-1, y+1, playah, libsCheckArray, dotsData) || this.stoneCheck(x+1, y, playah, libsCheckArray, dotsData));
+	    return (this.stoneCheck(y-1, x-1, playah, libsCheckArray, dotsData) || this.stoneCheck(y-1, x+1, playah, libsCheckArray, dotsData) || this.stoneCheck(y+1, x, playah, libsCheckArray, dotsData));
 	}
 
-	this.stoneCheck = (i, j, playah, libsCheckArray, dotsData)=>{
-	  if(dotsData[i] && dotsData[i][j] !== undefined){
-	    if(!libsCheckArray[i][j] && dotsData[i][j] === 0){
+	this.stoneCheck = (y, x, playah, libsCheckArray, dotsData)=>{
+	  if(dotsData[y] && dotsData[y][x] !== undefined){
+	    if(!libsCheckArray[y][x] && dotsData[y][x] === 0){
 	      return true;
 	    }
-	    else if(!libsCheckArray[i][j] && dotsData[i][j] === playah){
-	      return this.libsCheck(i, j, playah, libsCheckArray, dotsData);
+	    else if(!libsCheckArray[y][x] && dotsData[y][x] === playah){
+	      return this.libsCheck(y, x, playah, libsCheckArray, dotsData);
 	    }
 	    else
 	      return false;           
@@ -207,36 +365,18 @@ Template.Canvas.onCreated(function(){
 	}
 	
 
-	this.hexPainter = (x, y, tempInt)=>{
-		if(this.hexsPaint[x] && this.hexsPaint[x][y]){
-			this.hexsPaint[x][y].value += tempInt;
-			var hex = this.hexsPaint[x][y];
-			if(hex.value > 0){
-				this.ctx2.globalAlpha = 1;
-				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-				this.ctx2.globalAlpha = 0.4;
-				this.ctx2.drawImage(this.blueimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-			}
-			else if(hex.value < 0){
-				this.ctx2.globalAlpha = 1;
-				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-				this.ctx2.globalAlpha = 0.4;
-				this.ctx2.drawImage(this.redimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-			}
-			else{
-				this.ctx2.globalAlpha = 1;
-				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
-			}
-		}
-	};
+	
 
-	this.makeTurn = ()=>{
+	this.makeTurn = (moveString)=>{
+		if(!this.game.result){
+			this.kifu[this.kifu.length] = moveString;
+		}
 		if(this.previousMove){
-			var o = this.previousMove.x;
-			var p = this.previousMove.y;
-			var tempOwner = this.dotsData[o][p];
-			var xCntr = this.dotsPaint[o][p].xCntr;
-			var yCntr = this.dotsPaint[o][p].yCntr;
+			var y = this.previousMove.y;
+			var x = this.previousMove.x;
+			var tempOwner = this.dotsData[y][x];
+			var xCntr = this.dotsPaint[y][x].xCntr;
+			var yCntr = this.dotsPaint[y][x].yCntr;
 			if(tempOwner == 1){
 				this.ctx.drawImage(this.blues, xCntr - this.radius, yCntr - this.radius, this.radius * 2, this.radius * 2);
 			}
@@ -248,27 +388,40 @@ Template.Canvas.onCreated(function(){
 				this.drawArc(xCntr, yCntr);
 			}
 		}
+
+		if(moveString){
+			if(moveString.length === 2){
+				this.lastMove = {};
+				this.lastMove.x = parseInt(moveString.charAt(0), 36);
+				this.lastMove.y = parseInt(moveString.charAt(1), 36);
+			}
+			else{
+				this.lastMove = false;
+			}
+		}
+		else{
+			this.lastMove = false;
+		}
 		if(this.lastMove){
+			this.turn++
 			var opponent = (this.turn % 2) + 1;
 			var player = 3 - opponent;
 
 			if(player === 1){
 				var image1 = this.blues;
-				var image2 = this.reds;
 			}
 			else{
 				var image1 = this.reds;
-				var image2 = this.blues;
 			}
-			var x = this.lastMove.x;
 			var y = this.lastMove.y;
-
-			this.dotsData[x][y] = player;
+			var x = this.lastMove.x;
+			this.dotsData[y][x] = player;
 			this.previousMove = this.lastMove;
+			var paintDot = this.dotsPaint[y][x];
 
-			this.ctx.drawImage(image1, this.dotsPaint[x][y].xCntr - this.radius, this.dotsPaint[x][y].yCntr - this.radius, this.radius * 2, this.radius * 2);
+			this.ctx.drawImage(image1, paintDot.xCntr - this.radius, paintDot.yCntr - this.radius, this.radius * 2, this.radius * 2);
 			this.ctx.beginPath();
-	        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius / 2, 0, 2*Math.PI, false);
+	        this.ctx.arc(paintDot.xCntr, paintDot.yCntr, this.radius / 2, 0, 2*Math.PI, false);
 	        this.ctx.lineWidth = 3;
 	        this.ctx.strokeStyle = this.line_color;
 	        this.ctx.fillStyle = this.line_color;
@@ -290,28 +443,28 @@ Template.Canvas.onCreated(function(){
 	        else
 	        	var int = -1;
 
-	        if(x % 2 === 0){
-				this.hexPainter((x-2) / 2, y - 2, int);
-				this.hexPainter((x-2) / 2, y, int);
-				this.hexPainter(x / 2, y - 1, int);		      					
+	        if(y % 2 === 0){
+				this.hexMakeTurn((y-2) / 2, x - 2, int);
+				this.hexMakeTurn((y-2) / 2, x, int);
+				this.hexMakeTurn(y / 2, x - 1, int);		      					
 		    }
 		    else{
-		    	this.hexPainter((x-3) / 2, y - 1, int);
-				this.hexPainter((x-1) / 2, y - 2, int);
-				this.hexPainter((x-1) / 2, y, int);
+		    	this.hexMakeTurn((y-3) / 2, x - 1, int);
+				this.hexMakeTurn((y-1) / 2, x - 2, int);
+				this.hexMakeTurn((y-1) / 2, x, int);
 		    }
 		    this.ctx2.globalAlpha = 1;
 
 
-	        if(x%2 === 0){
-		        this.opponentHasLibs(x-1, y, opponent, int);
-		        this.opponentHasLibs(x+1, y-1, opponent, int);
-		        this.opponentHasLibs(x+1, y+1, opponent, int);
+	        if(y%2 === 0){
+		        this.opponentHasLibs(y-1, x, opponent, int);
+		        this.opponentHasLibs(y+1, x-1, opponent, int);
+		        this.opponentHasLibs(y+1, x+1, opponent, int);
 		    }
 		    else{
-		        this.opponentHasLibs(x-1, y-1, opponent, int);
-		        this.opponentHasLibs(x-1, y+1, opponent, int);
-		      	this.opponentHasLibs(x+1, y, opponent, int);
+		        this.opponentHasLibs(y-1, x-1, opponent, int);
+		        this.opponentHasLibs(y-1, x+1, opponent, int);
+		      	this.opponentHasLibs(y+1, x, opponent, int);
 		    }
 		}
 		else{
@@ -323,51 +476,118 @@ Template.Canvas.onCreated(function(){
 
 	}
 
-	this.dotPainter = ()=>{
-		console.log((new Date).getTime());
+	this.hexValuer = (y, x, tempInt)=>{
+		if(this.hexsPaint[y] && this.hexsPaint[y][x]){
+			this.hexsPaint[y][x].value += tempInt;
+		}
+	}
+
+	this.hexPainter = (y, x, tempInt)=>{
+		var hex = this.hexsPaint[y][x];
+		if(hex.value > 0){
+			this.ctx2.globalAlpha = 1;
+			this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+			this.ctx2.globalAlpha = 0.4;
+			this.ctx2.drawImage(this.blueimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+		}
+		else if(hex.value < 0){
+			this.ctx2.globalAlpha = 1;
+			this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+			this.ctx2.globalAlpha = 0.4;
+			this.ctx2.drawImage(this.redimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+		}
+		else{
+			this.ctx2.globalAlpha = 1;
+			this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+		}
+	};
+
+	this.hexMakeTurn = (y, x, tempInt)=>{
+		if(this.hexsPaint[y] && this.hexsPaint[y][x]){
+			this.hexsPaint[y][x].value += tempInt;
+			var hex = this.hexsPaint[y][x];
+			if(hex.value > 0){
+				this.ctx2.globalAlpha = 1;
+				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx2.globalAlpha = 0.4;
+				this.ctx2.drawImage(this.blueimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+			}
+			else if(hex.value < 0){
+				this.ctx2.globalAlpha = 1;
+				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+				this.ctx2.globalAlpha = 0.4;
+				this.ctx2.drawImage(this.redimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+			}
+			else{
+				this.ctx2.globalAlpha = 1;
+				this.ctx2.drawImage(this.blackimg, hex.xCntr - this.subx + Math.floor(this.subx / 22), hex.yCntr + Math.floor(this.suby / 2), this.subx * 2 - 4, this.suby * 3 + 1);
+			}
+		}	
+	};
+
+	this.boardPainter = ()=>{
+		//resets hexagons
+		for(var i=0; i<this.hexs.length; i++){
+			for(var j=0; j<this.hexs[0].length; j++){
+				if(this.hexsPaint[i][j]){
+					this.hexsPaint[i][j].value = 0;
+				}
+			}
+		}
 
 		for(i = 0; i < this.dots.length; i++){
 			for(j = 0; j < this.dots[0].length; j++){
-				if(this.dotsData[i][j]){
-  				tempOwner = this.dotsData[i][j];//owner of the server dot
-  				if(tempOwner > 0){
-	  				if(tempOwner == 1){
-	  					this.ctx.drawImage(this.blues, this.dotsPaint[i][j].xCntr - this.radius, this.dotsPaint[i][j].yCntr - this.radius, this.radius * 2, this.radius * 2);
-	  					var int = 1;
-	  				}
-	  				else if(tempOwner == 2){
-	  					this.ctx.drawImage(this.reds, this.dotsPaint[i][j].xCntr - this.radius, this.dotsPaint[i][j].yCntr - this.radius, this.radius * 2, this.radius * 2);
-	  					var int = -1;
-	  				}
+				if(this.dotsData[i][j] || this.dotsData[i][j] === 0){
 
-      				//reactively draws hexagons
-      				if(i % 2 === 0){
-      					this.hexPainter((i-2) / 2, j - 2, int);
-      					this.hexPainter((i-2) / 2, j, int);
-      					this.hexPainter(i / 2, j - 1, int);		      					
-      			    }
-      			    else{
-      			    	this.hexPainter((i-3) / 2, j - 1, int);
-      					this.hexPainter((i-1) / 2, j - 2, int);
-      					this.hexPainter((i-1) / 2, j, int);
-      			    }
-      			    this.ctx2.globalAlpha = 1;
+	  				tempOwner = this.dotsData[i][j];//owner of the server dot
+	  				if(tempOwner > 0){
+		  				if(tempOwner == 1){
+		  					this.ctx.drawImage(this.blues, this.dotsPaint[i][j].xCntr - this.radius, this.dotsPaint[i][j].yCntr - this.radius, this.radius * 2, this.radius * 2);
+		  					var int = 1;
+		  				}
+		  				else if(tempOwner == 2){
+		  					this.ctx.drawImage(this.reds, this.dotsPaint[i][j].xCntr - this.radius, this.dotsPaint[i][j].yCntr - this.radius, this.radius * 2, this.radius * 2);
+		  					var int = -1;
+		  				}
+		  				
+
+	      				//reactively draws hexagons
+	      				if(i % 2 === 0){
+	      					this.hexValuer((i-2) / 2, j - 2, int);
+	      					this.hexValuer((i-2) / 2, j, int);
+	      					this.hexValuer(i / 2, j - 1, int);		      					
+	      			    }
+	      			    else{
+	      			    	this.hexValuer((i-3) / 2, j - 1, int);
+	      					this.hexValuer((i-1) / 2, j - 2, int);
+	      					this.hexValuer((i-1) / 2, j, int);
+	      			    }
+	      			    this.ctx2.globalAlpha = 1;
 	      			}
-      			}
+	      			else{
+	  					this.drawArc(this.dotsPaint[i][j].xCntr, this.dotsPaint[i][j].yCntr);
+	  				}
+  				}
   			}
 		}
 		if(this.lastMove){
 			this.previousMove = this.lastMove;
-			var x = this.lastMove.x;
 			var y = this.lastMove.y;
+			var x = this.lastMove.x;
 			this.ctx.beginPath();
-	        this.ctx.arc(this.dotsPaint[x][y].xCntr, this.dotsPaint[x][y].yCntr, this.radius / 2, 0, 2*Math.PI, false);
+	        this.ctx.arc(this.dotsPaint[y][x].xCntr, this.dotsPaint[y][x].yCntr, this.radius / 2, 0, 2*Math.PI, false);
 	        this.ctx.lineWidth = 3;
 	        this.ctx.strokeStyle = this.line_color;
 	        this.ctx.fillStyle = this.line_color;
 	        this.ctx.fill();
     	}
-		console.log((new Date).getTime());
+		for(var i=0; i<this.hexs.length; i++){
+			for(var j=0; j<this.hexs[0].length; j++){
+				if(this.hexsPaint[i][j]){
+					this.hexPainter(i, j);
+				}
+			}
+		}
 	}
 
 	
@@ -501,29 +721,36 @@ Template.Canvas.onRendered(function() {
 
     this.canvasResizer();
 
-  	/*this.testObserver = Test.find().observe({
-
-		added: (doc)=>{
-			console.log(doc);
-			console.log((new Date).getTime());
-		}
-
-  	});*/
-
   	this.gameObserver = Games.find(this.gameId, {
     fields: {
         "turn": 1,
         "result": 1,
-        "dotsData": 1,
+        "kifu": 1,
         "lastMove": 1
     }}).observe({
 
 		added: (doc)=>{
 			
-			this.dotsData = doc.dotsData
+			//this.dotsData = doc.dotsData
 			this.turn = doc.turn;
-			this.lastMove = doc.lastMove;
-			this.dotPainter();
+			this.kifu = doc.kifu;
+			Session.set('moveNum', this.kifu.length);
+			var moveString = doc.lastMove;
+			if(moveString){
+				if(moveString.length === 2){
+					this.lastMove = {};
+					this.lastMove.x = parseInt(moveString.charAt(0), 36);
+					this.lastMove.y = parseInt(moveString.charAt(1), 36);
+				}
+				else{
+					this.lastMove = false;
+				}
+			}
+			else{
+				this.lastMove = false;
+			}
+
+			this.boardPainter();
 
 			if(this.game.result && Session.get('isGameFinished') === false){
 				Session.set('isGameFinished', true);
@@ -531,22 +758,42 @@ Template.Canvas.onRendered(function() {
 		},
 
 		changed: (doc)=>{
-			console.log((new Date).getTime());
 			this.game = doc;
-			this.turn = doc.turn;
-			this.lastMove = doc.lastMove;
 			if(!this.game.result){
-				this.makeTurn();
+				this.makeTurn(doc.lastMove);
 			}
 			else if(Session.get('isGameFinished') === false){
+				Session.set('moveNum', this.kifu.length);
 				Session.set('isGameFinished', true);
 			}
 		},
 	});
 
+	this.autorun(()=>{
+		var num = Session.get('moveNum');
+		var gVar = Session.get('globalVar');
+		if(num == 0 || (this.currentVariation && num < this.currentVariation[0])){
+			this.currentVariation = false;
+			Session.set('myVar', false);
+			this.lastGVar = false;
+			Session.set('globalVar', false);
+			gVar = false;
+		}
+		if(gVar && (!this.lastGVar || gVar.join() !== this.lastGVar.join())){
+			this.lastGVar = gVar;
+			this.currentVariation = gVar;
+			Session.set('myVar', gVar);
+			this.escapedVariation = false;
+			this.setBoard(gVar[0] + gVar.length - 1, gVar);
+		}
+		else{
+			this.setBoard(num, this.currentVariation);
+		} 
+	});
+
 	$( "#canvas1" ).mousemove((event)=>{
-		if(!this.isZoomed && this.player !== 0 && this.game.result === false){
-			if((this.turn % 2)+1 === this.player){
+		if(!this.isZoomed){
+			if((this.turn % 2)+1 === this.player || this.game.result !== false){
 				var imageData = this.pixelContext.getImageData(this.coAdjuster * event.offsetX, this.coAdjuster * event.offsetY, 1, 1).data;
 			    var k = imageData[1] -1;
 				var m = imageData[2] -1;
@@ -559,15 +806,9 @@ Template.Canvas.onRendered(function() {
 		    		this.lastK = k;
 		    		this.lastM = m;
 			    	if(k > -1){ 
-						if(this.dotsData[k][m] === 0 && this.hasLibs(k, m, this.player, this.game)){
-							if(this.player === 1){
-								this.ctx.drawImage(this.blues, this.dotsPaint[k][m].xCntr - this.radius, this.dotsPaint[k][m].yCntr - this.radius, this.radius * 2, this.radius * 2);
-							}
-
-							else{
-								this.ctx.drawImage(this.reds, this.dotsPaint[k][m].xCntr - this.radius, this.dotsPaint[k][m].yCntr - this.radius, this.radius * 2, this.radius * 2);
-							}
-
+			    		var player = this.turn%2 + 1;
+						if(this.dotsData[k][m] === 0 && this.hasLibs(k, m, player, this.dotsData)){
+							this.ctx.drawImage(this.dotImgs[player], this.dotsPaint[k][m].xCntr - this.radius, this.dotsPaint[k][m].yCntr - this.radius, this.radius * 2, this.radius * 2);
 					    } 
 					} 
 				}
@@ -579,116 +820,125 @@ Template.Canvas.onRendered(function() {
 
 
 Template.Canvas.events({
+
 	'click'(event, instance) {
 
-		console.log((new Date).getTime());
-		if(instance.player !== 0 && instance.game.result === false){
-			console.log(instance.player);
-			if((instance.player === 1 && instance.turn % 2 === 0) || (instance.player === 2 && instance.turn % 2 !== 0) ){
+		if((instance.player === 1 && instance.turn % 2 === 0) || (instance.player === 2 && instance.turn % 2 !== 0) || instance.game.result !== false){
+			if(instance.zoomFirst && !instance.isZoomed){
+				if(instance.lastK > -1 && instance.dotsData[instance.lastK][instance.lastM] === 0){
+					instance.drawArc(instance.dotsPaint[instance.lastK][instance.lastM].xCntr, instance.dotsPaint[instance.lastK][instance.lastM].yCntr);
 
-				console.log("gets2");
+		        	instance.lastK = -1;
+		        	instance.lastM = -1;
+		        }
 
+				zoomX = instance.coAdjuster * event.offsetX;
+				zoomY = instance.coAdjuster * event.offsetY;
 
-				if(instance.zoomFirst && !instance.isZoomed){
-
-					console.log("gets3");
-					if(instance.lastK > -1 && instance.dotsData[instance.lastK][instance.lastM] === 0){
-						instance.drawArc(instance.dotsPaint[instance.lastK][instance.lastM].xCntr, instance.dotsPaint[instance.lastK][instance.lastM].yCntr);
-
-			        	instance.lastK = -1;
-			        	instance.lastM = -1;
-			        }
-
-					zoomX = instance.coAdjuster * event.offsetX;
-					zoomY = instance.coAdjuster * event.offsetY;
-
-					if(zoomX - (instance.canvasW/4) < 0){
-						zoomX = 0;
-					}
-					else if(zoomX + (instance.canvasW/4) > instance.canvasW){
-						zoomX = (instance.canvasW/2)
-					}
-					else{
-						zoomX -= (instance.canvasW/4)
-					}
-
-					if(zoomY - (instance.canvasH/4) < 0){
-						zoomY = 0;
-					}
-					else if(zoomY + (instance.canvasH/4) > instance.canvasH){
-						zoomY = (instance.canvasH/2);
-					}
-					else{
-						zoomY -= (instance.canvasH/4)
-					}
-
-					instance.imageSave = instance.ctx.getImageData(0, 0, instance.canvasW, instance.canvasH);
-					instance.imageSave2 = instance.ctx2.getImageData(0, 0, instance.canvasW, instance.canvasH);
-					instance.dataSave = instance.pixelContext.getImageData(0, 0, instance.canvasW, instance.canvasH);
-
-					imageToZoom = instance.ctx.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
-					imageToZoom2 = instance.ctx2.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
-					dataToZoom = instance.pixelContext.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
-
-					var tempCanvas = $("<canvas>")
-					    .attr("width", imageToZoom.width)
-					    .attr("height", imageToZoom.height)[0];
-
-					tempCanvas.getContext("2d").putImageData(imageToZoom, 0, 0);
-					instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
-					instance.ctx.scale(2, 2);
-					instance.ctx.drawImage(tempCanvas, 0, 0);
-
-					tempCanvas.getContext("2d").putImageData(imageToZoom2, 0, 0);
-					instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
-					instance.ctx2.scale(2, 2);
-					instance.ctx2.drawImage(tempCanvas, 0, 0);
-
-					tempCanvas.getContext("2d").putImageData(dataToZoom, 0, 0);
-					instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
-					instance.pixelContext.scale(2, 2);
-					instance.pixelContext.drawImage(tempCanvas, 0, 0);
-
-					instance.isZoomed = true;
-					instance.ctx.scale(0.5, 0.5);
-					instance.ctx2.scale(0.5, 0.5);
-					instance.pixelContext.scale(0.5, 0.5);
-					return
+				if(zoomX - (instance.canvasW/4) < 0){
+					zoomX = 0;
 				}
-				
-
-
-				var imageData = instance.pixelContext.getImageData(instance.coAdjuster * event.offsetX, instance.coAdjuster * event.offsetY, 1, 1).data;
-			    var k = imageData[1] -1;
-				var m = imageData[2] -1;
-			    if(k > -1 && imageData[3] === 255){ 
-					if(instance.dotsData[k][m] === 0 && instance.hasLibs(k, m, instance.player, instance.game)){
-		    	
-				        if(instance.isZoomed){
-				        	instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
-					        instance.ctx.putImageData(instance.imageSave, 0, 0);
-					        instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
-					        instance.ctx2.putImageData(instance.imageSave2, 0, 0);
-					        instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
-					        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
-					        instance.isZoomed = false;
-				    	}
-
-				        Meteor.call('games.makeTurn', k, m, instance.gameId);
-				        console.log((new Date).getTime());
-				        return;
-				    }  
+				else if(zoomX + (instance.canvasW/4) > instance.canvasW){
+					zoomX = (instance.canvasW/2)
 				}
-				if(instance.isZoomed){
-					instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
-			        instance.ctx.putImageData(instance.imageSave, 0, 0);
-			        instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
-			        instance.ctx2.putImageData(instance.imageSave2, 0, 0);
-			        instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
-			        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
-			        instance.isZoomed = false;
-		    	}
-		    }
-		}
+				else{
+					zoomX -= (instance.canvasW/4)
+				}
+
+				if(zoomY - (instance.canvasH/4) < 0){
+					zoomY = 0;
+				}
+				else if(zoomY + (instance.canvasH/4) > instance.canvasH){
+					zoomY = (instance.canvasH/2);
+				}
+				else{
+					zoomY -= (instance.canvasH/4)
+				}
+
+				instance.imageSave = instance.ctx.getImageData(0, 0, instance.canvasW, instance.canvasH);
+				instance.imageSave2 = instance.ctx2.getImageData(0, 0, instance.canvasW, instance.canvasH);
+				instance.dataSave = instance.pixelContext.getImageData(0, 0, instance.canvasW, instance.canvasH);
+
+				imageToZoom = instance.ctx.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
+				imageToZoom2 = instance.ctx2.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
+				dataToZoom = instance.pixelContext.getImageData(zoomX, zoomY, (instance.canvasW/2), (instance.canvasH/2));
+
+				var tempCanvas = $("<canvas>")
+				    .attr("width", imageToZoom.width)
+				    .attr("height", imageToZoom.height)[0];
+
+				tempCanvas.getContext("2d").putImageData(imageToZoom, 0, 0);
+				instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
+				instance.ctx.scale(2, 2);
+				instance.ctx.drawImage(tempCanvas, 0, 0);
+
+				tempCanvas.getContext("2d").putImageData(imageToZoom2, 0, 0);
+				instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
+				instance.ctx2.scale(2, 2);
+				instance.ctx2.drawImage(tempCanvas, 0, 0);
+
+				tempCanvas.getContext("2d").putImageData(dataToZoom, 0, 0);
+				instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
+				instance.pixelContext.scale(2, 2);
+				instance.pixelContext.drawImage(tempCanvas, 0, 0);
+
+				instance.isZoomed = true;
+				instance.ctx.scale(0.5, 0.5);
+				instance.ctx2.scale(0.5, 0.5);
+				instance.pixelContext.scale(0.5, 0.5);
+				return
+			}
+			
+
+
+			var imageData = instance.pixelContext.getImageData(instance.coAdjuster * event.offsetX, instance.coAdjuster * event.offsetY, 1, 1).data;
+		    var k = imageData[1] -1;
+			var m = imageData[2] -1;
+		    if(k > -1 && imageData[3] === 255){
+		    	var player = instance.turn % 2 + 1; 
+				if(instance.dotsData[k][m] === 0 && instance.hasLibs(k, m, player, instance.dotsData)){
+	    	
+			        if(instance.isZoomed){
+			        	instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
+				        instance.ctx.putImageData(instance.imageSave, 0, 0);
+				        instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
+				        instance.ctx2.putImageData(instance.imageSave2, 0, 0);
+				        instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
+				        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
+				        instance.isZoomed = false;
+			    	}
+			    	if(instance.game.result === false){
+			        	Meteor.call('games.makeTurn', k, m, instance.gameId);
+			    	}
+			    	else{
+			    		var moveString = m.toString(36) + k.toString(36);
+			    		if(Session.get('myVar')){
+			    			var variation = Session.get('myVar');
+			    			var placement = instance.turn + 1 - variation[0];
+			    			variation[placement] = moveString;
+			    			variation.splice(placement+1);
+			    		}
+			    		else{
+			    			var variation = [];
+			    			variation.push(Session.get('moveNum'));
+			    			variation.push(moveString);
+			    		}
+			    		instance.currentVariation = variation;
+			    		Session.set('myVar', variation);
+			    		instance.makeTurn(moveString);			    		
+			    	}
+			        return;
+			    }  
+			}
+			if(instance.isZoomed){
+				instance.ctx.clearRect(0, 0, instance.canvasW, instance.canvasH);
+		        instance.ctx.putImageData(instance.imageSave, 0, 0);
+		        instance.ctx2.clearRect(0, 0, instance.canvasW, instance.canvasH);
+		        instance.ctx2.putImageData(instance.imageSave2, 0, 0);
+		        instance.pixelContext.clearRect(0, 0, instance.canvasW, instance.canvasH);
+		        instance.pixelContext.putImageData(instance.dataSave, 0, 0);
+		        instance.isZoomed = false;
+	    	}
+	    }
 	}
 });

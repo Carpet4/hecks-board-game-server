@@ -101,7 +101,14 @@ Template.GamePanel.onCreated(function(){
 				}
 			}
 		}; 
-	}	
+	}
+	this.autorun(()=>{
+		var variation = Session.get('myVar')
+		if(variation){
+			var num = variation[0] + variation.length - 1;
+			document.getElementById('moveNumber').value = num;
+		}
+	})	
 
 });
 
@@ -113,7 +120,15 @@ Template.GamePanel.onDestroyed(function () {
 });
 
 Template.GamePanel.helpers({
-	//clocks display
+	isFinished: ()=>{
+		if(Template.instance().game.result){
+			return true;
+		}
+		else{
+			return false;
+		}
+	},
+
   	clock1: ()=> {
   		rawTime = Math.ceil(Template.instance().p1Clock.get() / 1000);
   		minutes = Math.floor(rawTime / 60);
@@ -176,5 +191,54 @@ Template.GamePanel.events({
 
     'click .pass'(event, instance) {
       Meteor.call('games.pass', instance.gameId);
-    }
+    },
+
+    'click .shareVar'(event, instance) {
+    	if(Session.get('myVar'))
+     		Meteor.call('messages.variationInsert', Session.get('myVar'), instance.gameId);
+    },
+
+    'submit .changeMove'(event){
+		event.preventDefault();
+		var num = Number(event.target.num.value);
+		Session.set('moveNum', num);
+	},
+
+	'click .back10'(event){
+		var num = Number(document.getElementById('moveNumber').value);
+		num -= 10;
+		if(num < 0){
+			document.getElementById('moveNumber').value = 0;
+		}
+		else{
+			document.getElementById('moveNumber').value = num;
+		}
+		Session.set('moveNum', document.getElementById('moveNumber').value);
+	},
+
+	'click .back1'(event){
+		var num = Number(document.getElementById('moveNumber').value);
+		num -= 1;
+		if(num < 0){
+			document.getElementById('moveNumber').value = 0;
+		}
+		else{
+			document.getElementById('moveNumber').value = num;
+		}
+		Session.set('moveNum', document.getElementById('moveNumber').value);
+	},
+
+	'click .forward1'(event){
+		var num = Number(document.getElementById('moveNumber').value);
+		num += 1;
+		document.getElementById('moveNumber').value = num;
+		Session.set('moveNum', document.getElementById('moveNumber').value);
+	},
+
+	'click .forward10'(event){
+		var num = Number(document.getElementById('moveNumber').value);
+		num += 10;
+		document.getElementById('moveNumber').value = num;
+		Session.set('moveNum', document.getElementById('moveNumber').value);
+	},
 });

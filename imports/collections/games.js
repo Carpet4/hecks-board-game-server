@@ -9,9 +9,7 @@ export const Games = new Meteor.Collection('games');
 
 if (Meteor.isServer) {
 
-  Games.remove({ gNum: { $exists: true } });
-  
-	Meteor.publish('playerGames', function gamesPublication() { //what is this for???
+	Meteor.publish('playerGames', function gamesPublication() {
     if(this.userId){
       return Games.find({result: false, $or:[{p1: this.userId}, {p2: this.userId}]});
     }
@@ -104,7 +102,7 @@ dots = [
       ];
 
 var dotArrayCreator = function(){
-  tempArray = new Array();
+  var tempArray = new Array();
   for (i = 0; i < dots.length; i++) {
     tempArray[i] = new Array();
     for(j = 0; j< dots[0].length; j++){
@@ -118,11 +116,12 @@ var dotArrayCreator = function(){
 
 export function beginMatch(player1, player2, mainT, subT){
 
-  player1Rating = Meteor.users.findOne(player1).rating;
-  player1Name = Meteor.users.findOne(player1).username;
-  player2Rating = Meteor.users.findOne(player2).rating;
-  player2Name = Meteor.users.findOne(player2).username;
-  tempTime = (new Date).getTime();
+  var player1Rating = Meteor.users.findOne(player1).rating;
+  var player1Name = Meteor.users.findOne(player1).username;
+  var player2Rating = Meteor.users.findOne(player2).rating;
+  var player2Name = Meteor.users.findOne(player2).username;
+  var tempTime = (new Date).getTime();
+  var kifu = new Array();
   if(!Games.findOne(
   {result: false, $or: [{p1: {$in:[player1, player2]}}, {p2: {$in:[player1, player2]}}]})){
     Games.insert({
@@ -140,65 +139,68 @@ export function beginMatch(player1, player2, mainT, subT){
       turn: 0,
       result: false,
       passCount: 0,
+      kifu: kifu,
       dotsData: dotArrayCreator(),
-      xLength: 20,
-      yLength: 19
+      ranked: true,
+      hc: false,
+      yLength: 20,
+      xLength: 19
     });
   }
 }
 
 
 
-var opponentHasLibs = (o, p, playah, game)=>{
+var opponentHasLibs = (y, x, playah, game)=>{
   dotsData = game.dotsData;
-  if(dotsData[o] && dotsData[o][p] && dotsData[o][p] === playah){
-    if(!hasLibs(o, p, playah, game)){
-      stoneRemover(o, p, playah, dotsData);
+  if(dotsData[y] && dotsData[y][x] && dotsData[y][x] === playah){
+    if(!hasLibs(y, x, playah, game)){
+      stoneRemover(y, x, playah, dotsData);
     }
   }
 }
 
-var stoneRemover = (x, y, playah, dotsData)=>{
-  if(dotsData[x] && dotsData[x][y] === playah){
-    dotsData[x][y] = 0;
-    if(x%2 === 0){
-      stoneRemover(x-1, y, playah, dotsData);
-      stoneRemover(x+1, y-1, playah, dotsData);
-      stoneRemover(x+1, y+1, playah, dotsData);
+var stoneRemover = (y, x, playah, dotsData)=>{
+  if(dotsData[y] && dotsData[y][x] === playah){
+    dotsData[y][x] = 0;
+    if(y%2 === 0){
+      stoneRemover(y-1, x, playah, dotsData);
+      stoneRemover(y+1, x-1, playah, dotsData);
+      stoneRemover(y+1, x+1, playah, dotsData);
     }
     else{
-      stoneRemover(x-1, y-1, playah, dotsData);
-      stoneRemover(x-1, y+1, playah, dotsData);
-      stoneRemover(x+1, y, playah, dotsData);
+      stoneRemover(y-1, x-1, playah, dotsData);
+      stoneRemover(y-1, x+1, playah, dotsData);
+      stoneRemover(y+1, x, playah, dotsData);
     }
   }
 }
 
 
-var hasLibs = (o, p, playah, game)=>{
-  var libsCheckArray = new Array(game.xLength);
-  for(i=0; i < game.xLength; i++){
+var hasLibs = (y, x, playah, game)=>{
+  var libsCheckArray = new Array(game.yLength);
+  for(i=0; i < game.yLength; i++){
     libsCheckArray[i] = new Array();
   }
   var dotsData = game.dotsData;
-  return libsCheck(o, p, playah, libsCheckArray, dotsData);
+  return libsCheck(y, x, playah, libsCheckArray, dotsData);
 }
 
-var libsCheck = (x, y, playah, libsCheckArray, dotsData)=>{
-  libsCheckArray[x][y] = true;
-  if(x%2 === 0)
-    return (stoneCheck(x-1, y, playah, libsCheckArray, dotsData) || stoneCheck(x+1, y-1, playah, libsCheckArray, dotsData) || stoneCheck(x+1, y+1, playah, libsCheckArray, dotsData));     
+var libsCheck = (y, x, playah, libsCheckArray, dotsData)=>{
+  libsCheckArray[y][x] = true;
+  if(y%2 === 0)
+    return (stoneCheck(y-1, x, playah, libsCheckArray, dotsData) || stoneCheck(y+1, x-1, playah, libsCheckArray, dotsData) || stoneCheck(y+1, x+1, playah, libsCheckArray, dotsData));     
   else
-    return (stoneCheck(x-1, y-1, playah, libsCheckArray, dotsData) || stoneCheck(x-1, y+1, playah, libsCheckArray, dotsData) || stoneCheck(x+1, y, playah, libsCheckArray, dotsData));
+    return (stoneCheck(y-1, x-1, playah, libsCheckArray, dotsData) || stoneCheck(y-1, x+1, playah, libsCheckArray, dotsData) || stoneCheck(y+1, x, playah, libsCheckArray, dotsData));
 }
 
-var stoneCheck = (i, j, playah, libsCheckArray, dotsData)=>{
-  if(dotsData[i] && dotsData[i][j] !== undefined){
-    if(!libsCheckArray[i][j] && dotsData[i][j] === 0){
+var stoneCheck = (y, x, playah, libsCheckArray, dotsData)=>{
+  if(dotsData[y] && dotsData[y][x] !== undefined){
+    if(!libsCheckArray[y][x] && dotsData[y][x] === 0){
       return true;
     }
-    else if(!libsCheckArray[i][j] && dotsData[i][j] === playah){
-      return libsCheck(i, j, playah, libsCheckArray, dotsData);
+    else if(!libsCheckArray[y][x] && dotsData[y][x] === playah){
+      return libsCheck(y, x, playah, libsCheckArray, dotsData);
     }
     else
       return false;           
@@ -211,7 +213,6 @@ var stoneCheck = (i, j, playah, libsCheckArray, dotsData)=>{
 Meteor.methods({
 
   'games.timeLoss'(id){
-    console.log("gets here time");
     this.moveTime = (new Date).getTime();//current time
     this.game = Games.findOne(id);
     if(this.userId && this.game && !this.game.result){
@@ -285,8 +286,9 @@ Meteor.methods({
       }
       this.dotsData = this.game.dotsData;
       this.turn = this.game.turn;
-      this.xLength = this.game.xLength;
+      this.kifu = this.game.kifu;
       this.yLength = this.game.yLength;
+      this.xLength = this.game.xLength;
       this.lastMoveTime = this.game.lastMoveTime;//time of last move played
       this.fischerParam = this.game.subT * 1000; // to be changed later into time setting
       if(this.dotsData[k] && this.dotsData[k][m] !== undefined){
@@ -311,14 +313,16 @@ Meteor.methods({
       
       if(((this.userId === this.game.p1 && this.turn % 2 === 0) || (this.userId === this.game.p2 && this.turn % 2 !== 0)) && this.game.result === false){
         if(this.dot === 0 && hasLibs(k, m, player, this.game)){         
-          this.lastMove = {x: k, y: m};
           this.dotsData[k][m] = player;
           //time left after reducing time spent
           this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
           if(this.playerTime < this.fischerParam){
-            Meteor.call('games.timeLoss', id);
+            Meteor.call('games.timeLoss', id); //need to see if requires to break from method if this is true
           }
           
+          var moveString = m.toString(36) + k.toString(36);
+          this.kifu[this.kifu.length] = moveString;
+          this.lastMove = moveString;
 
           //dealing with opponent's touching stones
 
@@ -341,6 +345,7 @@ Meteor.methods({
             var modifier = {$set: {
               dotsData: this.dotsData,
               turn: this.turn + 1,
+              kifu: this.kifu,
               passCount: 0,
               lastMove: this.lastMove,
               lastMoveTime: this.moveTime,
@@ -351,6 +356,7 @@ Meteor.methods({
             var modifier = {$set: {
               dotsData: this.dotsData,
               turn: this.turn + 1,
+              kifu: this.kifu,
               passCount: 0,
               lastMove: this.lastMove,
               lastMoveTime: this.moveTime,
@@ -371,6 +377,7 @@ Meteor.methods({
     this.game = Games.findOne(id); 
     if(this.userId && this.game && this.game.result === false){
       this.turn = this.game.turn;
+      this.kifu = this.game.kifu
       if((this.userId === this.game.p1 && this.game.turn % 2 === 0) || (this.userId === this.game.p2 && this.game.turn % 2 !== 0)){
 
         if(this.turn % 2 === 0){
@@ -389,14 +396,17 @@ Meteor.methods({
         
         this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
         if(this.playerTime < this.fischerParam){
-          Meteor.call('games.timeLoss', this.game._id);
+          Meteor.call('games.timeLoss', this.game._id); //need to consider breaking out of method when reachign here
         }
-        console.log(this.playerTime);
+        
+        this.kifu[this.kifu.length] = "pass";
+        console.log(this.kifu);
 
         if(this.turn % 2 === 0){
           var modifier = {$set: {
             passCount: tempPassCount + 1, 
-            turn: tempTurn + 1, 
+            turn: tempTurn + 1,
+            kifu: this.kifu, 
             lastMove: false,
             lastMoveTime: this.moveTime,
             p1Time: this.playerTime
@@ -405,7 +415,8 @@ Meteor.methods({
         else{
           var modifier = {$set: {
             passCount: tempPassCount + 1, 
-            turn: tempTurn + 1, 
+            turn: tempTurn + 1,
+            kifu: this.kifu,  
             lastMove: false,
             lastMoveTime: this.moveTime,
             p2Time: this.playerTime
@@ -435,9 +446,9 @@ Meteor.methods({
           this.dotsData = this.game.dotsData;
 
           //changes values of hexagons
-          changeValues = function(x, y, operator){
-            if(hexs[x] && hexs[x][y] === 0){
-              that.hexsData[x][y] += operator;
+          changeValues = function(y, x, operator){
+            if(hexs[y] && hexs[y][x] === 0){
+              that.hexsData[y][x] += operator;
             }
           }
 

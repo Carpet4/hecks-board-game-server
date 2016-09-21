@@ -2,7 +2,11 @@
   <div class="gameMessagesContainer" id="gameMessagesContainer">
     <ul>
       {{#each messages}}
-        {{> GameMessage}}
+        {{#if $eq type "game"}}
+          {{> GameMessage}}
+        {{else}}
+          {{>VariationMessage}}
+        {{/if}}  
         {{scrollDown}}
       {{/each}}
     </ul>
@@ -17,4 +21,8 @@
 
 <template name="GameMessage">
   <li style="word-wrap: break-word"> <span class="midAlign">{{timeToMinutes timeStamp}}</span> <strong>{{#each writterCursor username}}{{>UserButton}}{{/each}}</strong><span class="midAlign">: {{text}}</span></li>
+</template>
+
+<template name="VariationMessage">
+  <li style="word-wrap: break-word"> <span class="midAlign">{{timeToMinutes timeStamp}}</span> <strong>{{#each writterCursor username}}{{>UserButton}}{{/each}}</strong><span class="midAlign">: <button class="varButton btn-link" value={{_id}}>Variation</button></span></li>
 </template>

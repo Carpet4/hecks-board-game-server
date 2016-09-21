@@ -72,7 +72,6 @@ html,body {
   background-color: rgb(20, 20, 20);
   border-color: purple;  
 }
-
 sup{
   display: inline-block;
   width: 0px;
@@ -171,9 +170,21 @@ input[type="text"], input[type="password"], select, textarea {
   text-align: center;
 }
 
-.resign, .pass{
+.resign, .pass, .shareVar{
   width: 100%;
 }
+.forward1, .back1, .forward10, .back10{
+  width: 20%;
+  padding: 0px;
+  margin: 0px;
+}
+#moveNumber{
+  width: 20%;
+  padding: 0px;
+  margin: 0px;
+  text-align: center;
+}
+
 
 #canvasCol{
   background-color:black;

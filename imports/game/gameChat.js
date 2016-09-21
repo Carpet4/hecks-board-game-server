@@ -20,12 +20,18 @@ Template.GameChat.onRendered(function(){
 Template.GameChat.helpers({
 
   messages: ()=> {
-    return Messages.find({type: "game", room: Template.instance().gameId});
+    return Messages.find({room: Template.instance().gameId});
   },
 
 });
 
 Template.GameChat.events({
+
+  'click .varButton'(event){
+    console.log(event.target.value);
+    variation = Messages.findOne(event.target.value).variation;
+    Session.set('globalVar', variation);
+  },
 
   'submit .newGameMessage'(event, instance) {
     // Prevent default browser form submit

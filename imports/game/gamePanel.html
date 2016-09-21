@@ -11,12 +11,25 @@
 	  	</tr>
 	  
       	<tr>
+      		{{#if isFinished}}
+				<td>
+					<button class="shareVar mainButton">Share Variation</button>
+				</td>
+				<td>
+					<div style="white-space: nowrap;">
+					
+						<button class="mainButton back10"><span class="glyphicon glyphicon-backward"></span></button><button class="mainButton back1"><span class="glyphicon glyphicon-triangle-left"></span></button><form style="display: inline;" class="changeMove" autocomplete=off><input id="moveNumber" type="text" name="num" value=0></form><button class="mainButton forward1"><span class="glyphicon glyphicon-triangle-right"></span></button><button class="mainButton forward10"><span class="glyphicon glyphicon-forward"></span></button>
+					
+					</div>
+				</td>
+      		{{else}}
 			<td>
 				<button class="resign mainButton">Resign</button>
 			</td>	
 			<td>
 				<button class="pass mainButton">Pass</button>
 			</td>
+			{{/if}}
 		</tr>
 		<tr>
 
@@ -26,4 +39,3 @@
     </table>
 
 </Template>
-
