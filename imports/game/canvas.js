@@ -61,7 +61,7 @@ Template.Canvas.onCreated(function(){
 			console.log("first if");
 			if(this.game.result !== false){
 				if(!variation){
-					if(location + 1 > this.kifu.length){
+					if(location + 1 > this.kifu.length){//check if its still needed
 						location = this.kifu.length;
 						console.log(location);
 						if(document.getElementById('moveNumber')){
@@ -127,6 +127,18 @@ Template.Canvas.onCreated(function(){
 			}
 			this.dotsData = dotsArray;
 			this.boardPainter();
+			if(variation){
+				var blackX = parseInt(variation[1].charAt(0), 36);
+				var blackY = parseInt(variation[1].charAt(1), 36);
+				var paintDot = this.dotsPaint[blackY][blackX];
+				this.ctx.beginPath();
+		        this.ctx.arc(paintDot.xCntr, paintDot.yCntr, this.radius / 2, 0, 2*Math.PI, false);
+		        this.ctx.lineWidth = 3;
+		        this.ctx.strokeStyle = this.bg_color;
+		        this.ctx.fillStyle = this.bg_color;
+		        this.ctx.stroke();
+		        this.ctx.fill();
+			}
 		}
 		console.log((new Date).getTime());
 	}
@@ -775,25 +787,26 @@ Template.Canvas.onRendered(function() {
 	});
 
 	this.autorun(()=>{
-		var num = Session.get('moveNum');
 		var gVar = Session.get('globalVar');
+		if(gVar && (!this.lastGVar || gVar.join() !== this.lastGVar.join())){
+			this.lastGVar = gVar;
+			this.currentVariation = gVar;
+			Session.set('myVar', gVar);
+			this.setBoard(gVar[0] + gVar.length - 1, gVar);
+		}
+	});
+
+	this.autorun(()=>{
+		num = Session.get('moveNum');
 		if(num == 0 || (this.currentVariation && num < this.currentVariation[0])){
+			console.log("gets there");
 			this.currentVariation = false;
 			Session.set('myVar', false);
 			this.lastGVar = false;
 			Session.set('globalVar', false);
 			gVar = false;
 		}
-		if(gVar && (!this.lastGVar || gVar.join() !== this.lastGVar.join())){
-			this.lastGVar = gVar;
-			this.currentVariation = gVar;
-			Session.set('myVar', gVar);
-			this.escapedVariation = false;
-			this.setBoard(gVar[0] + gVar.length - 1, gVar);
-		}
-		else{
-			this.setBoard(num, this.currentVariation);
-		} 
+		this.setBoard(num, this.currentVariation);
 	});
 
 	$( "#canvas1" ).mousemove((event)=>{
