@@ -8,12 +8,35 @@ export const Games = new Meteor.Collection('games');
 //export const Test = new Meteor.Collection('test');
 
 if (Meteor.isServer) {
+  
+
+  Meteor.startup(() => {
+    Games.update({ timeStamp: { $exists: false } }, {$set:{timeStamp: (new Date).getTime()}}, {multi: true});
+    var gamesToChange = Games.find();
+    gamesToChange.forEach(function (doc) {
+      if(doc.result && doc.result.length > 8){
+        if(doc.name1.substring(0, 3) === doc.result.substring(0, 3)){
+          Games.update(doc._id, {$set: {result: "S+R"}});
+        }
+        else{
+          Games.update(doc._id, {$set: {result: "G+R"}});
+        }
+      }
+    });
+  });
 
 	Meteor.publish('playerGames', function gamesPublication() {
     if(this.userId){
       return Games.find({result: false, $or:[{p1: this.userId}, {p2: this.userId}]});
     }
   });
+
+  Meteor.publish('playerGameList', function gamesPublication(name) {
+    if(this.userId){
+      return Games.find({$or:[{name1: name}, {name2: name}]});
+    }
+  });
+
 
 	Meteor.publish('singleGame', function singleGamePublication(id) {
     if(this.userId){
@@ -132,6 +155,7 @@ export function beginMatch(player1, player2, mainT, subT){
       subT: subT,
       lastMove: false,
       lastMoveTime: tempTime,
+      timeStamp: tempTime,
       name1: player1Name,
       name2: player2Name,
       rating1: player1Rating,
@@ -223,14 +247,14 @@ Meteor.methods({
       if(this.turn % 2 === 0){
         this.playerTime = this.game.p1Time;
         modifier = {$set: {
-          result: this.game.name2 + " wins on time!",
+          result: "G+T",
           p1Time: 0
         }};
       }
       else{
         this.playerTime = this.game.p2Time;
         modifier = {$set: {
-          result: this.game.name1 + " wins on time!",
+          result: "S+T",
           p2Time: 0
         }};
       }
@@ -279,7 +303,6 @@ Meteor.methods({
     if(Meteor.isServer) {
       check(k, Number);
       check(m, Number);
-      console.log((new Date).getTime());
       this.moveTime = (new Date).getTime();//current time
       this.game = Games.findOne(id);
       if(!this.game || !this.userId){
@@ -366,9 +389,7 @@ Meteor.methods({
           }
 
           //Test.insert({n: this.turn + 1});
-          console.log((new Date).getTime() + "this");
           Games.update(id, modifier);
-          console.log((new Date).getTime() + " " + Games.findOne(id).turn);
         }
       }
     }
@@ -387,7 +408,6 @@ Meteor.methods({
         else{
           this.playerTime = this.game.p2Time;
         }
-        console.log(this.playerTime);
 
         var tempPassCount = this.game.passCount;
         var tempTurn = this.game.turn;
@@ -401,7 +421,6 @@ Meteor.methods({
         }
         
         this.kifu[this.kifu.length] = "pass";
-        console.log(this.kifu);
 
         if(this.turn % 2 === 0){
           var modifier = {$set: {
@@ -502,10 +521,8 @@ Meteor.methods({
               }
             }
           }
-          console.log(" " + p1Points + " " + p1Points + " ")
           combinedPoints = p1Points - p2Points - 0.5;
 
-          console.log(tempTurn);
           if (Meteor.isServer) {
             
             //rating of players
@@ -514,14 +531,14 @@ Meteor.methods({
 
             //finds the amount of rating to change and changes it for both players
             if(combinedPoints > 0){
-              endText = this.game.name1 + " wins by " + combinedPoints + " points!";
+              endText = "S+" + combinedPoints;
               ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
 
               Qa += ratingOperator;
               Qb -= ratingOperator;
             }
             else{
-              endText = this.game.name2 + " wins by " + Math.abs(combinedPoints) + " points!";
+              endText = "G+" + Math.abs(combinedPoints);
               ratingOperator = 40 * (Math.pow(10 , Qa/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
 
               Qa -= ratingOperator;
@@ -549,12 +566,12 @@ Meteor.methods({
 
       if(this.game.p1 === this.userId){
         var modifier = {$set: {
-          result: this.game.name2 + " wins by resignation!"
+          result: "G+R"
         }};
       }
       else if(this.game.p2 === this.userId){
         var modifier = {$set: {
-          result: this.game.name1 + " wins by resignation!"
+          result: "S+R"
         }};
       }
 

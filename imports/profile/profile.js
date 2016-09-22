@@ -2,10 +2,12 @@ import { Template } from 'meteor/templating';
 import { Meteor } from 'meteor/meteor';
 import { ReactiveVar } from 'meteor/reactive-var';
 //import { Messages } from '../../imports/collections/messages.js';
+import { Games } from '../../imports/collections/games.js';
 import './profile.html';
 
 Template.Profile.onCreated(function(){
 	this.subscribe('singleProfile', FlowRouter.getParam('username'));
+  this.subscribe('playerGameList', FlowRouter.getParam('username'));
   this.changePassword = new ReactiveVar(false);
 });
 
@@ -19,12 +21,24 @@ Template.Profile.helpers({
   		return true;
   },
 
+  games: (id)=>{
+    return Games.find({$or: [{p1: id}, {p2: id}]}, {sort: {timeStamp: -1}, limit : 100});
+  },
+
   changePwdHelper: ()=>{
     return Template.instance().changePassword.get();
-  }
+  },
 
+  
 });
 
+Template.SingleGameOnList.helpers({
+  getResult: (result)=>{
+    if(result !== false){
+      return true;
+    }
+  }
+});
 
 Template.Profile.events({
 

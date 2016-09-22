@@ -36,7 +36,6 @@ if (Meteor.isServer) {
 
   Meteor.publish('gameMessages', function gameMessagesPublication(id) {
     if(this.userId){
-      console.log(Games.find().count());
       var game = Games.findOne(id);
       if(game){
         if((game.p1 === this.userId || game.p2 === this.userId) && game.result === false){
@@ -135,7 +134,6 @@ Meteor.methods({
         });
 
         Rooms.update(room, {$set: {lastMessage: tempTime}});
-        console.log((new Date).getTime());
       }
     }
 	}

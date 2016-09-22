@@ -55,6 +55,10 @@ Meteor.startup(function(){
       return Meteor.users.find({username: name});
   });
 
+  UI.registerHelper('idWritterCursor', function(id){
+      return Meteor.users.find(id);
+  });
+
   UI.registerHelper('mathFloor', function(num){
       return Math.floor(num);
   });

@@ -43,7 +43,33 @@
 				</div>
 			</li>
 			{{/if}}
-		</ul>		
+		</ul>
+
+		<table class="table-bordered gameListTable">
+			<tr>
+				<th>Sente</th>
+				<th>Rating</th>
+		    	<th>Gote</th>
+			    <th>Rating</th>
+			    <th>Result</th> 
+			    <th>View</th>
+			</tr>
+			{{#each games _id}}
+				{{> SingleGameOnList}}
+			{{/each}}
+		</table>
+
 	{{/with}}
 	</div>	
+</template>
+
+<template name="SingleGameOnList">
+	<tr> 
+  		<td>{{#each idWritterCursor p1}}{{>UserButton}}{{/each}}</td> 
+  		<td>{{mathFloor rating1}}</td> 
+  		<td>{{#each idWritterCursor p2}}{{>UserButton}}{{/each}}</td> 
+  		<td>{{mathFloor rating2}}</td> 
+  		<td>{{#if getResult result}}{{result}}{{else}}<a class="btn-link" href="/game/{{_id}}"> Watch!</a>{{/if}}</td>
+  		<td><a class="btn-link" href="/game/{{_id}}"> Here</a></td>
+  	</tr>
 </template>

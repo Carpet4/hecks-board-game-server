@@ -103,12 +103,25 @@ input[type="text"], input[type="password"], select, textarea {
     text-align: center;
   }
 
+
   .top100Table tr td:first-child::before {
       content: counter(rowNumber);
       min-width: 1em;
       margin-right: 0.5em;
   }
 
+
+.gameListTable, .gameListTable th, .gameListTable td {
+    border: 1px solid purple;
+    padding: 0px 3px;
+}
+.gameListTable {
+    border-spacing: 15px;
+}
+
+.gameListTable tr td:nth-child(2), .gameListTable tr td:nth-child(4), .gameListTable tr td:nth-child(5) {
+  text-align: center;
+}
 
 .watchTable, .watchTable th, .watchTable td {
     border: 1px solid purple;
