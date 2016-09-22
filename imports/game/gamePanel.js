@@ -5,7 +5,7 @@ import { countdown } from './game.js';
 import './gamePanel.html';
 
 Template.GamePanel.onCreated(function(){
-
+	Session.set('canStartReview', false);
 	this.gameId = FlowRouter.getParam('id');
 	this.game = Games.findOne(this.gameId);
 	this.kifu = this.game.kifu
@@ -15,6 +15,7 @@ Template.GamePanel.onCreated(function(){
 	this.p1Clock = new ReactiveVar(this.game.p1Time);//clock1
 	this.p2Clock = new ReactiveVar(this.game.p2Time);//clock2
 	this.countdown = false;
+	Session.set('moveNumBool', true);
 
 	if(this.game.p1 === Meteor.userId()){
 		this.player = 1;
@@ -39,6 +40,7 @@ Template.GamePanel.onCreated(function(){
 
 
 	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1, "kifu": 1}}).observe({
+
 		changed: (doc)=>{
 			this.p1Clock.set(doc.p1Time);
 			this.p2Clock.set(doc.p2Time);
@@ -107,12 +109,20 @@ Template.GamePanel.onCreated(function(){
 	this.autorun(()=>{
 		var variation = Session.get('myVar')
 		if(variation){
+			console.log("gets here variation");
 			var num = Number(variation[0]) + variation.length - 1;
 			document.getElementById('moveNumber').value = num;
 		}
 	})	
 
 });
+
+/*Template.GamePanel.onRendered(function(){
+	if(this.game.result !== false){
+		document.getElementById('moveNumber').value = this.game.kifu.length;
+		Session.set('moveNumBool', !Session.get('moveNumBool'));
+	}
+});*/
 
 Template.GamePanel.onDestroyed(function () {
 	if(this.clockWorker) {
@@ -122,6 +132,15 @@ Template.GamePanel.onDestroyed(function () {
 });
 
 Template.GamePanel.helpers({
+
+	moveNumInitialValue: ()=>{
+		Meteor.setTimeout(function(){
+			Session.set('canStartReview', true), 20
+		});
+		console.log(Session.get('canStartReview'));
+		return Template.instance().kifu.length;
+	},
+
 	isFinished: ()=>{
 		if(Template.instance().game.result){
 			return true;
@@ -225,7 +244,7 @@ Template.GamePanel.events({
 				}
 			}
 		}
-		Session.set('moveNum', document.getElementById('moveNumber').value);
+		Session.set('moveNumBool', !Session.get('moveNumBool'));
 	},
 
 	'click .back10'(event){
@@ -237,7 +256,7 @@ Template.GamePanel.events({
 		else{
 			document.getElementById('moveNumber').value = num;
 		}
-		Session.set('moveNum', document.getElementById('moveNumber').value);
+		Session.set('moveNumBool', !Session.get('moveNumBool'));
 	},
 
 	'click .back1'(event){
@@ -249,7 +268,7 @@ Template.GamePanel.events({
 		else{
 			document.getElementById('moveNumber').value = num;
 		}
-		Session.set('moveNum', document.getElementById('moveNumber').value);
+		Session.set('moveNumBool', !Session.get('moveNumBool'));
 	},
 
 	'click .forward1'(event, instance){
@@ -273,7 +292,7 @@ Template.GamePanel.events({
 				document.getElementById('moveNumber').value = num;
 			}
 		}
-		Session.set('moveNum', document.getElementById('moveNumber').value);
+		Session.set('moveNumBool', !Session.get('moveNumBool'));
 	},
 
 	'click .forward10'(event, instance){
@@ -297,6 +316,6 @@ Template.GamePanel.events({
 				document.getElementById('moveNumber').value = num;
 			}
 		}
-		Session.set('moveNum', document.getElementById('moveNumber').value);
+		Session.set('moveNumBool', !Session.get('moveNumBool'));
 	},
 });

@@ -21,7 +21,14 @@ Template.Messages.onRendered(function(){
 Template.Messages.helpers({
 
   messages: ()=> {
-    return Messages.find({room: Session.get('currentChat')});
+    var messagesCursur = Messages.find({room: Session.get('currentChat')})
+    var skip = messagesCursur.count() - 120;
+    if (skip > 0){
+      return Messages.find({room: Session.get('currentChat')}, {sort: {timeStamp: 1}, skip : skip});
+    }
+    else{
+      return messagesCursur;
+    }
   },
 
 });

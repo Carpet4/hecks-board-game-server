@@ -61,21 +61,19 @@ Template.Canvas.onCreated(function(){
 			console.log("first if");
 			if(this.game.result !== false){
 				if(!variation){
-					if(location + 1 > this.kifu.length){//check if its still needed
+					if(location > this.kifu.length){//check if its still needed
 						location = this.kifu.length;
-						console.log(location);
 						if(document.getElementById('moveNumber')){
-							console.log(location);
+							console.log("should not ever get here1");
 							document.getElementById('moveNumber').value = Number(location);
 						}
 					}
 				}
 				else{
-					if(location + 2 > variation[0] + variation.length){
+					if(location + 1 > variation[0] + variation.length){
 						location = variation[0] + variation.length - 1;
-						console.log(location);
 						if(document.getElementById('moveNumber')){
-							console.log(location);
+							console.log("should not ever get here2");
 							document.getElementById('moveNumber').value = Number(location);
 						}
 					}
@@ -751,7 +749,7 @@ Template.Canvas.onRendered(function() {
 			//this.dotsData = doc.dotsData
 			this.turn = doc.turn;
 			this.kifu = doc.kifu;
-			Session.set('moveNum', this.kifu.length);
+			//Session.set('moveNum', this.kifu.length);
 			var moveString = doc.lastMove;
 			if(moveString){
 				if(moveString.length === 2){
@@ -780,33 +778,43 @@ Template.Canvas.onRendered(function() {
 				this.makeTurn(doc.lastMove);
 			}
 			else if(Session.get('isGameFinished') === false){
-				Session.set('moveNum', this.kifu.length);
+				//Session.set('moveNum', this.kifu.length);
 				Session.set('isGameFinished', true);
 			}
 		},
 	});
 
 	this.autorun(()=>{
-		var gVar = Session.get('globalVar');
-		if(gVar && (!this.lastGVar || gVar.join() !== this.lastGVar.join())){
-			this.lastGVar = gVar;
-			this.currentVariation = gVar;
-			Session.set('myVar', gVar);
-			this.setBoard(gVar[0] + gVar.length - 1, gVar);
+		if(this.game.result !== false){
+			var gVar = Session.get('globalVar');
+			if(gVar && (!this.lastGVar || gVar.join() !== this.lastGVar.join())){
+				this.lastGVar = gVar;
+				this.currentVariation = gVar;
+				Session.set('myVar', gVar);
+				console.log("autorun1");
+				this.setBoard(gVar[0] + gVar.length - 1, gVar);
+			}
 		}
 	});
 
 	this.autorun(()=>{
-		num = Session.get('moveNum');
-		if(num == 0 || (this.currentVariation && num < this.currentVariation[0])){
-			console.log("gets there");
-			this.currentVariation = false;
-			Session.set('myVar', false);
-			this.lastGVar = false;
-			Session.set('globalVar', false);
-			gVar = false;
+		if(this.game.result !== false){
+			if(Session.get('canStartReview')){
+				num = Session.get('moveNumBool');
+				num = Number(document.getElementById('moveNumber').value);
+				console.log(num);
+				if(num == 0 || (this.currentVariation && num < this.currentVariation[0])){
+					this.currentVariation = false;
+					Session.set('myVar', false);
+					this.lastGVar = false;
+					Session.set('globalVar', false);
+					gVar = false;
+				}
+				console.log(num, this.currentVariation);
+				console.log("autorun2");
+				this.setBoard(num, this.currentVariation);
+			}
 		}
-		this.setBoard(num, this.currentVariation);
 	});
 
 	$( "#canvas1" ).mousemove((event)=>{
@@ -938,7 +946,7 @@ Template.Canvas.events({
 			    		}
 			    		else{
 			    			var variation = [];
-			    			variation.push(Number(Session.get('moveNum')));
+			    			variation.push(Number(document.getElementById('moveNumber').value));
 			    			variation.push(moveString);
 			    		}
 			    		instance.currentVariation = variation;

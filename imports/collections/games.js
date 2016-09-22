@@ -10,21 +10,6 @@ export const Games = new Meteor.Collection('games');
 if (Meteor.isServer) {
   
 
-  Meteor.startup(() => {
-    Games.update({ timeStamp: { $exists: false } }, {$set:{timeStamp: (new Date).getTime()}}, {multi: true});
-    var gamesToChange = Games.find();
-    gamesToChange.forEach(function (doc) {
-      if(doc.result && doc.result.length > 8){
-        if(doc.name1.substring(0, 3) === doc.result.substring(0, 3)){
-          Games.update(doc._id, {$set: {result: "S+R"}});
-        }
-        else{
-          Games.update(doc._id, {$set: {result: "G+R"}});
-        }
-      }
-    });
-  });
-
 	Meteor.publish('playerGames', function gamesPublication() {
     if(this.userId){
       return Games.find({result: false, $or:[{p1: this.userId}, {p2: this.userId}]});
@@ -138,7 +123,12 @@ var dotArrayCreator = function(){
 }
 
 export function beginMatch(player1, player2, mainT, subT){
-
+  var randomizer = Math.random();
+  if(randomizer > 0.5){
+    var tempPlayer = player1;
+    player1 = player2;
+    player2 = tempPlayer;
+  }
   var player1Rating = Meteor.users.findOne(player1).rating;
   var player1Name = Meteor.users.findOne(player1).username;
   var player2Rating = Meteor.users.findOne(player2).rating;
@@ -521,7 +511,7 @@ Meteor.methods({
               }
             }
           }
-          combinedPoints = p1Points - p2Points - 0.5;
+          combinedPoints = p1Points - p2Points - 1.5;
 
           if (Meteor.isServer) {
             
