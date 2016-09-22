@@ -28,15 +28,7 @@ Template.Game.helpers({
 Template.Game.onCreated(function GameOnCreated() {
   this.imageLoadCheck = new ReactiveVar(0);
   this.gameId = FlowRouter.getParam('id');
-  console.log(this.gameId);
 	this.subscribe('singleGame', this.gameId); //might better place the subsciptions inside autorun?a
-  this.subscribe('gameMessages', this.gameId);
-  this.autorun(() => {
-    if(Session.get('isGameFinished') === true){
-      this.subscribe('singleGame', this.gameId);
-      this.subscribe('gameMessages', this.gameId);
-    }    
-  });
 
   countdown.src = "/countdown.mp3";
   stonePlacement.src = "/stonePlacement.mp3";//need to make sure this was loaded somehow

@@ -411,28 +411,7 @@ Meteor.methods({
         }
         
         this.kifu[this.kifu.length] = "pass";
-
-        if(this.turn % 2 === 0){
-          var modifier = {$set: {
-            passCount: tempPassCount + 1, 
-            turn: tempTurn + 1,
-            kifu: this.kifu, 
-            lastMove: false,
-            lastMoveTime: this.moveTime,
-            p1Time: this.playerTime
-          }};
-        }
-        else{
-          var modifier = {$set: {
-            passCount: tempPassCount + 1, 
-            turn: tempTurn + 1,
-            kifu: this.kifu,  
-            lastMove: false,
-            lastMoveTime: this.moveTime,
-            p2Time: this.playerTime
-          }};
-        }
-        Games.update(id, modifier);
+        
 
         if(this.game.passCount === 1){
 
@@ -535,8 +514,31 @@ Meteor.methods({
               Qb += ratingOperator;
             }
 
+            if(this.turn % 2 === 0){
+              var modifier = {$set: {
+                passCount: tempPassCount + 1, 
+                turn: tempTurn + 1,
+                kifu: this.kifu, 
+                lastMove: "pass",
+                lastMoveTime: this.moveTime,
+                p1Time: this.playerTime,
+                result: endText
+              }};
+            }
+            else{
+              var modifier = {$set: {
+                passCount: tempPassCount + 1, 
+                turn: tempTurn + 1,
+                kifu: this.kifu,  
+                lastMove: "pass",
+                lastMoveTime: this.moveTime,
+                p2Time: this.playerTime,
+                result: endText
+              }};
+            }
+
             //updates games collection with new result
-            Games.update(id, {$set:{ result: endText}});
+            Games.update(id, modifier);
 
             if(tempTurn > 2){
               Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
@@ -545,7 +547,29 @@ Meteor.methods({
             }
           }
         }
-
+        else{
+          if(this.turn % 2 === 0){
+            var modifier = {$set: {
+              passCount: tempPassCount + 1, 
+              turn: tempTurn + 1,
+              kifu: this.kifu, 
+              lastMove: "pass",
+              lastMoveTime: this.moveTime,
+              p1Time: this.playerTime
+            }};
+          }
+          else{
+            var modifier = {$set: {
+              passCount: tempPassCount + 1, 
+              turn: tempTurn + 1,
+              kifu: this.kifu,  
+              lastMove: "pass",
+              lastMoveTime: this.moveTime,
+              p2Time: this.playerTime
+            }};
+          }
+          Games.update(id, modifier);
+        }
       }
     }
   },

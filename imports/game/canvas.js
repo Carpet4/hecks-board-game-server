@@ -17,6 +17,7 @@ import { blues, reds, blueimg, redimg, blackimg, stonePlacement, passSound } fro
 
 
 Template.Canvas.onDestroyed(function(){
+	Session.set('isGameFinished', false);
 	$(window).off('resize');
 });
         
@@ -55,30 +56,8 @@ Template.Canvas.onCreated(function(){
 
 
 	this.setBoard = (location, variation)=>{
-		console.log((new Date).getTime());
 		location = Number(location);
 		if(Number.isInteger(location)){
-			console.log("first if");
-			if(this.game.result !== false){
-				if(!variation){
-					if(location > this.kifu.length){//check if its still needed
-						location = this.kifu.length;
-						if(document.getElementById('moveNumber')){
-							console.log("should not ever get here1");
-							document.getElementById('moveNumber').value = Number(location);
-						}
-					}
-				}
-				else{
-					if(location + 1 > variation[0] + variation.length){
-						location = variation[0] + variation.length - 1;
-						if(document.getElementById('moveNumber')){
-							console.log("should not ever get here2");
-							document.getElementById('moveNumber').value = Number(location);
-						}
-					}
-				}
-			}
 			this.turn = 0;
 			var dotsArray = new Array(this.dots.length);
 			for(var i=0; i<this.dots.length; i++){
@@ -138,7 +117,6 @@ Template.Canvas.onCreated(function(){
 		        this.ctx.fill();
 			}
 		}
-		console.log((new Date).getTime());
 	}
 
 
@@ -384,7 +362,7 @@ Template.Canvas.onCreated(function(){
 
 	this.makeTurn = (moveString)=>{
 		this.turn++
-		if(!this.game.result){
+		if(!this.game.result || moveString === "pass"){
 			this.kifu[this.kifu.length] = moveString;
 		}
 		if(this.previousMove){
@@ -773,36 +751,40 @@ Template.Canvas.onRendered(function() {
 		},
 
 		changed: (doc)=>{
-			this.game = doc;
-			if(!this.game.result){
+			if(!doc.result){
 				this.makeTurn(doc.lastMove);
 			}
-			else if(Session.get('isGameFinished') === false){
-				//Session.set('moveNum', this.kifu.length);
+			else{
+				this.game.result = doc.result;
+				var letter = Number(doc.result.charAt(2));
+				if(Number.isInteger(letter)){
+					this.makeTurn(doc.lastMove);
+				}
+				if(Session.get('isGameFinished') === false){
 				Session.set('isGameFinished', true);
+			} 
+			
 			}
 		},
 	});
 
+
 	this.autorun(()=>{
-		if(this.game.result !== false){
-			var gVar = Session.get('globalVar');
-			if(gVar && (!this.lastGVar || gVar.join() !== this.lastGVar.join())){
-				this.lastGVar = gVar;
-				this.currentVariation = gVar;
-				Session.set('myVar', gVar);
-				console.log("autorun1");
-				this.setBoard(gVar[0] + gVar.length - 1, gVar);
-			}
+		var gVar = Session.get('globalVar');
+		if(gVar && (!this.lastGVar || gVar.join() !== this.lastGVar.join())){
+			this.lastGVar = gVar;
+			this.currentVariation = gVar;
+			Session.set('myVar', gVar);
+			this.setBoard(gVar[0] + gVar.length - 1, gVar);
 		}
+
 	});
 
 	this.autorun(()=>{
-		if(this.game.result !== false){
-			if(Session.get('canStartReview')){
-				num = Session.get('moveNumBool');
-				num = Number(document.getElementById('moveNumber').value);
-				console.log(num);
+		if(Session.get('canStartReview')){
+			num = Session.get('moveNumBool');
+			num = Number(document.getElementById('moveNumber').value);
+			if(this.game.result !== false){
 				if(num == 0 || (this.currentVariation && num < this.currentVariation[0])){
 					this.currentVariation = false;
 					Session.set('myVar', false);
@@ -810,8 +792,7 @@ Template.Canvas.onRendered(function() {
 					Session.set('globalVar', false);
 					gVar = false;
 				}
-				console.log(num, this.currentVariation);
-				console.log("autorun2");
+
 				this.setBoard(num, this.currentVariation);
 			}
 		}
@@ -848,7 +829,6 @@ Template.Canvas.onRendered(function() {
 Template.Canvas.events({
 
 	'click'(event, instance) {
-
 		if((instance.player === 1 && instance.turn % 2 === 0) || (instance.player === 2 && instance.turn % 2 !== 0) || instance.game.result !== false){
 			if(instance.zoomFirst && !instance.isZoomed){
 				if(instance.lastK > -1 && instance.dotsData[instance.lastK][instance.lastM] === 0){

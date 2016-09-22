@@ -374,6 +374,10 @@ input[type="text"], input[type="password"], select, textarea {
   background-color: #66ffe0;
 }
 
+.lightblueText{
+  color: #66ffe0;
+}
+
 .green{
   background-color: #33ff33;
 }

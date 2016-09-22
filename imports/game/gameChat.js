@@ -4,8 +4,15 @@ import { Messages } from '../../imports/collections/messages.js';
 import './gameChat.html';
 
 Template.GameChat.onCreated(function(){
-
   this.gameId = FlowRouter.getParam('id');
+  this.subscribe('gameMessages', this.gameId);
+  this.autorun(() => {
+    if(Session.get('isGameFinished') === true){
+      this.subscribe('gameMessages', this.gameId);
+    }    
+  });
+
+  
 
 });
 
@@ -28,7 +35,6 @@ Template.GameChat.helpers({
 Template.GameChat.events({
 
   'click .varButton'(event){
-    console.log(event.target.value);
     variation = Messages.findOne(event.target.value).variation;
     Session.set('globalVar', variation);
   },

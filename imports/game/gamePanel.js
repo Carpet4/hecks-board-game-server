@@ -109,7 +109,6 @@ Template.GamePanel.onCreated(function(){
 	this.autorun(()=>{
 		var variation = Session.get('myVar')
 		if(variation){
-			console.log("gets here variation");
 			var num = Number(variation[0]) + variation.length - 1;
 			document.getElementById('moveNumber').value = num;
 		}
@@ -137,17 +136,7 @@ Template.GamePanel.helpers({
 		Meteor.setTimeout(function(){
 			Session.set('canStartReview', true), 20
 		});
-		console.log(Session.get('canStartReview'));
 		return Template.instance().kifu.length;
-	},
-
-	isFinished: ()=>{
-		if(Template.instance().game.result){
-			return true;
-		}
-		else{
-			return false;
-		}
 	},
 
   	clock1: ()=> {
@@ -236,7 +225,7 @@ Template.GamePanel.events({
 				}
 			}
 			else{
-				if(num > instance.game.kifu.length){
+				if(num > instance.kifu.length){
 					document.getElementById('moveNumber').value = instance.kifu.length;
 				}
 				else{
@@ -285,7 +274,7 @@ Template.GamePanel.events({
 			}
 		}
 		else{
-			if(num > instance.game.kifu.length){
+			if(num > instance.kifu.length){
 				document.getElementById('moveNumber').value = instance.kifu.length;
 			}
 			else{
@@ -309,7 +298,7 @@ Template.GamePanel.events({
 			}
 		}
 		else{
-			if(num > instance.game.kifu.length){
+			if(num > instance.kifu.length){
 				document.getElementById('moveNumber').value = instance.kifu.length;
 			}
 			else{

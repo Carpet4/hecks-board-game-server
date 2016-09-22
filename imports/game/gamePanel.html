@@ -11,7 +11,7 @@
 	  	</tr>
 	  
       	<tr>
-      		{{#if isFinished}}
+      		{{#if $.Session.get 'isGameFinished'}}
 				<td>
 					<button class="shareVar mainButton">Share Variation</button>
 				</td>
@@ -33,7 +33,7 @@
 		</tr>
 		<tr>
 
-	  		<td colspan="2">{{turn}}</td>
+	  		<td colspan="2" class="blabla {{#if $.Session.get 'isGameFinished'}}lightblueText{{/if}}">{{turn}}</td>
 
 	  	</tr>		
     </table>
