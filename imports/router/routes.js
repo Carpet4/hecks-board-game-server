@@ -53,6 +53,13 @@ FlowRouter.route('/about', {
 	}
 });
 
+FlowRouter.route('/top100', {
+	name: 'top100',
+	action(){
+		BlazeLayout.render('MainLayout', {main: 'Top100'});
+	}
+});
+
 FlowRouter.route('/play', {
 	name:'play',
 	action(){

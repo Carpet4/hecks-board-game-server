@@ -1,0 +1,31 @@
+
+<template name="Top100">
+	{{#if Template.subscriptionsReady}}
+	    <div class="container">
+
+			<h2>Top 100!</h2>
+			<div class="table-responsive">
+				<table class="table-bordered top100Table">
+					<tr>
+						<th>Rank</th>
+				    	<th>Player</th>
+					    <th>Rating</th> 
+					</tr>
+				  	{{#each players}}
+						{{> SingleTop100}}
+					{{/each}}
+				</table>
+			</div> 
+		</div>
+	{{/if}}
+</template>
+
+<template name="SingleTop100">
+
+  	<tr> 
+  		<td></td>
+  		<td>{{#each writterCursor username}}{{>UserButton}}{{/each}}</td> 
+  		<td>{{mathFloor rating}}</td> 
+  	</tr>
+
+</template>

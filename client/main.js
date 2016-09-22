@@ -22,6 +22,7 @@ import '../imports/userButton/userButton.js';
 import '../imports/login/login.js';
 import '../imports/router/routes.js';
 import '../imports/about/about.html';
+import '../imports/top100/top100.js';
 
 Meteor.startup(function(){
 

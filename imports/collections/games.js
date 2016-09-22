@@ -244,28 +244,29 @@ Meteor.methods({
 
         //rating adjustment
         if (Meteor.isServer) {
-          
-          Qa = this.game.rating1;
-          Qb = this.game.rating2;
+          if(this.turn > 3){
+            Qa = this.game.rating1;
+            Qb = this.game.rating2;
 
-          if(this.turn % 2 !== 0){
-            ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
+            if(this.turn % 2 !== 0){
+              ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
 
-            Qa += ratingOperator;
-            Qb -= ratingOperator;
+              Qa += ratingOperator;
+              Qb -= ratingOperator;
+            }
+
+            else{
+              ratingOperator = 40 * (Math.pow(10 , Qa/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
+
+              Qa -= ratingOperator;
+              Qb += ratingOperator;
+            }
+
+
+            Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
+
+            Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
           }
-
-          else{
-            ratingOperator = 40 * (Math.pow(10 , Qa/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
-
-            Qa -= ratingOperator;
-            Qb += ratingOperator;
-          }
-
-
-          Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
-
-          Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
         }
       } 
     }
@@ -504,9 +505,9 @@ Meteor.methods({
           console.log(" " + p1Points + " " + p1Points + " ")
           combinedPoints = p1Points - p2Points - 0.5;
 
-
+          console.log(tempTurn);
           if (Meteor.isServer) {
-
+            
             //rating of players
             Qa = this.game.rating1;
             Qb = this.game.rating2;
@@ -527,15 +528,14 @@ Meteor.methods({
               Qb += ratingOperator;
             }
 
-            //updates users collection with new ratings
-            
-            Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
-
-            Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
-
-
             //updates games collection with new result
             Games.update(id, {$set:{ result: endText}});
+
+            if(tempTurn > 2){
+              Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
+
+              Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
+            }
           }
         }
 
@@ -562,29 +562,30 @@ Meteor.methods({
         Games.update(id, modifier);
 
         if (Meteor.isServer) {
-          
-          Qa = this.game.rating1;
-          Qb = this.game.rating2;
+          if(this.game.turn > 3){
+            Qa = this.game.rating1;
+            Qb = this.game.rating2;
 
-          if(this.game.p2 === this.userId){
-            ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
+            if(this.game.p2 === this.userId){
+              ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
 
-            Qa += ratingOperator;
-            Qb -= ratingOperator;
+              Qa += ratingOperator;
+              Qb -= ratingOperator;
+            }
+
+            else{
+              ratingOperator = 40 * (Math.pow(10 , Qa/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
+
+              Qa -= ratingOperator;
+              Qb += ratingOperator;
+            }
+
+            Meteor.users.update(this.game.p1, {
+              $set: {rating: Qa}});
+
+            Meteor.users.update(this.game.p2, {
+              $set: {rating: Qb}});
           }
-
-          else{
-            ratingOperator = 40 * (Math.pow(10 , Qa/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
-
-            Qa -= ratingOperator;
-            Qb += ratingOperator;
-          }
-
-          Meteor.users.update(this.game.p1, {
-            $set: {rating: Qa}});
-
-          Meteor.users.update(this.game.p2, {
-            $set: {rating: Qb}});
         }
       }
     }
