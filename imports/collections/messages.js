@@ -17,7 +17,7 @@ if (Meteor.isServer) {
 
   Meteor.startup(function() {
       Meteor.setInterval(()=> {
-        min = (new Date).getTime() - 3600000 * 24;
+        var min = (new Date).getTime() - 3600000 * 24;
         Messages.remove({
           timeStamp: {$lt: min}
         });

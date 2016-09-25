@@ -5,7 +5,19 @@ import { check } from 'meteor/check';
 
 export const Rooms = new Meteor.Collection('rooms');
 
+
+
 if (Meteor.isServer) {
+
+
+	Meteor.startup(function() {
+	    Meteor.setInterval(()=> {
+	        var min = (new Date).getTime() - 1000 * 60 * 60 * 24 * 14;
+	        Rooms.remove({
+	          	lastMessage: {$lt: min}
+	        });
+	    }, 	3600000);
+	});
 
 	Meteor.publish('rooms', function roomsPublication() {
 		if(this.userId)
