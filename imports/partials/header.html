@@ -78,6 +78,7 @@
 					{{idToName sender}} invited you for a game!<br>
 					Main time: {{timeDisplay mainT}}<br>
 					Time Increments: {{timeDisplay subT}}<br>
+					{{#if ranked}}Ranked{{else}}Free{{/if}}<br>
 					<button class="btn btn-success gameAccept" value="{{_id}}">V</button>
 					<button class="btn btn-danger gameDecline" value="{{_id}}">X</button>
 			
@@ -85,6 +86,7 @@
 					You have sent a game request to {{idToName reciever}}!
 					Main time: {{timeDisplay mainT}}<br>
 					Time Increments: {{timeDisplay subT}}<br>
+					{{#if ranked}}Ranked{{else}}Free{{/if}}<br>
 					<button class="btn btn-danger gameDecline" value="{{_id}}">X</button>
 				{{/if}}	
 			{{/if}}											

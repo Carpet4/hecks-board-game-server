@@ -122,7 +122,7 @@ var dotArrayCreator = function(){
   return tempArray;
 }
 
-export function beginMatch(player1, player2, mainT, subT){
+export function beginMatch(player1, player2, mainT, subT, ranked){
   var randomizer = Math.random();
   if(randomizer > 0.5){
     var tempPlayer = player1;
@@ -135,6 +135,7 @@ export function beginMatch(player1, player2, mainT, subT){
   var player2Name = Meteor.users.findOne(player2).username;
   var tempTime = (new Date).getTime();
   var kifu = new Array();
+  console.log(ranked);
   if(!Games.findOne(
   {result: false, $or: [{p1: {$in:[player1, player2]}}, {p2: {$in:[player1, player2]}}]})){
     Games.insert({
@@ -155,7 +156,7 @@ export function beginMatch(player1, player2, mainT, subT){
       passCount: 0,
       kifu: kifu,
       dotsData: dotArrayCreator(),
-      ranked: true,
+      ranked: ranked,
       hc: false,
       yLength: 20,
       xLength: 19
@@ -257,7 +258,7 @@ Meteor.methods({
         Games.update(id, modifier);
 
         //rating adjustment
-        if (Meteor.isServer) {
+        if (Meteor.isServer && this.game.ranked) {
           if(this.turn > 3){
             Qa = this.game.rating1;
             Qb = this.game.rating2;
@@ -540,7 +541,7 @@ Meteor.methods({
             //updates games collection with new result
             Games.update(id, modifier);
 
-            if(tempTurn > 2){
+            if(tempTurn > 2 && this.game.ranked){
               Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
 
               Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
@@ -592,7 +593,7 @@ Meteor.methods({
       if(modifier){  
         Games.update(id, modifier);
 
-        if (Meteor.isServer) {
+        if (Meteor.isServer && this.game.ranked) {
           if(this.game.turn > 3){
             Qa = this.game.rating1;
             Qb = this.game.rating2;

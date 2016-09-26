@@ -119,8 +119,8 @@ Template.PlayModal.events({
 
     'submit .gameInvite'(event, instance) {
     	event.preventDefault();
-    	//console.log(event.target.submit.value + " " + event.target.timeInc.value  + " " + event.target.timeMain.value);	
-    	Meteor.call('notifications.gameInvite', event.target.submit.value, Number(event.target.timeMain.value), Number(event.target.timeInc.value));
+      var isRanked = event.target.isRanked.checked;
+    	Meteor.call('notifications.gameInvite', event.target.submit.value, Number(event.target.timeMain.value), Number(event.target.timeInc.value), isRanked);
     	Modal.hide('playModal');
 	}
 

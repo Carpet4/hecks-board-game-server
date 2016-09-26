@@ -58,7 +58,7 @@ Meteor.methods({
             subT = Math.round(avarageTime / 10) * 10;
           }
           
-          beginMatch(player1, player2, 180, subT);
+          beginMatch(player1, player2, 180, subT, true);
         } 
         else{
           AutomatchPlayers.insert({

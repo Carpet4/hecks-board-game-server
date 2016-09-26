@@ -8,6 +8,11 @@ import { check } from 'meteor/check';
 export const Notifications = new Meteor.Collection('notifications');
 
 if (Meteor.isServer) {
+
+	Notifications.remove({
+      	type: "gameInvite",
+      	ranked:{$exists: false}
+    });
 	Meteor.publish('notifications', function notificationPublication() {
 		if(this.userId)
     		return Notifications.find({$or: [{$and:[{sender: this.userId}, {type: "gameInvite"}]}, {reciever: this.userId}]});
@@ -16,16 +21,18 @@ if (Meteor.isServer) {
 
 Meteor.methods({
 
-	'notifications.gameInvite'(opponent, mainT, subT){
+	'notifications.gameInvite'(opponent, mainT, subT, isRanked){
 		if(Meteor.users.findOne({username: opponent})){
 			check(mainT, Number);
 			check(subT, Number);
+			check(isRanked, Boolean);
 			Notifications.insert({
 				type: "gameInvite",
 				sender: this.userId,
 				reciever: Meteor.users.findOne({username: opponent})._id,
 				mainT: mainT,
-				subT: subT
+				subT: subT,
+				ranked: isRanked
 			});
 		}
 	},
@@ -43,7 +50,7 @@ Meteor.methods({
         	{result: false, $or: [{p1: {$in:[this.userId, this.opponent]}}, {p2: {$in:[this.userId, this.opponent]}}]})){
         		AutomatchPlayers.remove({user: {$in:[this.userId, this.opponent]}});		
 				Notifications.remove(id);
-				beginMatch(this.userId, this.opponent, this.notification.mainT, this.notification.subT);
+				beginMatch(this.userId, this.opponent, this.notification.mainT, this.notification.subT, this.notification.ranked);
 			}
 		}
 	},
