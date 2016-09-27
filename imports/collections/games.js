@@ -135,7 +135,6 @@ export function beginMatch(player1, player2, mainT, subT, ranked){
   var player2Name = Meteor.users.findOne(player2).username;
   var tempTime = (new Date).getTime();
   var kifu = new Array();
-  console.log(ranked);
   if(!Games.findOne(
   {result: false, $or: [{p1: {$in:[player1, player2]}}, {p2: {$in:[player1, player2]}}]})){
     Games.insert({

@@ -39,11 +39,20 @@ Template.GamePanel.onCreated(function(){
 	
 
 
-	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1, "kifu": 1}}).observe({
+	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1, "lastMoveTime": 1, "kifu": 1}}).observe({
 
 		changed: (doc)=>{
-			this.p1Clock.set(doc.p1Time);
-			this.p2Clock.set(doc.p2Time);
+			if(doc.turn % 2 === 1){
+				console.log("1");
+				this.p1Clock.set(doc.p1Time);
+				this.p2Clock.set(Math.max(0, doc.p2Time - ((new Date).getTime() - doc.lastMoveTime)));
+			}
+			else{
+				console.log("2");
+				this.p1Clock.set(Math.max(0, doc.p1Time - ((new Date).getTime() - doc.lastMoveTime)));
+				this.p2Clock.set(doc.p2Time);
+			}
+
 			this.game.result = doc.result;
 			this.kifu = doc.kifu;
 			if(doc.turn !== this.turn && this.countdown === true){
