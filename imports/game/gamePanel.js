@@ -8,12 +8,15 @@ Template.GamePanel.onCreated(function(){
 	Session.set('canStartReview', false);
 	this.gameId = FlowRouter.getParam('id');
 	this.game = Games.findOne(this.gameId);
-	this.kifu = this.game.kifu
+	this.kifu = this.game.kifu;
 	this.gameId = this.game._id;
 	this.turn = this.game.turn;
 	this.timeFixer = (new Date).getTime() - this.game.lastMoveTime;//fixes to correct time after page reload
 	this.p1Clock = new ReactiveVar(this.game.p1Time);//clock1
 	this.p2Clock = new ReactiveVar(this.game.p2Time);//clock2
+	this.p1Time = this.game.p1Time;
+	this.p2Time = this.game.p2Time;
+	this.lastMoveTime = this.game.lastMoveTime;
 	this.countdown = false;
 	Session.set('moveNumBool', true);
 
@@ -52,7 +55,6 @@ Template.GamePanel.onCreated(function(){
 				this.p1Clock.set(Math.max(0, doc.p1Time - ((new Date).getTime() - doc.lastMoveTime)));
 				this.p2Clock.set(doc.p2Time);
 			}
-
 			this.game.result = doc.result;
 			this.kifu = doc.kifu;
 			if(doc.turn !== this.turn && this.countdown === true){
@@ -61,6 +63,9 @@ Template.GamePanel.onCreated(function(){
 				this.countdown = false;
 			}
 			this.turn = doc.turn;
+			this.p1Time = doc.p1Time;
+			this.p2Time = doc.p2Time;
+			this.lastMoveTime = doc.lastMoveTime;
 
 			//cancels the interval when game is finished
 			if(this.game.result !== false){
@@ -90,25 +95,27 @@ Template.GamePanel.onCreated(function(){
 		}
 		this.clockWorker.onmessage = (event)=>{
 		    if(this.turn % 2 === 0){
+		    	this.p1Clock.set(this.p1Time - ((new Date).getTime() - this.lastMoveTime));
 				var time = this.p1Clock.get();
 				if(time < 10100 && this.countdown === false){
 					countdown.currentTime = Math.max(0, 10000 - time);
 					countdown.play();
 					this.countdown = true;
 				}
-				this.p1Clock.set(time - 100);
+				
 				if(this.player === 2 && this.p1Clock.get() <= 0){
 					Meteor.call('games.timeLoss', this.gameId);
 				}
 			}
 			else{
+				this.p2Clock.set(this.p2Time - ((new Date).getTime() - this.lastMoveTime));
 				var time = this.p2Clock.get();
 				if(time < 10100 && this.countdown === false){
 					countdown.currentTime = Math.max(0, 10000 - time);
 					countdown.play();
 					this.countdown = true;
 				}
-				this.p2Clock.set(time - 100);
+				
 				if(this.player === 1 && this.p2Clock.get() <= 0){
 					Meteor.call('games.timeLoss', this.gameId);
 				}
