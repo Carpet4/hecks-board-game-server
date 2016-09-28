@@ -332,6 +332,7 @@ Meteor.methods({
           this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
           if(this.playerTime < this.fischerParam){
             Meteor.call('games.timeLoss', id); //need to see if requires to break from method if this is true
+            return;
           }
           
           var moveString = m.toString(36) + k.toString(36);

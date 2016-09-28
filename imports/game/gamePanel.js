@@ -46,12 +46,10 @@ Template.GamePanel.onCreated(function(){
 
 		changed: (doc)=>{
 			if(doc.turn % 2 === 1){
-				console.log("1");
 				this.p1Clock.set(doc.p1Time);
 				this.p2Clock.set(Math.max(0, doc.p2Time - ((new Date).getTime() - doc.lastMoveTime)));
 			}
 			else{
-				console.log("2");
 				this.p1Clock.set(Math.max(0, doc.p1Time - ((new Date).getTime() - doc.lastMoveTime)));
 				this.p2Clock.set(doc.p2Time);
 			}
@@ -98,7 +96,7 @@ Template.GamePanel.onCreated(function(){
 		    	this.p1Clock.set(this.p1Time - ((new Date).getTime() - this.lastMoveTime));
 				var time = this.p1Clock.get();
 				if(time < 10100 && this.countdown === false){
-					countdown.currentTime = Math.max(0, 10000 - time);
+					countdown.currentTime = Math.max(0, (10000 - time)/1000);
 					countdown.play();
 					this.countdown = true;
 				}
@@ -111,7 +109,7 @@ Template.GamePanel.onCreated(function(){
 				this.p2Clock.set(this.p2Time - ((new Date).getTime() - this.lastMoveTime));
 				var time = this.p2Clock.get();
 				if(time < 10100 && this.countdown === false){
-					countdown.currentTime = Math.max(0, 10000 - time);
+					countdown.currentTime = Math.max(0, (10000 - time)/1000);
 					countdown.play();
 					this.countdown = true;
 				}
