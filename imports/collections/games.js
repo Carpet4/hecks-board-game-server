@@ -409,6 +409,7 @@ Meteor.methods({
         this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
         if(this.playerTime < this.fischerParam){
           Meteor.call('games.timeLoss', this.game._id); //need to consider breaking out of method when reachign here
+          return;
         }
         
         this.kifu[this.kifu.length] = "pass";

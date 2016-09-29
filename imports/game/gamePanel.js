@@ -86,7 +86,6 @@ Template.GamePanel.onCreated(function(){
 		}
 	}
 
-	//interval that decreases a second at a time (client only) for the player whose turn it is, 
 	if(!this.game.result){
 		if(typeof(this.clockWorker) == "undefined") {
 	    	this.clockWorker = new Worker("/clockWorker.js");
