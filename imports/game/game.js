@@ -20,7 +20,6 @@ Template.Game.helpers({
 
   imagesReady: ()=> {
     if(Template.instance().imageLoadCheck.get() === 5){
-      console.log(document.images.length);
       return true;
     }
   }

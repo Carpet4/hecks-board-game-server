@@ -18,6 +18,7 @@ Template.GamePanel.onCreated(function(){
 	this.p2Time = this.game.p2Time;
 	this.lastMoveTime = this.game.lastMoveTime;
 	this.countdown = false;
+	this.syncFactor = 0;
 	Session.set('moveNumBool', true);
 
 	if(this.game.p1 === Meteor.userId()){
@@ -45,14 +46,15 @@ Template.GamePanel.onCreated(function(){
 	this.clocksObserver = Games.find(this.gameId, {fields: {"result": 1, "p1Time": 1, "p2Time": 1, "turn": 1, "lastMoveTime": 1, "kifu": 1}}).observe({
 
 		changed: (doc)=>{
-			if(doc.turn % 2 === 1){
-				this.p1Clock.set(doc.p1Time);
-				this.p2Clock.set(Math.max(0, doc.p2Time - ((new Date).getTime() - doc.lastMoveTime)));
-			}
-			else{
-				this.p1Clock.set(Math.max(0, doc.p1Time - ((new Date).getTime() - doc.lastMoveTime)));
-				this.p2Clock.set(doc.p2Time);
-			}
+			var tempTime = (new Date).getTime();
+			this.p1Clock.set(doc.p1Time);
+			this.p2Clock.set(doc.p2Time);
+
+			var tempSync = doc.lastMoveTime - tempTime;
+			if(tempSync > this.syncFactor){
+				this.syncFactor = tempSync;
+				console.log("Your PC clock is unsynced with the global clock");
+			} 
 			this.game.result = doc.result;
 			this.kifu = doc.kifu;
 			if(doc.turn !== this.turn && this.countdown === true){
@@ -92,7 +94,7 @@ Template.GamePanel.onCreated(function(){
 		}
 		this.clockWorker.onmessage = (event)=>{
 		    if(this.turn % 2 === 0){
-		    	this.p1Clock.set(this.p1Time - ((new Date).getTime() - this.lastMoveTime));
+		    	this.p1Clock.set(this.p1Time - this.syncFactor - ((new Date).getTime() - this.lastMoveTime));
 				var time = this.p1Clock.get();
 				if(time < 10100 && this.countdown === false){
 					countdown.currentTime = Math.max(0, (10000 - time)/1000);
@@ -105,7 +107,7 @@ Template.GamePanel.onCreated(function(){
 				}
 			}
 			else{
-				this.p2Clock.set(this.p2Time - ((new Date).getTime() - this.lastMoveTime));
+				this.p2Clock.set(this.p2Time - this.syncFactor - ((new Date).getTime() - this.lastMoveTime));
 				var time = this.p2Clock.get();
 				if(time < 10100 && this.countdown === false){
 					countdown.currentTime = Math.max(0, (10000 - time)/1000);
