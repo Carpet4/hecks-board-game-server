@@ -312,7 +312,6 @@ Meteor.methods({
         return
       }
       
-      console.log("gets here");
       //time left for the player
       if(this.turn % 2 === 0){
         this.playerTime = this.game.p1Time;
