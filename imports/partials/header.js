@@ -44,7 +44,8 @@ Template.Header.helpers({
       Template.instance().notificationCount = count;
     },
     activeGames: ()=>{
-      if(Games.findOne({result: false, $or:[{p1: Meteor.userId()}, {p2: Meteor.userId()}]})){
+      var game = Games.findOne({result: false, $or:[{p1: Meteor.userId()}, {p2: Meteor.userId()}]});
+      if(game){
         if(!Template.instance().activeGame){
           Template.instance().activeGame = true;
           var sound = Template.instance().gameStartSound;
@@ -52,6 +53,10 @@ Template.Header.helpers({
             sound.play()
           }
         }
+        var timeOuter = game.p1Time + 3000 + Math.random() * 10000;
+        Meteor.setTimeout(function(){
+          Meteor.call('games.timeLoss', game._id);
+        }, timeOuter);
         return true;
       }
       Template.instance().activeGame = false;

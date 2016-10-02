@@ -229,7 +229,7 @@ Meteor.methods({
   'games.timeLoss'(id){
     this.moveTime = (new Date).getTime();//current time
     this.game = Games.findOne(id);
-    if(this.userId && this.game && !this.game.result){
+    if(this.game && !this.game.result){
       this.turn = this.game.turn;
       this.lastMoveTime = this.game.lastMoveTime;//time of last move played
 
@@ -311,18 +311,27 @@ Meteor.methods({
       else{
         return
       }
-
+      
+      console.log("gets here");
       //time left for the player
       if(this.turn % 2 === 0){
         this.playerTime = this.game.p1Time;
+        var oppoTime = this.game.p2Time;
         player = 1;
         opponent = 2;
       }
       else{
         this.playerTime = this.game.p2Time;
+        var oppoTime = this.game.p1Time;
         player = 2;
         opponent = 1;
       }
+
+      timeOuter = oppoTime + 3000;
+
+      Meteor.setTimeout(function(){
+        Meteor.call('games.timeLoss', id);
+      }, timeOuter);
 
       
       if(((this.userId === this.game.p1 && this.turn % 2 === 0) || (this.userId === this.game.p2 && this.turn % 2 !== 0)) && this.game.result === false){
