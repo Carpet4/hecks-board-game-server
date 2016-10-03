@@ -39,7 +39,9 @@ Meteor.methods({
           AutomatchPlayers.remove({
             user: player2
           });
-
+          if (Meteor.isServer) {
+            console.log("automatch1", Meteor.users.findOne(player2).username);
+          }
           avarageTime = (tempMinTime + tempMaxTime + this.opponent.minTime + this.opponent.maxTime) / 4;
 
           if(avarageTime > tempMaxTime){
@@ -79,6 +81,9 @@ Meteor.methods({
   		AutomatchPlayers.remove({
         		user: this.userId
       });
+      if (Meteor.isServer) {
+        console.log("automatch2", Meteor.users.findOne(this.userId).username);
+      }
     }
 	}
 

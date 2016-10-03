@@ -607,7 +607,7 @@ Template.Canvas.onRendered(function() {
     this.hexsPaint = new Array();
 
 
-    this.ctx2.fillStyle = "this.bg_color";
+    this.ctx2.fillStyle = this.bg_color;
     this.ctx2.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.drawArc = (x, y)=>{
@@ -926,6 +926,7 @@ Template.Canvas.events({
 			    	}
 			    	else{
 			    		var moveString = m.toString(36) + k.toString(36);
+			    		console.log(moveString);
 			    		if(Session.get('myVar')){
 			    			var variation = Session.get('myVar');
 			    			var placement = instance.turn + 1 - variation[0];

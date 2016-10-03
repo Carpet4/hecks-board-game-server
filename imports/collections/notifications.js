@@ -48,7 +48,10 @@ Meteor.methods({
 			this.opponent = this.notification.sender;
 			if(!Games.findOne(
         	{result: false, $or: [{p1: {$in:[this.userId, this.opponent]}}, {p2: {$in:[this.userId, this.opponent]}}]})){
-        		AutomatchPlayers.remove({user: {$in:[this.userId, this.opponent]}});		
+        		AutomatchPlayers.remove({user: {$in:[this.userId, this.opponent]}});
+        		if (Meteor.isServer) {
+        			console.log("notification", Meteor.users.findOne(this.userId).username, Meteor.users.findOne(this.opponent).username);	
+        		}	
 				Notifications.remove(id);
 				beginMatch(this.userId, this.opponent, this.notification.mainT, this.notification.subT, this.notification.ranked);
 			}
