@@ -9,6 +9,7 @@ if (Meteor.isServer) {
 		if(!Meteor.users.findOne(fields.userId).status.online){//if not loggedin somewhere else
 			console.log(Meteor.users.findOne(fields.userId).username, new Date);
 			AutomatchPlayers.remove({user: fields.userId});
+			console.log(Meteor.users.findOne(fields.userId).username);
 			Meteor.users.update(fields.userId, {$set: {lastRead: {messanger: (new Date).getTime(), community: (new Date).getTime()}}});//change the lastread
 		}
 	});
