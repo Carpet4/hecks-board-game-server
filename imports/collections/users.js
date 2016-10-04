@@ -6,9 +6,9 @@ import { AutomatchPlayers } from './automatchPlayers.js';
 if (Meteor.isServer) {
 
 	UserStatus.events.on("connectionLogout", function(fields){//when closes a tab/logsout
+		console.log(Meteor.users.findOne(fields.userId).username);
 		Meteor.setTimeout(function(){
 			if(!Meteor.users.findOne(fields.userId).status.online){//if not loggedin somewhere else
-				console.log(Meteor.users.findOne(fields.userId).username, new Date);
 				AutomatchPlayers.remove({user: fields.userId});
 				console.log(Meteor.users.findOne(fields.userId).username);
 				Meteor.users.update(fields.userId, {$set: {lastRead: {messanger: (new Date).getTime(), community: (new Date).getTime()}}});//change the lastread
