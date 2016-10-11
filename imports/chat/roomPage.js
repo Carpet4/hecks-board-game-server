@@ -37,7 +37,7 @@ Template.RoomPage.helpers({
 	},
 
 	allowedToInvite: ()=> {
-		roomObject = Rooms.findOne(Template.instance().roomId);
+		var roomObject = Rooms.findOne(Template.instance().roomId);
 		if(roomObject.users.indexOf(Meteor.userId()) > -1 && (roomObject.isPrivate === false || 
 		roomObject.owner === Meteor.userId() || roomObject.moderators.indexOf(Meteor.userId()) > -1 || 
 		roomObject.invPrivi === true)){
@@ -45,13 +45,13 @@ Template.RoomPage.helpers({
 		}
 	},
 
-})
+});
 
 Template.RoomPage.events({
 
   'submit .nameChange'(event, instance) {
   	event.preventDefault();
-  	newName = event.target.roomName.value.toString();
+  	var newName = event.target.roomName.value.toString();
   	Meteor.call('rooms.nameChange', instance.roomId, newName, function(err, result){
   		if(result){
   			FlowRouter.go('/room/' + newName);
@@ -67,27 +67,27 @@ Template.RoomPage.events({
 
   'submit .aboutChange'(event, instance) {
   	event.preventDefault();
-  	newAbout = event.target.roomAbout.value.toString();
+  	var newAbout = event.target.roomAbout.value.toString();
   	Meteor.call('rooms.aboutChange', instance.roomId, newAbout);
   },
 
   'submit .privacyChange'(event, instance) {
   	event.preventDefault();
   	
-  	newPrivacy = event.target.isPrivate.checked;
+  	var newPrivacy = event.target.isPrivate.checked;
   	Meteor.call('rooms.privacyChange', instance.roomId, newPrivacy);
   },
 
   'submit .invPriviChange'(event, instance) {
   	event.preventDefault();
   	
-  	newInvPrivi = event.target.invBul.checked;
+  	var newInvPrivi = event.target.invBul.checked;
   	Meteor.call('rooms.invPriviChange', instance.roomId, newInvPrivi);
   },
 
   'submit .inviteToRoom'(event, instance) {
   	event.preventDefault();
-  	invited = event.target.invited.value;
+  	var invited = event.target.invited.value;
   	if(invited){
 	  	Meteor.call('rooms.invite', instance.roomId, invited);
 	  	event.target.invited.value = "";

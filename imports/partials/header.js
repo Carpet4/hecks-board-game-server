@@ -35,7 +35,7 @@ Template.Header.helpers({
         if(count > Template.instance().notificationCount){
           var sound = Template.instance().notificationSound;
           if(sound.src){
-            sound.play()
+            sound.play();
           }
         }
         Template.instance().notificationCount = count;
@@ -50,7 +50,7 @@ Template.Header.helpers({
           Template.instance().activeGame = true;
           var sound = Template.instance().gameStartSound;
           if(sound.src){
-            sound.play()
+            sound.play();
           }
         }
         var timeOuter = game.p1Time + 3000 + Math.random() * 10000;
@@ -83,7 +83,7 @@ Template.Header.events({
 Template.Notification.helpers({  
 
   roomName: (id)=>{
-    room = Rooms.findOne(id);
+    var room = Rooms.findOne(id);
     if(room)
       return room.name;
   },
@@ -96,9 +96,9 @@ Template.Notification.helpers({
 Template.Notification.helpers({
 
   timeDisplay: (time)=>{
-    hours = Math.floor(time / 3600);
-    minutes = Math.floor((time - hours*3600) / 60);
-    seconds = time - (hours * 3600) - (minutes * 60);
+    var hours = Math.floor(time / 3600);
+    var minutes = Math.floor((time - hours*3600) / 60);
+    var seconds = time - (hours * 3600) - (minutes * 60);
 
     var result = "";
 

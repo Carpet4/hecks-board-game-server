@@ -6,4 +6,4 @@ Template.Top100.helpers({
 	players: ()=>{
 		return Meteor.users.find({}, {sort: {rating: -1}, limit : 100});
 	}
-})
+});

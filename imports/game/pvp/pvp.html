@@ -1,9 +1,9 @@
-<template name="Game">
+<template name="Pvp">
 	{{#if $and Template.subscriptionsReady imagesReady}}	  	
 		<div class="container-fluid gameContainer">	
 			<div class="row gameRow">
 				<div class="col-md-8 gameCol" id="canvasCol">
-			    	{{>Canvas}}
+			    	{{>PvpCanvas}}
 			    </div>
 			    <div class="col-md-4 gameCol" style="border: 2px solid purple; min-height:500px;">
 	  				{{>GamePanel}}

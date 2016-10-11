@@ -12,11 +12,11 @@ Template.RoomsBar.onCreated(function(){
 	CommunityChats = new Meteor.Collection(null);
 	Session.set('currentChat', false);
 
-	lastRead = Session.get('communityLastRead');
+	var lastRead = Session.get('communityLastRead');
 	if(!lastRead){
 		lastRead = Meteor.user().lastRead.community;
 		if(lastRead === Infinity){
-			lastRead = (new Date).getTime();
+			lastRead = Date.now();
 		}
 		else{
 			setTimeout(function(){
@@ -107,7 +107,7 @@ Template.RoomsBar.events({
 	},
 
 	'click .activeRoom'(event){
-		roomId = event.target.value;
+		var roomId = event.target.value;
 		CommunityChats.update({state: "open"}, {$set: {state: "read"}})
 		CommunityChats.update({roomId: roomId}, {$set: {state: "open"}})
 
@@ -142,7 +142,7 @@ Template.AvaRoomOnList.events({
 Template.ActiveRoomOnList.helpers({
 
 	isUnRead: (id)=> {
-		room = CommunityChats.findOne({roomId: id});
+		var room = CommunityChats.findOne({roomId: id});
 		if(room){
 			if(room.state === "unRead"){
 				return true;
@@ -151,7 +151,7 @@ Template.ActiveRoomOnList.helpers({
 	},
 
 	isOpen: (id)=> {
-		room = CommunityChats.findOne({roomId: id});
+		var room = CommunityChats.findOne({roomId: id});
 		if(room){
 			if(room.state === "open"){
 				return true;

@@ -10,7 +10,7 @@ export const MessangerWindows = new Meteor.Collection(null);
 Template.Messanger.onCreated(function(){
 	
 	this.subscribe('messangerRooms');
-	lastRead = Meteor.user().lastRead.messanger;
+	var lastRead = Meteor.user().lastRead.messanger;
 	if(lastRead === Infinity){
 		lastRead = (new Date).getTime();
 	}
@@ -25,7 +25,7 @@ Template.Messanger.onCreated(function(){
 	messangerObserver = Rooms.find({type: "messanger", users: Meteor.userId()}).observe({
 		added: function(doc){
 			if(doc.lastMessage > lastRead){
-				users = doc.users;
+				var users = doc.users;
 				if(users[0] === Meteor.userId()){
 					this.chatee = users[1];
 				}
@@ -44,7 +44,7 @@ Template.Messanger.onCreated(function(){
 				}
 			}
 			else{
-				users = doc.users;
+				var users = doc.users;
 				if(users[0] === Meteor.userId()){
 					this.chatee = users[1];
 				}

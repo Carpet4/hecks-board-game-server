@@ -1,6 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
-import { Games } from './games.js';
 import { beginMatch } from './games.js';
 import { check } from 'meteor/check';
 
@@ -33,8 +31,8 @@ Meteor.methods({
     	  this.opponent = AutomatchPlayers.findOne({minTime: {$lt: tempMaxTime+1}, maxTime: {$gt: tempMinTime-1}, minRank: {$lt: this.rating+1}, maxRank: {$gt: this.rating-1}, rating: {$lt: tempMaxRank+1}, rating: {$gt: tempMinRank-1}});
         if(this.opponent){
 
-          player1 = this.userId;
-          player2 = this.opponent.user;
+          var player1 = this.userId;
+          var player2 = this.opponent.user;
 
           AutomatchPlayers.remove({
             user: player2
@@ -42,8 +40,8 @@ Meteor.methods({
           if (Meteor.isServer) {
             console.log("automatch1", Meteor.users.findOne(player2).username);
           }
-          avarageTime = (tempMinTime + tempMaxTime + this.opponent.minTime + this.opponent.maxTime) / 4;
-
+          var avarageTime = (tempMinTime + tempMaxTime + this.opponent.minTime + this.opponent.maxTime) / 4;
+          var subT;
           if(avarageTime > tempMaxTime){
             subT = tempMaxTime;
           }

@@ -44,7 +44,6 @@ Template.CommunityMessage.helpers({
 
 Template.Messages.events({
   'submit .new-message'(event) {
-    console.log((new Date).getTime());
     // Prevent default browser form submit
     event.preventDefault();
  
@@ -59,7 +58,6 @@ Template.Messages.events({
    
       // Clear form
       target.text.value = '';
-      console.log((new Date).getTime());
     }
   },
 });

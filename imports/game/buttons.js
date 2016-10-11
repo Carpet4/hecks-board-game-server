@@ -5,11 +5,11 @@ import './buttons.html';
 
 Template.Buttons.events({
 
-	'click .resign'(event, instance) {
+	'click .resign'() {
       Meteor.call('games.resign', FlowRouter.getParam('id'));
     },
 
-    'click .pass'(event, instance) {
+    'click .pass'() {
       Meteor.call('games.pass', FlowRouter.getParam('id'));
     }
 });

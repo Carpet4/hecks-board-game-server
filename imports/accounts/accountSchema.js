@@ -9,8 +9,8 @@ Accounts.onCreateUser((options, user) => {
   user.activeGames = [];
   user.lastRead = 0;
   if(Rooms.findOne({name: "Main"})){
-  	roomId = Rooms.findOne({name: "Main"})._id;
-	  Rooms.update(roomId, {$push: {users: user._id}})
+  	var roomId = Rooms.findOne({name: "Main"})._id;
+	  Rooms.update(roomId, {$push: {users: user._id}});
   }
 
   return user;

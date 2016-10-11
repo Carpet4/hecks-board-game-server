@@ -1,0 +1,38 @@
+<Template name="PvbPanel">
+	<table class="gamePanel">
+
+		<tr>
+	  		<td style="color: blue;"><h2>You</h2></td>
+	  		<td style="color: red;"><h3>Botty McStupid</h3></td>
+	  	</tr>
+
+	  
+      	<tr>
+      		{{#if $.Session.get 'isGameFinished'}}
+				<td>
+					<button class="shareVar mainButton">Share Variation</button>
+				</td>
+				<td>
+					<div style="white-space: nowrap;">
+					
+						<button class="mainButton back10"><span class="glyphicon glyphicon-backward"></span></button><button class="mainButton back1"><span class="glyphicon glyphicon-triangle-left"></span></button><form style="display: inline;" class="changeMove" autocomplete=off><input id="moveNumber" type="text" name="num" value={{moveNumInitialValue}}></form><button class="mainButton forward1"><span class="glyphicon glyphicon-triangle-right"></span></button><button class="mainButton forward10"><span class="glyphicon glyphicon-forward"></span></button>
+					
+					</div>
+				</td>
+      		{{else}}
+			<td>
+				<button class="resign mainButton">Resign</button>
+			</td>	
+			<td>
+				<button class="pass mainButton">Pass</button>
+			</td>
+			{{/if}}
+		</tr>
+		<tr>
+
+	  		<td colspan="2" class="blabla {{#if $.Session.get 'isGameFinished'}}lightblueText{{/if}}">{{$.Session.get 'turn'}}</td>
+
+	  	</tr>		
+    </table>
+
+</Template>

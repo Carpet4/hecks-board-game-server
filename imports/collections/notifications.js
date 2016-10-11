@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
 import { Games } from './games.js';
 import { AutomatchPlayers } from './automatchPlayers.js';
 import { beginMatch } from './games.js';

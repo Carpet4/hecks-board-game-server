@@ -17,7 +17,7 @@ if (Meteor.isServer) {
 
   Meteor.startup(function() {
       Meteor.setInterval(()=> {
-        var min = (new Date).getTime() - 3600000 * 24;
+        var min = Date.now() - 3600000 * 24;
         Messages.remove({
           timeStamp: {$lt: min}
         });
@@ -26,8 +26,8 @@ if (Meteor.isServer) {
 
 	Meteor.publish('communityMessages', function messagesPublication() {
     if(this.userId){
-      chatRooms = Rooms.find({type: "community", users:this.userId}, {fields: {_id: 1}}).fetch();
-      for(i = 0; i < chatRooms.length; i ++){
+      var chatRooms = Rooms.find({type: "community", users:this.userId}, {fields: {_id: 1}}).fetch();
+      for(var i = 0; i < chatRooms.length; i ++){
         chatRooms[i] = chatRooms[i]._id;
       }
       return Messages.find({room: {$in: chatRooms}});
@@ -60,8 +60,8 @@ Meteor.methods({
   'messages.gameInsert'(text, id){
     check(text, String);
     if(this.userId){
-      tempName = Meteor.users.findOne(this.userId).username;
-      tempTime = (new Date).getTime();
+      var tempName = Meteor.users.findOne(this.userId).username;
+      var tempTime = Date.now();
 
       Messages.insert({
         text: text,
@@ -81,8 +81,8 @@ Meteor.methods({
       check(variation[i], String);
     }
     if(this.userId){
-      tempName = Meteor.users.findOne(this.userId).username;
-      tempTime = (new Date).getTime();
+      var tempName = Meteor.users.findOne(this.userId).username;
+      var tempTime = Date.now();
       Messages.insert({
         variation: variation,
         text: "",
@@ -98,10 +98,10 @@ Meteor.methods({
   'messages.messangerInsert'(text, room){
     check(text, String);
     if(this.userId){
-      tempRoom = Rooms.findOne(room);
+      var tempRoom = Rooms.findOne(room);
       if(tempRoom && tempRoom.users.indexOf(this.userId) > -1){
-        tempName = Meteor.users.findOne(this.userId).username;
-        tempTime = (new Date).getTime();
+        var tempName = Meteor.users.findOne(this.userId).username;
+        var tempTime = Date.now();
 
         Messages.insert({
           text: text,
@@ -119,10 +119,10 @@ Meteor.methods({
 	'messages.insert'(text, room){ //need to check if the person is in the room
     check(text, String);
     if(this.userId){
-      tempRoom = Rooms.findOne(room);
+      var tempRoom = Rooms.findOne(room);
       if(tempRoom && tempRoom.users.indexOf(this.userId) > -1){
-        tempName = Meteor.users.findOne(this.userId).username;
-        tempTime = (new Date).getTime();
+        var tempName = Meteor.users.findOne(this.userId).username;
+        var tempTime = Date.now();
 
     		Messages.insert({
           text: text,

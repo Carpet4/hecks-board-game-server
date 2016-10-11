@@ -42,7 +42,7 @@ Template.SingleGameOnList.helpers({
 
 Template.Profile.events({
 
-	'submit #submitProfile'(event, instance) { //cannot change back to empty, need to fix
+	'submit #submitProfile'(event) { //cannot change back to empty, need to fix
   	event.preventDefault();
     event.stopPropagation();
     if(event.target.box.value.length > 0){
@@ -51,7 +51,6 @@ Template.Profile.events({
   },
 
   'click #changePwd'(event, instance){
-    console.log(instance.changePassword);
     instance.changePassword.set(!instance.changePassword.get());
     if(instance.changePassword.get()){
       AccountsTemplates.setState('changePwd');

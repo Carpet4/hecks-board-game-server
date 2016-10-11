@@ -67,10 +67,17 @@ FlowRouter.route('/play', {
 	}
 });
 
+FlowRouter.route('/bot', {
+	name:'bot',
+	action(){
+		BlazeLayout.render('MainLayout', {main:'Pvb'});
+	}
+});
+
 FlowRouter.route('/game/:id', {
 	name: 'game',
 	action(){
-		BlazeLayout.render('MainLayout', {main: 'Game'});
+		BlazeLayout.render('MainLayout', {main: 'Pvp'});
 	}
 });
 

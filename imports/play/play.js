@@ -51,15 +51,12 @@ Template.Play.helpers({
 Template.Play.events({
 
 	'click .automatchInsert'(event, instance) {
-    console.log("1");
     if(!AutomatchPlayers.findOne({user: Meteor.userId()})){
-      console.log("2");
       Meteor.call('automatchPlayers.insert', instance.minTime, instance.maxTime, instance.minRank, instance.maxRank);
     }
   },
 
-  'click .automatchRemove'(event, instance) {
-
+  'click .automatchRemove'() {
       Meteor.call('automatchPlayers.remove');
   },
 

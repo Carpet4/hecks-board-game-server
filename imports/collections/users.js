@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
 import { AutomatchPlayers } from './automatchPlayers.js';
 
@@ -11,7 +10,7 @@ if (Meteor.isServer) {
 			if(!Meteor.users.findOne(fields.userId).status.online){//if not loggedin somewhere else
 				AutomatchPlayers.remove({user: fields.userId});
 				console.log(Meteor.users.findOne(fields.userId).username);
-				Meteor.users.update(fields.userId, {$set: {lastRead: {messanger: (new Date).getTime(), community: (new Date).getTime()}}});//change the lastread
+				Meteor.users.update(fields.userId, {$set: {lastRead: {messanger: Date.now(), community: Date.now()}}});//change the lastread
 			}
 		}, 15000);
 	});
@@ -107,7 +106,7 @@ Meteor.methods({
 
 	'users.infiniteLastReadM'(){
 		if(this.userId){
-			lastRead = Meteor.users.findOne(this.userId).lastRead;
+			var lastRead = Meteor.users.findOne(this.userId).lastRead;
 			lastRead.messanger = Infinity;
 			Meteor.users.update(this.userId, {$set: {lastRead: lastRead}});
 		}
@@ -115,7 +114,7 @@ Meteor.methods({
 	//changes back to number at the beginning of this file
 	'users.infiniteLastReadC'(){
 		if(this.userId){
-			lastRead = Meteor.users.findOne(this.userId).lastRead;
+			var lastRead = Meteor.users.findOne(this.userId).lastRead;
 			lastRead.community = Infinity;
 			Meteor.users.update(this.userId, {$set: {lastRead: lastRead}});
 		}

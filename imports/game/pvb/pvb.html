@@ -1,0 +1,14 @@
+<template name="Pvb">
+	{{#if $and Template.subscriptionsReady imagesReady}}	  	
+		<div class="container-fluid gameContainer">	
+			<div class="row gameRow">
+				<div class="col-md-8 gameCol" id="canvasCol">
+			    	{{>PvbCanvas}}
+			    </div>
+			    <div class="col-md-4 gameCol" style="border: 2px solid purple; min-height:500px;">
+	  				{{>PvbPanel}}
+			    </div>
+  			</div>
+  		</div>	      
+    {{/if}}
+</template>

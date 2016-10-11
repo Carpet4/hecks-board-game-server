@@ -65,11 +65,11 @@ Template.RoomUserButton.events({
     },
 
     'click .startChat'(event) {
-    	chatee = event.target.value;
+    	var chatee = event.target.value;
     	this.room = Rooms.findOne({type: "messanger", users: {$all: [Meteor.userId(), chatee]}});
        	if(!this.room){
        		Meteor.call('rooms.createMessanger', chatee, function (err, id){
-       		MessangerWindows.insert({roomId: id, state: "open", chatee: chatee})
+       		   MessangerWindows.insert({roomId: id, state: "open", chatee: chatee});
        		});
        	}
        	else{
@@ -96,11 +96,11 @@ Template.UserButton.events({
   },
 
   'click .startChat'(event) {
-  	chatee = event.target.value;
+  	var chatee = event.target.value;
   	this.room = Rooms.findOne({type: "messanger", users: {$all: [Meteor.userId(), chatee]}});
    	if(!this.room){
    		Meteor.call('rooms.createMessanger', chatee, function (err, id){
-   		MessangerWindows.insert({roomId: id, state: "open", chatee: chatee})
+   		 MessangerWindows.insert({roomId: id, state: "open", chatee: chatee});
    		});
    	}
    	else{
@@ -117,7 +117,7 @@ Template.UserButton.events({
 
 Template.PlayModal.events({  
 
-    'submit .gameInvite'(event, instance) {
+    'submit .gameInvite'(event) {
     	event.preventDefault();
       var isRanked = event.target.isRanked.checked;
     	Meteor.call('notifications.gameInvite', event.target.submit.value, Number(event.target.timeMain.value), Number(event.target.timeInc.value), isRanked);

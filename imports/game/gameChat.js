@@ -35,7 +35,7 @@ Template.GameChat.helpers({
 Template.GameChat.events({
 
   'click .varButton'(event){
-    variation = Messages.findOne(event.target.value).variation;
+    var variation = Messages.findOne(event.target.value).variation;
     Session.set('globalVar', variation);
   },
 
