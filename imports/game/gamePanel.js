@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Games } from '../../imports/collections/games.js';
-import { countdown } from './pvp/pvp.js';
+import { countdown } from './gameSounds/gameSounds.js';
 import './gamePanel.html';
 
 Template.GamePanel.onCreated(function(){
