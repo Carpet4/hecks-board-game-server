@@ -145,7 +145,7 @@ Template.PvbCanvas.onRendered(function() {
 
 	this.autorun(()=>{
 		var pass = Session.get('pvbPass');
-		if(pass){
+		if(pass && (this.turn%2) + 1 === this.player){
 			this.turn++;
 			Session.set('turn', this.turn);
 			makeTurn("pass", this.turn, this.dotsData, this.hexsData, this.lastMove, this.kifu, this.result);
@@ -168,9 +168,9 @@ Template.PvbCanvas.onRendered(function() {
 			else{
 				this.botWorker.postMessage("pass");
 			}
-			Session.set('pvbPass', false);
 			passSound.play();
 		}
+		Session.set('pvbPass', false);
 	});
 
 	this.autorun(()=>{

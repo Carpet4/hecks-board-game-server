@@ -236,8 +236,8 @@ var counter = function(playoutData){
 		return 2;
 };
 
-var applyToTree = function(result){
-	var wFactor = (bot === result) ? 1 : 0;
+var applyToTree = function(MCTree){
+	var wFactor = (bot === randomResult) ? 1 : 0;
 	var tempTree = MCTree;
 	tempTree.visited ++;
 	tempTree.won += wFactor;
@@ -250,6 +250,7 @@ var applyToTree = function(result){
 		tempTree.won += wFactor;
 	}
 	treeVar = [];
+	randomResult = false;
 };
 
 var playout = function(player, opponent, playoutData, playoutPool){
@@ -312,8 +313,7 @@ var playout = function(player, opponent, playoutData, playoutPool){
 					}
 				}
 			}
-			var result = counter(playoutData);
-			applyToTree(result);
+			randomResult = counter(playoutData);
 			return;
 		}
 		else{
@@ -421,7 +421,7 @@ var UCTLoop = function(UCTTree, UCTPool, UCTData){
 };
 
 
-var randomGame = function(UCTPool){
+var randomGame = function(UCTPool, MCTree){
 	var playoutPool = movePool.slice();
 	var UCTData = [];
 	var i;
@@ -630,13 +630,16 @@ var movePoolUpdater = function(movePool, dotData){
 };
 
 var analyze = function(){
+	var MCTree = {visited: 0, won: 0};
 	var bestWR = 0;
 	var move = false;
 	movePoolUpdater(movePool, dotData);
 	var UCTPool = UCTPoolCreator();
-	var i;
-	for(i=0; i<10000; i++){
-		randomGame(UCTPool);
+	var initialDate = Date.now() + 10000;
+	while(Date.now() < initialDate){
+		randomGame(UCTPool, MCTree);
+		if(randomResult)
+			applyToTree(MCTree);
 	}
 	Object.keys(MCTree).forEach(function (property) {
 		if(property.length === 2){
@@ -654,7 +657,7 @@ var analyze = function(){
 		move = "res";
 	}
 	console.log(bestWR, move);
-	console.log(MCTree);
+	MCTree = null;
     return move;
 };
 
@@ -689,14 +692,6 @@ var makeTurn = (moveString)=>{
 			        opponentHasLibs(y-1, x, opponent, dotData, movePool);
 			        opponentHasLibs(y+1, x-1, opponent, dotData, movePool);
 			        opponentHasLibs(y+1, x+1, opponent, dotData, movePool);
-			    }
-			    if(MCTree[moveString]){
-			    	//MCTree = MCTree[moveString];
-			    	MCTree = {visited: 0, won: 0};
-			    	//console.log(MCTree);
-			    }
-			    else{
-			    	MCTree = {visited: 0, won: 0};
 			    }
 			}
 		}		
@@ -770,14 +765,14 @@ var dots = [
             [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1],
 		];
 
+var randomResult = false;
 var yLength = dots.length;
 var xLength = dots[0].length;
 var stoneRemoverCount = 0;
 var dotData = dotArrayCreator();
 var movePool = movePoolCreator();
-var MCTree = {visited: 0, won: 0};
 var treeVar = [];
-var firstLiners = ["50", "70", "90", "b0", "d0", "5j", "7j", "9j", "bj", "dj", "41", "33", "25", "17", "09", "e1", "f3", "g5", "h7", "i9", "0a", "1c", "2e", "3g", "4i", "ia", "hc", "ge", "fg", "ei"]
+var firstLiners = ["50", "70", "90", "b0", "d0", "5j", "7j", "9j", "bj", "dj", "41", "33", "25", "17", "09", "e1", "f3", "g5", "h7", "i9", "0a", "1c", "2e", "3g", "4i", "ia", "hc", "ge", "fg", "ei"];
 var turn = 0;
 var pTurn = 0; //playout turn
 //var playoutCounter = 0;

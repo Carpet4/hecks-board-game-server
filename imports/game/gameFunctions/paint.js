@@ -136,7 +136,7 @@ export const boardPainter = (ctx, ctx2, hexsPaint, dotsPaint, hexsData, dotsData
 	  				else{
 	  					ctx.drawImage(dotImgs[tempOwner], dotsPaint[i][j].xCntr - radius, dotsPaint[i][j].yCntr - radius, radius * 2, radius * 2);
 	  				}
-	  				dotsPaint.owner = tempOwner;
+	  				dotsPaint[i][j].owner = tempOwner;
 
 	  			}
       		}
