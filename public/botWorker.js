@@ -325,7 +325,7 @@ var playout = function(player, opponent, playoutData, playoutPool){
 	}
 };
 
-var UCTLoop = function(UCTTree, UCTPool, UCTData){
+var UCTLoop = function(UCTTree, UCTPool, UCTData, turn){
 	var tOption; //tree option
 	var vOption = -1; // value option
 	var biggestOption = {value: 0};
@@ -335,7 +335,7 @@ var UCTLoop = function(UCTTree, UCTPool, UCTData){
 	for(var i=0; i<UCTPool.length; i++){
 		tOption = UCTTree[UCTPool[i]];
 		if(tOption){// need to change it to opposite when its opponent's turn
-			if((pTurn%2) + 1 === bot){
+			if((turn%2) + 1 === bot){
 				winRatio = tOption.won/tOption.visited;
 			}
 			else{
@@ -346,7 +346,7 @@ var UCTLoop = function(UCTTree, UCTPool, UCTData){
 		else{
 			x = parseInt(UCTPool[i].charAt(0), 36);
 			y = parseInt(UCTPool[i].charAt(1), 36);
-			if(hasLibs(y, x, (pTurn%2) + 1, UCTData)){
+			if(hasLibs(y, x, (turn%2) + 1, UCTData)){
 				vOption = 10000 + Math.random();
 			}
 			else{
@@ -364,8 +364,8 @@ var UCTLoop = function(UCTTree, UCTPool, UCTData){
 		x = parseInt(index.charAt(0), 36);
 		y = parseInt(index.charAt(1), 36);
 		treeVar.push(index);
-		pTurn++;
-		opponent = (pTurn % 2) + 1;
+		turn++;
+		opponent = (turn % 2) + 1;
 		player = 3 - opponent;
 		UCTData[y][x] = player;
 	    if(y&1){
@@ -381,47 +381,45 @@ var UCTLoop = function(UCTTree, UCTPool, UCTData){
 	    UCTPool.splice(biggestOption.index, 1);
 	    if(UCTTree[index]){
 	    	tempTree = UCTTree[index];
-	    	UCTLoop(tempTree, UCTPool, UCTData);
+	    	UCTLoop(tempTree, UCTPool, UCTData, turn);
 	    }
 	    else{
 	    	UCTTree[index] = {visited: 0, won: 0};
 	    	playout(opponent, player, UCTData, UCTPool);
-	    	pTurn = turn;
 	    }
 	}
 	else{ //this should move to only the first loop
 		var iRandomizer = Math.floor(Math.random()*yLength);
 		var jRandomizer = Math.floor(Math.random()*xLength);
-		player = (pTurn%2) + 1;
+		player = (turn%2) + 1;
 		for(i=0; i<yLength; i++){
 			var modifiedI = (i + iRandomizer) % yLength;
 			for(var j=0; j<xLength; j++){
 				var modifiedJ = (j + jRandomizer) % xLength;
 				if(UCTData[modifiedI][modifiedJ] === player + 3){
 					if(hasLibs(modifiedI, modifiedJ, player, UCTData)){
-						pTurn++;
+						turn++;
 						UCTData[modifiedI][modifiedJ] = player;
 						index = modifiedJ.toString(36) + modifiedI.toString(36);
 						treeVar.push(index);
 						if(UCTTree[index]){
 					    	tempTree = UCTTree[index];
-					    	UCTLoop(tempTree, UCTPool, UCTData);
+					    	UCTLoop(tempTree, UCTPool, UCTData, turn);
 					    }
 					    else{
 					    	UCTTree[index] = {visited: 0, won: 0};
 					    	playout(3-player, player, UCTData, UCTPool);
-					    	pTurn = turn;
 					    }
 					}
 				}
 			}
 		}
 	}
-	//pTurn = turn; mabye get rid of pturn entirely, anyway need to make sure pturn is reset even if last loop fails;
+
 };
 
 
-var randomGame = function(UCTPool, MCTree){
+var randomGame = function(UCTPool, MCTree, turn){
 	var playoutPool = movePool.slice();
 	var UCTData = [];
 	var i;
@@ -438,7 +436,7 @@ var randomGame = function(UCTPool, MCTree){
 	for(i=0; i<UCTPool.length; i++){
 		tOption = UCTTree[UCTPool[i]];
 		if(tOption){// need to change it to opposite when its opponent's turn
-			if((pTurn%2) + 1 === bot){
+			if((turn%2) + 1 === bot){
 				winRatio = tOption.won/tOption.visited;
 			}
 			else{
@@ -461,8 +459,8 @@ var randomGame = function(UCTPool, MCTree){
 		x = parseInt(index.charAt(0), 36);
 		y = parseInt(index.charAt(1), 36);
 		treeVar.push(index);
-		pTurn++;
-		opponent = (pTurn % 2) + 1;
+		turn++;
+		opponent = (turn % 2) + 1;
 		player = 3 - opponent;
 		UCTData[y][x] = player;
 	    if(y&1){
@@ -479,36 +477,34 @@ var randomGame = function(UCTPool, MCTree){
 	    playoutPool.splice(poolIndex, 1);
 	    if(UCTTree[index]){
 	    	tempTree = UCTTree[index];
-	    	UCTLoop(tempTree, playoutPool, UCTData);
+	    	UCTLoop(tempTree, playoutPool, UCTData, turn);
 	    }
 	    else{
 	    	UCTTree[index] = {visited: 0, won: 0};
 	    	playout(opponent, player, UCTData, playoutPool);
-	    	pTurn = turn;
 	    }
 	}
 	else{ //this should move to only the first loop
 		var iRandomizer = Math.floor(Math.random()*yLength);
 		var jRandomizer = Math.floor(Math.random()*xLength);
-		player = (pTurn%2) + 1;
+		player = (turn%2) + 1;
 		for(i=0; i<yLength; i++){
 			var modifiedI = (i + iRandomizer) % yLength;
 			for(var j=0; j<xLength; j++){
 				var modifiedJ = (j + jRandomizer) % xLength;
 				if(UCTData[modifiedI][modifiedJ] === player + 3){
 					if(hasLibs(modifiedI, modifiedJ, player, UCTData)){
-						pTurn++;
+						turn++;
 						UCTData[modifiedI][modifiedJ] = player;
 						index = modifiedJ.toString(36) + modifiedI.toString(36);
 						treeVar.push(index);
 						if(UCTTree[index]){
 					    	tempTree = UCTTree[index];
-					    	UCTLoop(tempTree, UCTPool, UCTData);
+					    	UCTLoop(tempTree, UCTPool, UCTData, turn);
 					    }
 					    else{
 					    	UCTTree[index] = {visited: 0, won: 0};
 					    	playout(3-player, player, UCTData, UCTPool);
-					    	pTurn = turn;
 					    }
 					}
 				}
@@ -637,7 +633,7 @@ var analyze = function(){
 	var UCTPool = UCTPoolCreator();
 	var initialDate = Date.now() + 10000;
 	while(Date.now() < initialDate){
-		randomGame(UCTPool, MCTree);
+		randomGame(UCTPool, MCTree, turn);
 		if(randomResult)
 			applyToTree(MCTree);
 	}
@@ -663,7 +659,6 @@ var analyze = function(){
 
 var makeTurn = (moveString)=>{
 	turn++;
-	pTurn = turn;
 	var lastMove;
 	if(moveString && moveString.length === 2)
 		lastMove = true;
@@ -697,11 +692,20 @@ var makeTurn = (moveString)=>{
 		}		
 	}
 	if((turn%2) + 1 === bot){
-		var myMove = analyze();
+		var myMove;
+		if(moveString === "pass" && turn > 100){
+			var count = counter(dotData);
+			var winner = (bot === count) ? true : false;
+			if(winner)
+				myMove = "pass";
+			else
+				myMove = analyze();
+		}
+		else
+			myMove = analyze();
         postMessage(myMove);
 		makeTurn(myMove);
 	}
-     
 };
 
 self.onmessage = (event)=>{
@@ -774,7 +778,6 @@ var movePool = movePoolCreator();
 var treeVar = [];
 var firstLiners = ["50", "70", "90", "b0", "d0", "5j", "7j", "9j", "bj", "dj", "41", "33", "25", "17", "09", "e1", "f3", "g5", "h7", "i9", "0a", "1c", "2e", "3g", "4i", "ia", "hc", "ge", "fg", "ei"];
 var turn = 0;
-var pTurn = 0; //playout turn
 //var playoutCounter = 0;
 var bot;
 var human;

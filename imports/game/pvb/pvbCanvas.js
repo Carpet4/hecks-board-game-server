@@ -42,9 +42,12 @@ Template.PvbCanvas.onCreated(function(){
 	this.lastGVar = false;
 	if(!this.result){
 		Session.set('isGameFinished', false);
+		Session.set('canStartReview', false);
+
 	}
 	else if(!Session.get('isGameFinished')){
 		Session.set('isGameFinished', true);
+		
 
 	}
 

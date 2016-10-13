@@ -240,22 +240,22 @@ var stoneCheck = (y, x, playah, libsCheckArray, dotsData)=>{
 Meteor.methods({
 
   'games.timeLoss'(id){
-    this.moveTime = Date.now();//current time
-    this.game = Games.findOne(id);
-    if(this.game && !this.game.result){
-      this.turn = this.game.turn;
-      this.lastMoveTime = this.game.lastMoveTime;//time of last move played
-      var modifier;
+    var moveTime = Date.now();//current time
+    var game = Games.findOne(id);
+    if(game && !game.result){
+      var turn = game.turn;
+      var lastMoveTime = game.lastMoveTime;//time of last move played
+      var modifier, playerTime;
       //time left for the player
-      if(this.turn % 2 === 0){
-        this.playerTime = this.game.p1Time;
+      if(turn % 2 === 0){
+        playerTime = game.p1Time;
         modifier = {$set: {
           result: "G+T",
           p1Time: 0
         }};
       }
       else{
-        this.playerTime = this.game.p2Time;
+        playerTime = game.p2Time;
         modifier = {$set: {
           result: "S+T",
           p2Time: 0
@@ -263,19 +263,19 @@ Meteor.methods({
       }
 
       //time left after reducing time spent
-      this.playerTime -= this.moveTime - this.lastMoveTime;
-      if(this.playerTime <= 0){
+      playerTime -= moveTime - lastMoveTime;
+      if(playerTime <= 0){
 
 
         Games.update(id, modifier);
 
         //rating adjustment
-        if (Meteor.isServer && this.game.ranked) {
-          if(this.turn > 3){
-            var Qa = this.game.rating1;
-            var Qb = this.game.rating2;
+        if (Meteor.isServer && game.ranked) {
+          if(turn > 3){
+            var Qa = game.rating1;
+            var Qb = game.rating2;
             var ratingOperator;
-            if(this.turn % 2 !== 0){
+            if(turn % 2 !== 0){
               ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
 
               Qa += ratingOperator;
@@ -290,9 +290,9 @@ Meteor.methods({
             }
 
 
-            Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
+            Meteor.users.update(game.p1, {$set: {rating: Qa}});
 
-            Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
+            Meteor.users.update(game.p2, {$set: {rating: Qb}});
           }
         }
       } 
@@ -306,34 +306,35 @@ Meteor.methods({
     if(Meteor.isServer) {
       check(k, Number);
       check(m, Number);
-      this.moveTime = Date.now();//current time
-      this.game = Games.findOne(id);
-      if(!this.game || !this.userId){
+      var moveTime = Date.now();//current time
+      var game = Games.findOne(id);
+      if(!game || !this.userId){
         return;
       }
-      this.dotsData = this.game.dotsData;
-      this.turn = this.game.turn;
-      this.kifu = this.game.kifu;
-      this.lastMoveTime = this.game.lastMoveTime;//time of last move played
-      this.fischerParam = this.game.subT * 1000; // to be changed later into time setting
-      if(this.dotsData[k] && this.dotsData[k][m] !== undefined){
-        this.dot = this.dotsData[k][m];
+      var dotsData = game.dotsData;
+      var turn = game.turn;
+      var kifu = game.kifu;
+      var lastMoveTime = game.lastMoveTime;//time of last move played
+      var fischerParam = game.subT * 1000; // to be changed later into time setting
+      var dot;
+      if(dotsData[k] && dotsData[k][m] !== undefined){
+        dot = dotsData[k][m];
       }
       else{
         return;
       }
       
-      var oppoTime, player, opponent;
+      var oppoTime, player, opponent, playerTime;
       //time left for the player
-      if(this.turn % 2 === 0){
-        this.playerTime = this.game.p1Time;
-        oppoTime = this.game.p2Time;
+      if(turn % 2 === 0){
+        playerTime = game.p1Time;
+        oppoTime = game.p2Time;
         player = 1;
         opponent = 2;
       }
       else{
-        this.playerTime = this.game.p2Time;
-        oppoTime = this.game.p1Time;
+        playerTime = game.p2Time;
+        oppoTime = game.p1Time;
         player = 2;
         opponent = 1;
       }
@@ -345,57 +346,57 @@ Meteor.methods({
       }, timeOuter);
 
       
-      if(((this.userId === this.game.p1 && this.turn % 2 === 0) || (this.userId === this.game.p2 && this.turn % 2 !== 0)) && this.game.result === false){
-        if(this.dot === 0 && hasLibs(k, m, player, this.game)){         
-          this.dotsData[k][m] = player;
+      if(((this.userId === game.p1 && turn % 2 === 0) || (this.userId === game.p2 && turn % 2 !== 0)) && game.result === false){
+        if(dot === 0 && hasLibs(k, m, player, game)){         
+          dotsData[k][m] = player;
           //time left after reducing time spent
-          this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
-          if(this.playerTime < this.fischerParam){
+          playerTime -= moveTime - lastMoveTime - fischerParam;
+          if(playerTime < fischerParam){
             Meteor.call('games.timeLoss', id); //need to see if requires to break from method if this is true
             return;
           }
           
           var moveString = m.toString(36) + k.toString(36);
-          this.kifu[this.kifu.length] = moveString;
-          this.lastMove = moveString;
+          kifu[kifu.length] = moveString;
+          var lastMove = moveString;
 
           //dealing with opponent's touching stones
 
           if(k%2 === 0){
-            opponentHasLibs(k-1, m, opponent, this.game);
-            opponentHasLibs(k+1, m-1, opponent, this.game);
-            opponentHasLibs(k+1, m+1, opponent, this.game);
+            opponentHasLibs(k-1, m, opponent, game);
+            opponentHasLibs(k+1, m-1, opponent, game);
+            opponentHasLibs(k+1, m+1, opponent, game);
           }
           else{
-            opponentHasLibs(k-1, m-1, opponent, this.game);
-            opponentHasLibs(k-1, m+1, opponent, this.game);
-            opponentHasLibs(k+1, m, opponent, this.game);
+            opponentHasLibs(k-1, m-1, opponent, game);
+            opponentHasLibs(k-1, m+1, opponent, game);
+            opponentHasLibs(k+1, m, opponent, game);
           }
 
 
 
 
           var modifier;
-          if(this.turn % 2 === 0){
+          if(turn % 2 === 0){
             modifier = {$set: {
-              dotsData: this.dotsData,
-              turn: this.turn + 1,
-              kifu: this.kifu,
+              dotsData: dotsData,
+              turn: turn + 1,
+              kifu: kifu,
               passCount: 0,
-              lastMove: this.lastMove,
-              lastMoveTime: this.moveTime,
-              p1Time: this.playerTime
+              lastMove: lastMove,
+              lastMoveTime: moveTime,
+              p1Time: playerTime
             }};
           }
           else{
             modifier = {$set: {
-              dotsData: this.dotsData,
-              turn: this.turn + 1,
-              kifu: this.kifu,
+              dotsData: dotsData,
+              turn: turn + 1,
+              kifu: kifu,
               passCount: 0,
-              lastMove: this.lastMove,
-              lastMoveTime: this.moveTime,
-              p2Time: this.playerTime
+              lastMove: lastMove,
+              lastMoveTime: moveTime,
+              p2Time: playerTime
             }};
           }
 
@@ -407,41 +408,40 @@ Meteor.methods({
   },
 
   'games.pass'(id) {
-    this.game = Games.findOne(id); 
-    if(this.userId && this.game && this.game.result === false){
-      this.turn = this.game.turn;
-      this.kifu = this.game.kifu;
-      if((this.userId === this.game.p1 && this.game.turn % 2 === 0) || (this.userId === this.game.p2 && this.game.turn % 2 !== 0)){
-
-        if(this.turn % 2 === 0){
-          this.playerTime = this.game.p1Time;
+    var game = Games.findOne(id); 
+    if(this.userId && game && game.result === false){
+      var turn = game.turn;
+      var kifu = game.kifu;
+      if((this.userId === game.p1 && turn % 2 === 0) || (this.userId === game.p2 && turn % 2 !== 0)){
+        var playerTime;
+        if(turn % 2 === 0){
+          playerTime = game.p1Time;
         }
         else{
-          this.playerTime = this.game.p2Time;
+          playerTime = game.p2Time;
         }
 
-        var tempPassCount = this.game.passCount;
-        var tempTurn = this.game.turn;
-        this.moveTime = Date.now();
-        this.lastMoveTime = this.game.lastMoveTime;
-        this.fischerParam = this.game.subT * 1000;
+        var tempPassCount = game.passCount;
+        var moveTime = Date.now();
+        var lastMoveTime = game.lastMoveTime;
+        var fischerParam = game.subT * 1000;
         
-        this.playerTime -= this.moveTime - this.lastMoveTime - this.fischerParam;
-        if(this.playerTime < this.fischerParam){
-          Meteor.call('games.timeLoss', this.game._id); //need to consider breaking out of method when reachign here
+        playerTime -= moveTime - lastMoveTime - fischerParam;
+        if(playerTime < fischerParam){
+          Meteor.call('games.timeLoss', game._id); //need to consider breaking out of method when reachign here
           return;
         }
         
-        this.kifu[this.kifu.length] = "pass";
+        kifu[kifu.length] = "pass";
         
         var modifier;
-        if(this.game.passCount === 1){
+        if(game.passCount === 1){
 
           //tells the loop which hexs are legit
 
 
           //holds the hexs values while looping
-          this.hexsData = [
+          var hexsData = [
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -454,41 +454,40 @@ Meteor.methods({
                           ];
 
                       
-          this.dotsData = this.game.dotsData;
+          var dotsData = game.dotsData;
 
           //changes values of hexagons
           var changeValues = function(y, x, operator){
             if(hexs[y] && hexs[y][x] === 0){
-              that.hexsData[y][x] += operator;
+              hexsData[y][x] += operator;
             }
           };
 
           //searching for stones
-          var that = this;
-          var i, j;
+          var i, j, operator;
           for(i = 0; i < dots.length; i++){
             for(j = 0; j < dots[0].length; j++){
               if(dots[i][j] === 0){
                 //find the owner
-                if(this.dotsData[i][j] === 1){
-                  this.operator = 1;
+                if(dotsData[i][j] === 1){
+                  operator = 1;
                 }
-                else if(this.dotsData[i][j] === 2){
-                  this.operator = -1;
+                else if(dotsData[i][j] === 2){
+                  operator = -1;
                 }
                 else{
                   continue;
                 }
                 //finds nearby hexagons and updates values
                 if(i % 2 === 0){
-                  changeValues((i - 2) / 2, j - 2, this.operator);
-                  changeValues((i - 2) / 2, j, this.operator);
-                  changeValues(i / 2, j - 1, this.operator);
+                  changeValues((i - 2) / 2, j - 2, operator);
+                  changeValues((i - 2) / 2, j, operator);
+                  changeValues(i / 2, j - 1, operator);
                 }
                 else{
-                  changeValues((i - 3) / 2, j - 1, this.operator);
-                  changeValues((i - 1) / 2, j - 2, this.operator);
-                  changeValues((i - 1) / 2, j, this.operator);
+                  changeValues((i - 3) / 2, j - 1, operator);
+                  changeValues((i - 1) / 2, j - 2, operator);
+                  changeValues((i - 1) / 2, j, operator);
                 }
 
 
@@ -504,10 +503,10 @@ Meteor.methods({
           for(i = 0; i < hexs.length; i++){
             for(j = 0; j < hexs[0].length; j++){
               if(hexs[i][j] === 0){
-                if(that.hexsData[i][j] > 0){
+                if(hexsData[i][j] > 0){
                   p1Points ++;
                 }
-                if(that.hexsData[i][j] < 0){
+                if(hexsData[i][j] < 0){
                   p2Points ++;
                 }
               }
@@ -518,8 +517,8 @@ Meteor.methods({
           if (Meteor.isServer) {
             
             //rating of players
-            var Qa = this.game.rating1;
-            var Qb = this.game.rating2;
+            var Qa = game.rating1;
+            var Qb = game.rating2;
             var ratingOperator, endText;
 
             //finds the amount of rating to change and changes it for both players
@@ -537,25 +536,25 @@ Meteor.methods({
               Qa -= ratingOperator;
               Qb += ratingOperator;
             }
-            if(this.turn % 2 === 0){
+            if(turn % 2 === 0){
               modifier = {$set: {
                 passCount: tempPassCount + 1, 
-                turn: tempTurn + 1,
-                kifu: this.kifu, 
+                turn: turn + 1,
+                kifu: kifu, 
                 lastMove: "pass",
-                lastMoveTime: this.moveTime,
-                p1Time: this.playerTime,
+                lastMoveTime: moveTime,
+                p1Time: playerTime,
                 result: endText
               }};
             }
             else{
               modifier = {$set: {
                 passCount: tempPassCount + 1, 
-                turn: tempTurn + 1,
-                kifu: this.kifu,  
+                turn: turn + 1,
+                kifu: kifu,  
                 lastMove: "pass",
-                lastMoveTime: this.moveTime,
-                p2Time: this.playerTime,
+                lastMoveTime: moveTime,
+                p2Time: playerTime,
                 result: endText
               }};
             }
@@ -563,32 +562,32 @@ Meteor.methods({
             //updates games collection with new result
             Games.update(id, modifier);
 
-            if(tempTurn > 2 && this.game.ranked){
-              Meteor.users.update(this.game.p1, {$set: {rating: Qa}});
+            if(turn > 2 && game.ranked){
+              Meteor.users.update(game.p1, {$set: {rating: Qa}});
 
-              Meteor.users.update(this.game.p2, {$set: {rating: Qb}});
+              Meteor.users.update(game.p2, {$set: {rating: Qb}});
             }
           }
         }
         else{
-          if(this.turn % 2 === 0){
+          if(turn % 2 === 0){
             modifier = {$set: {
               passCount: tempPassCount + 1, 
-              turn: tempTurn + 1,
-              kifu: this.kifu, 
+              turn: turn + 1,
+              kifu: kifu, 
               lastMove: "pass",
-              lastMoveTime: this.moveTime,
-              p1Time: this.playerTime
+              lastMoveTime: moveTime,
+              p1Time: playerTime
             }};
           }
           else{
             modifier = {$set: {
               passCount: tempPassCount + 1, 
-              turn: tempTurn + 1,
-              kifu: this.kifu,  
+              turn: turn + 1,
+              kifu: kifu,  
               lastMove: "pass",
-              lastMoveTime: this.moveTime,
-              p2Time: this.playerTime
+              lastMoveTime: moveTime,
+              p2Time: playerTime
             }};
           }
           Games.update(id, modifier);
@@ -598,15 +597,15 @@ Meteor.methods({
   },
 
   'games.resign'(id){
-    this.game = Games.findOne(id);
-    if(this.game && !this.game.result && (this.userId === this.game.p1 || this.game.p2)){
+    var game = Games.findOne(id);
+    if(game && !game.result && (this.userId === game.p1 || game.p2)){
       var modifier;
-      if(this.game.p1 === this.userId){
+      if(game.p1 === this.userId){
       modifier = {$set: {
           result: "G+R"
         }};
       }
-      else if(this.game.p2 === this.userId){
+      else if(game.p2 === this.userId){
         modifier = {$set: {
           result: "S+R"
         }};
@@ -615,13 +614,13 @@ Meteor.methods({
       if(modifier){  
         Games.update(id, modifier);
 
-        if (Meteor.isServer && this.game.ranked) {
-          if(this.game.turn > 3){
-            var Qa = this.game.rating1;
-            var Qb = this.game.rating2;
+        if (Meteor.isServer && game.ranked) {
+          if(game.turn > 3){
+            var Qa = game.rating1;
+            var Qb = game.rating2;
             var ratingOperator;
 
-            if(this.game.p2 === this.userId){
+            if(game.p2 === this.userId){
               ratingOperator = 40 * (Math.pow(10 , Qb/400) / (Math.pow(10 , Qa/400) + Math.pow(10 , Qb/400)));
 
               Qa += ratingOperator;
@@ -635,10 +634,10 @@ Meteor.methods({
               Qb += ratingOperator;
             }
 
-            Meteor.users.update(this.game.p1, {
+            Meteor.users.update(game.p1, {
               $set: {rating: Qa}});
 
-            Meteor.users.update(this.game.p2, {
+            Meteor.users.update(game.p2, {
               $set: {rating: Qb}});
           }
         }

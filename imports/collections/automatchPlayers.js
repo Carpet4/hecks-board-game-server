@@ -24,15 +24,15 @@ Meteor.methods({
     check(tempMinTime, Number);
 
     if(this.userId && !AutomatchPlayers.findOne({user: this.userId})){
-      this.rating = Math.floor(Meteor.users.findOne(this.userId).rating);
-      tempMinRank += this.rating;
-      tempMaxRank += this.rating;
+      var rating = Math.floor(Meteor.users.findOne(this.userId).rating);
+      tempMinRank += rating;
+      tempMaxRank += rating;
       if (Meteor.isServer) {
-    	  this.opponent = AutomatchPlayers.findOne({minTime: {$lt: tempMaxTime+1}, maxTime: {$gt: tempMinTime-1}, minRank: {$lt: this.rating+1}, maxRank: {$gt: this.rating-1}, rating: {$lt: tempMaxRank+1}, rating: {$gt: tempMinRank-1}});
-        if(this.opponent){
+    	  var opponent = AutomatchPlayers.findOne({minTime: {$lt: tempMaxTime+1}, maxTime: {$gt: tempMinTime-1}, minRank: {$lt: rating+1}, maxRank: {$gt: rating-1}, rating: {$lt: tempMaxRank+1}, rating: {$gt: tempMinRank-1}});
+        if(opponent){
 
           var player1 = this.userId;
-          var player2 = this.opponent.user;
+          var player2 = opponent.user;
 
           AutomatchPlayers.remove({
             user: player2
@@ -40,7 +40,7 @@ Meteor.methods({
           if (Meteor.isServer) {
             console.log("automatch1", Meteor.users.findOne(player2).username);
           }
-          var avarageTime = (tempMinTime + tempMaxTime + this.opponent.minTime + this.opponent.maxTime) / 4;
+          var avarageTime = (tempMinTime + tempMaxTime + opponent.minTime + opponent.maxTime) / 4;
           var subT;
           if(avarageTime > tempMaxTime){
             subT = tempMaxTime;
@@ -48,11 +48,11 @@ Meteor.methods({
           else if(avarageTime < tempMinTime){
             subT = tempMinTime;
           }
-          else if(avarageTime > this.opponent.maxTime){
-            subT = this.opponent.maxTime;
+          else if(avarageTime > opponent.maxTime){
+            subT = opponent.maxTime;
           }
-          else if(avarageTime < this.opponent.minTime){
-            subT = this.opponent.minTime;
+          else if(avarageTime < opponent.minTime){
+            subT = opponent.minTime;
           }
           else{
             subT = Math.round(avarageTime / 10) * 10;
@@ -67,7 +67,7 @@ Meteor.methods({
             maxTime: tempMaxTime,
             minRank: tempMinRank,
             maxRank: tempMaxRank,
-            rating: this.rating
+            rating: rating
           });
         }
       }
@@ -79,12 +79,6 @@ Meteor.methods({
   		AutomatchPlayers.remove({
         		user: this.userId
       });
-      if (Meteor.isServer) {
-        console.log("automatch2", Meteor.users.findOne(this.userId).username);
-      }
     }
 	}
-
-
-
 });

@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
 import { Notifications } from './notifications.js';
 import { check } from 'meteor/check';
 
@@ -12,7 +11,7 @@ if (Meteor.isServer) {
 
 	Meteor.startup(function() {
 	    Meteor.setInterval(()=> {
-	        var min = (new Date).getTime() - 1000 * 60 * 60 * 24 * 14;
+	        var min = Date.now() - 1000 * 60 * 60 * 24 * 14;
 	        Rooms.remove({
 	          	lastMessage: {$lt: min}
 	        });
@@ -25,9 +24,9 @@ if (Meteor.isServer) {
   	});
 
   	Meteor.publish('singleRoom', function singleRoomPublication(tempName) {
-  		this.room = Rooms.findOne({type: "community", name: tempName});
-  		if(this.userId && this.room){
-  			if(!this.room.isPrivate || this.room.users.indexOf(this.userId) > -1 || this.room.invited.indexOf(this.userId) > -1){
+  		var room = Rooms.findOne({type: "community", name: tempName});
+  		if(this.userId && room){
+  			if(!room.isPrivate || room.users.indexOf(this.userId) > -1 || room.invited.indexOf(this.userId) > -1){
   				return Rooms.find({name: tempName});
   			}
   		}	
@@ -81,7 +80,7 @@ Meteor.methods({
 	},
 
 	'rooms.join'(room){
-		tempRoom = Rooms.findOne(room);
+		var tempRoom = Rooms.findOne(room);
 		if(tempRoom && this.userId){
 			if(tempRoom.users.indexOf(this.userId) === -1){
 				if(tempRoom.invited.indexOf(this.userId) > -1){
@@ -96,7 +95,7 @@ Meteor.methods({
 	},
 
 	'rooms.decline'(room){
-		tempRoom = Rooms.findOne(room);
+		var tempRoom = Rooms.findOne(room);
 		if(this.userId && tempRoom){
 			if(tempRoom.invited.indexOf(this.userId) > -1){
 				Rooms.update(room, {$pull: {invited: this.userId}});
@@ -106,7 +105,7 @@ Meteor.methods({
 	},
 
 	'rooms.leave'(room){
-		tempRoom = Rooms.findOne(room);
+		var tempRoom = Rooms.findOne(room);
 		if(this.userId && tempRoom){
 			if(tempRoom.users.indexOf(this.userId) > -1){
 				Rooms.update(room, {$pull: {users: this.userId}});
@@ -126,7 +125,7 @@ Meteor.methods({
 			}
 		}
 		else{
-			return false
+			return false;
 		}
 	},
 
@@ -158,46 +157,46 @@ Meteor.methods({
 	},
 
 	'rooms.makeMod'(room, tempId){
-		this.room = Rooms.findOne(room);
-		if(this.userId && this.room){
-			if(this.room.owner === this.userId && this.room.users.indexOf(tempId) > -1 && 
-			this.room.moderators.indexOf(tempId) === -1 && this.room.owner !== tempId){
+		var tempRoom = Rooms.findOne(room);
+		if(this.userId && tempRoom){
+			if(tempRoom.owner === this.userId && tempRoom.users.indexOf(tempId) > -1 && 
+			tempRoom.moderators.indexOf(tempId) === -1 && tempRoom.owner !== tempId){
 				Rooms.update(room, {$push:{ moderators: tempId}});
 			}
 		}
 	},
 
 	'rooms.disMod'(room, tempId){
-		this.room = Rooms.findOne(room);
-		if(this.userId && this.room){
-			if(this.room.owner === this.userId && this.room.moderators.indexOf(tempId) > -1){
+		var tempRoom = Rooms.findOne(room);
+		if(this.userId && tempRoom){
+			if(tempRoom.owner === this.userId && tempRoom.moderators.indexOf(tempId) > -1){
 				Rooms.update(room, {$pull:{ moderators: tempId}});
 			}
 		}
 	},
 
 	'rooms.kick'(room, tempId){
-		this.room = Rooms.findOne(room);
-		if(this.userId && this.room){
-			if((this.room.owner === this.userId || this.room.moderators.indexOf(this.userId) > -1) && this.room.users.indexOf(tempId) > -1 && 
-			this.room.moderators.indexOf(tempId) === -1 && this.room.owner !== tempId){
+		var tempRoom = Rooms.findOne(room);
+		if(this.userId && tempRoom){
+			if((tempRoom.owner === this.userId || tempRoom.moderators.indexOf(this.userId) > -1) && tempRoom.users.indexOf(tempId) > -1 && 
+			tempRoom.moderators.indexOf(tempId) === -1 && tempRoom.owner !== tempId){
 				Rooms.update(room, {$pull:{users: tempId}});
 			}
 		}
 	},
 
 	'rooms.invite'(room, tempName){
-		this.room = Rooms.findOne(room);
-		this.invited = Meteor.users.findOne({username: tempName});
-		if(this.room && this.invited){
-			this.invitedId = this.invited._id;
-			if(this.room.users.indexOf(this.invitedId) === -1 && this.room.users.indexOf(this.userId) > -1 && 
-			(this.room.isPrivate === false || this.room.invPrivi === true || (this.room.owner === this.userId || this.room.moderators.indexOf(this.userId) > -1))){
-				Rooms.update(room, {$push:{invited: this.invitedId}});
+		var tempRoom = Rooms.findOne(room);
+		var invited = Meteor.users.findOne({username: tempName});
+		if(tempRoom && invited){
+			var invitedId = invited._id;
+			if(tempRoom.users.indexOf(invitedId) === -1 && tempRoom.users.indexOf(this.userId) > -1 && 
+			(tempRoom.isPrivate === false || tempRoom.invPrivi === true || (tempRoom.owner === this.userId || tempRoom.moderators.indexOf(this.userId) > -1))){
+				Rooms.update(room, {$push:{invited: invitedId}});
 				Notifications.insert({
 					type: "roomInvite", 
 					sender: this.userId, 
-					reciever: this.invited._id, 
+					reciever: invitedId, 
 					room: room
 				});
 			}
@@ -205,10 +204,10 @@ Meteor.methods({
 	},
 
 	'rooms.cancelInvite'(room, id){
-		this.room = Rooms.findOne(room);
-		if(this.userId && this.room && Meteor.users.findOne(id)){
-			if(this.room.users.indexOf(this.userId) > -1 && 
-			(this.room.isPrivate === false || this.room.invPrivi === true || (this.room.owner === this.userId || this.room.moderators.indexOf(this.userId) > -1))){
+		var tempRoom = Rooms.findOne(room);
+		if(this.userId && tempRoom && Meteor.users.findOne(id)){
+			if(tempRoom.users.indexOf(this.userId) > -1 && 
+			(tempRoom.isPrivate === false || tempRoom.invPrivi === true || (tempRoom.owner === this.userId || tempRoom.moderators.indexOf(this.userId) > -1))){
 				Rooms.update(room, {$pull:{invited: id}});
 				Notifications.remove({
 					type: "roomInvite", 
