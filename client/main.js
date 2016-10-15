@@ -109,7 +109,7 @@ Tracker.autorun(function () {
         } catch(err) {
            console.log(err);
         }
-    } else {
+    } else if(UserStatus.isMonitoring()){
         UserStatus.stopMonitor();
     }
 });
