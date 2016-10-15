@@ -37,9 +37,9 @@ Meteor.startup(function(){
   });
 
   UI.registerHelper('scrollDown', function(){
-      out = Template.instance().messagesContainer;
+      var out = Template.instance().messagesContainer;
         if(out){
-        isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 30;
+        var isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 30;
         if(isScrolledToBottom){
           setTimeout(function(){//otherwise it runs before DOM is actually updated
               out.scrollTop = out.scrollHeight - out.clientHeight;
@@ -50,8 +50,8 @@ Meteor.startup(function(){
   });
 
   UI.registerHelper('timeToMinutes', function(time){
-      this.time = new Date(time);
-      return (pad2(this.time.getHours()) + ":" + pad2(this.time.getMinutes()));
+      time = new Date(time);
+      return (pad2(time.getHours()) + ":" + pad2(time.getMinutes()));
   });
 
   UI.registerHelper('writterCursor', function(name){
@@ -87,12 +87,29 @@ Meteor.startup(function(){
 
 });
 
-closingWindow = function(){
+var closingWindow = function(){
     if(Meteor.userId()){
       Session.set('closingChat', true);
     	Meteor.call('users.isChatF');
 	}
-}
-pad2 = function(number) {
+};
+
+var pad2 = function(number) {
   return (number < 10 ? '0' : '') + number;
-}
+};
+
+Tracker.autorun(function () {
+    if (Meteor.userId()) {
+        try {
+            UserStatus.startMonitor({
+            threshold: 30000,
+            interval: 1000,
+            idleOnBlur: true
+            });
+        } catch(err) {
+           console.log(err);
+        }
+    } else {
+        UserStatus.stopMonitor();
+    }
+});

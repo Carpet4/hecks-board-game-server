@@ -3,6 +3,8 @@ import { Template } from 'meteor/templating';
 import { Rooms } from '../../imports/collections/rooms.js';
 import { Messages } from '../../imports/collections/messages.js';
 
+var msgSound = new Audio();
+msgSound.src = "/msgSound.mp3";
 import './messanger.html';
 
 export const MessangerWindows = new Meteor.Collection(null);
@@ -10,9 +12,10 @@ export const MessangerWindows = new Meteor.Collection(null);
 Template.Messanger.onCreated(function(){
 	
 	this.subscribe('messangerRooms');
+
 	var lastRead = Meteor.user().lastRead.messanger;
 	if(lastRead === Infinity){
-		lastRead = (new Date).getTime();
+		lastRead = Date.now();
 	}
 	else{
 		setTimeout(function(){
@@ -22,7 +25,7 @@ Template.Messanger.onCreated(function(){
 		}, 4000);
 		
 	}
-	messangerObserver = Rooms.find({type: "messanger", users: Meteor.userId()}).observe({
+	this.messangerObserver = Rooms.find({type: "messanger", users: Meteor.userId()}).observe({
 		added: function(doc){
 			if(doc.lastMessage > lastRead){
 				var users = doc.users;
@@ -52,6 +55,9 @@ Template.Messanger.onCreated(function(){
 					this.chatee = users[0];
 				}
 				MessangerWindows.insert({roomId: doc._id, state: "unRead", chatee: this.chatee});
+			}
+			if(Meteor.user().status.idle){
+				msgSound.play();
 			}
 		},
 
