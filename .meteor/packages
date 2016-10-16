@@ -21,7 +21,7 @@ kadira:flow-router
 kadira:blaze-layout
 erasaur:meteor-lodash
 stolinski:stylus-multi
-fortawesome:fontawesome           # need to delete this and retry using phantomjs
+fortawesome:fontawesome
 fastclick@1.0.12
 raix:handlebar-helpers
 aldeed:collection2

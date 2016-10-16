@@ -99,7 +99,8 @@ var pad2 = function(number) {
 };
 
 Tracker.autorun(function () {
-    if (Meteor.userId()) {
+    if(Meteor.userId()){
+      if(!UserStatus.isMonitoring()){
         try {
             UserStatus.startMonitor({
             threshold: 30000,
@@ -109,6 +110,7 @@ Tracker.autorun(function () {
         } catch(err) {
            console.log(err);
         }
+      }
     } else if(UserStatus.isMonitoring()){
         UserStatus.stopMonitor();
     }
