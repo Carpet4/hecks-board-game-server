@@ -21,7 +21,7 @@ if (Meteor.isServer) {
 Meteor.methods({
 
 	'notifications.gameInvite'(opponent, mainT, subT, isRanked){
-		if(Meteor.users.findOne({username: opponent})){
+		if(this.userId && Meteor.users.findOne({username: opponent})){
 			check(mainT, Number);
 			check(subT, Number);
 			check(isRanked, Boolean);
@@ -48,9 +48,6 @@ Meteor.methods({
 			if(!Games.findOne(
         	{result: false, $or: [{p1: {$in:[this.userId, this.opponent]}}, {p2: {$in:[this.userId, this.opponent]}}]})){
         		AutomatchPlayers.remove({user: {$in:[this.userId, this.opponent]}});
-        		if (Meteor.isServer) {
-        			console.log("notification", Meteor.users.findOne(this.userId).username, Meteor.users.findOne(this.opponent).username);	
-        		}	
 				Notifications.remove(id);
 				beginMatch(this.userId, this.opponent, this.notification.mainT, this.notification.subT, this.notification.ranked);
 			}
