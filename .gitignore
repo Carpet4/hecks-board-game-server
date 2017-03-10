@@ -1,2 +1,2 @@
 node_modules/
-public/.well-known/
+public/.well-known/acme-challenge/
